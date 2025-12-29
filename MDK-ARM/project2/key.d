@@ -40,4 +40,6 @@ project2/key.o: ..\Hardware\key.c ..\Hardware\key.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\list.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\CMSIS_RTOS_V2\cmsis_os2.h \
   ..\Inc\memorymap.h ..\Inc\gpio.h ..\Hardware\led.h ..\Hardware\OLED.h \
-  ..\Hardware\OLED_Data.h ..\Hardware\disp.h
+  ..\Hardware\OLED_Data.h ..\Hardware\disp.h ..\Hardware\ov2640.h \
+  ..\Hardware\sccb.h ..\App\camera_task.h ..\App\task_common.h \
+  ..\App\uart_tx_task.h ..\App\uart_rx_task.h ..\App\inference_task.h

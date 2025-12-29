@@ -8,15 +8,33 @@ void key_proc(void)
 	if(key[0].single_flag)
 	{
 		key[0].single_flag=0;
-		//view++; view%=6;
-		cnt=0;
+
+		// 切换工作模式：IDLE -> COLLECTING -> INFERENCE -> IDLE
+		WorkMode_t current_mode = Task_GetMode();
+		if(current_mode == MODE_IDLE)
+		{
+			Task_SetMode(MODE_COLLECTING);
+			g_gesture_id = 0;
+			g_target_images = 100;  // 默认采集100张
+			g_current_images = 0;
+		}
+		else if(current_mode == MODE_COLLECTING)
+		{
+			Task_SetMode(MODE_INFERENCE);
+		}
+		else
+		{
+			Task_SetMode(MODE_IDLE);
+		}
+
 		LED2_Toggle;
 		OLED_Clear();
 	}
 	if(key[0].long_flag)
 	{
 		key[0].long_flag=0;
-
+		// 长按：重置计数器（保留原功能）
+		cnt1=0; cnt2=0;
 	}
 	if(key[0].double_flag)
 	{
@@ -28,8 +46,8 @@ void key_proc(void)
 
 void key_task(void)
 {
-	key[0].key_sta = HAL_GPIO_ReadPin(GPIOE,GPIO_PIN_2);
-	key[1].key_sta = HAL_GPIO_ReadPin(GPIOD,GPIO_PIN_11);
+	key[0].key_sta = HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_0);  // 修正为 KEY0_Pin (PA0)
+	key[1].key_sta = HAL_GPIO_ReadPin(GPIOD,GPIO_PIN_11); // KEY1_Pin (PD11) 正确
 	for(int i = 0; i < 2; i++)
 	{
 		switch(key[i].key_judge)
@@ -98,8 +116,8 @@ void key_task(void)
 
 void key_task2(void)
 {
-	key[0].key_sta = HAL_GPIO_ReadPin(GPIOE,GPIO_PIN_2);
-	key[1].key_sta = HAL_GPIO_ReadPin(GPIOD,GPIO_PIN_11);
+	key[0].key_sta = HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_0);  // 修正为 KEY0_Pin (PA0)
+	key[1].key_sta = HAL_GPIO_ReadPin(GPIOD,GPIO_PIN_11); // KEY1_Pin (PD11) 正确
 	for(int i = 0; i < 2; i++)
 	{
 		switch(key[i].key_judge)

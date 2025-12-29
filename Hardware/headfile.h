@@ -2,7 +2,7 @@
 #define __HEADFILE_H
 
 
-// ±ê×¼¿âÎÄ¼ş
+// ï¿½ï¿½×¼ï¿½ï¿½ï¿½Ä¼ï¿½
 #include "stdio.h"
 #include "stdlib.h"
 #include "string.h"
@@ -13,7 +13,7 @@
 #include "stdbool.h"
 #include "time.h"
 
-// cubeMXÉú³ÉµÄÎÄ¼ş
+// cubeMXï¿½ï¿½ï¿½Éµï¿½ï¿½Ä¼ï¿½
 #include "main.h"
 #include "cmsis_os.h"
 #include "memorymap.h"
@@ -26,18 +26,30 @@ typedef int16_t    s16;
 typedef uint32_t   u32;
 typedef int32_t    s32;
 
-// ×Ô¶¨ÒåÎÄ¼ş
-#include "led.h" // LEDµÆ
-#include "key.h" // °´¼ü
-#include "OLED.h" // OLED¹¦ÄÜ½Ó¿Ú
-#include "disp.h" // OLEDÏÔÊ¾
+// ï¿½Ô¶ï¿½ï¿½ï¿½ï¿½Ä¼ï¿½
+#include "led.h" // LEDï¿½ï¿½
+#include "key.h" // ï¿½ï¿½ï¿½ï¿½
+#include "OLED.h" // OLEDï¿½ï¿½ï¿½Ü½Ó¿ï¿½
+#include "disp.h" // OLEDï¿½ï¿½Ê¾
 
+// ï¿½ï¿½ï¿½ï¿½Í·ï¿½ï¿½ï¿½
+#include "ov2640.h"          // OV2640ï¿½ï¿½ï¿½ï¿½
+#include "camera_task.h"     // ï¿½ï¿½ï¿½ï¿½Í·ï¿½ï¿½ï¿½ï¿½
+#include "uart_tx_task.h"
+#include "uart_rx_task.h"
+#include "task_common.h"     // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+#include "inference_task.h"
+// #include "uart_protocol.h"   // ï¿½ï¿½ï¿½ï¿½Ğ­ï¿½ï¿½
 
 // OLED
-extern u8 view; // ÏÔÊ¾Ò³Ãæ
-extern u8 cnt;
+extern u8 view; // ï¿½ï¿½Ê¾Ò³ï¿½ï¿½
+extern u8 cnt1,cnt2;
 
-
+extern uint8_t camera_init_flag;
+extern uint8_t capture_status;  // capture_frameè¿”å›å€¼
+extern uint8_t capture_success_cnt;  // é‡‡é›†æˆåŠŸæ¬¡æ•°
+extern uint8_t capture_fail_reason;  // å¤±è´¥åŸå› ä»£ç 
+extern uint8_t href_state;  // HREFå¼•è„šçŠ¶æ€ï¼ˆè°ƒè¯•ç”¨ï¼‰
 
 
 
