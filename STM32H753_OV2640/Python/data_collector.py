@@ -84,7 +84,7 @@ class DataCollector:
 
     def receive_image(self):
         """
-        接收图像数据
+        接收图像数据（支持JPEG和灰度两种格式）
 
         Returns:
             numpy array: 灰度图像，形状为(height, width)
@@ -100,26 +100,80 @@ class DataCollector:
 
             # 解析图像参数
             parts = line.split(',')
+            if len(parts) != 4:
+                print(f"✗ 图像头部格式错误: {line}")
+                return None
+
             width = int(parts[1])
             height = int(parts[2])
             data_length = int(parts[3])
 
-            # 读取图像数据
+            # 读取图像数据（精确读取data_length字节）
             image_data = self.ser.read(data_length)
 
-            # 读取结束标记
-            end_marker = self.read_response()
-            if end_marker != "$END":
-                print(f"警告: 未收到正确的结束标记: {end_marker}")
+            if len(image_data) != data_length:
+                print(f"✗ 数据长度不匹配: 期望{data_length}, 实际{len(image_data)}")
+                # 清空缓冲区
+                self.ser.reset_input_buffer()
+                return None
 
-            # 转换为numpy数组
-            image = np.frombuffer(image_data, dtype=np.uint8)
-            image = image.reshape((height, width))
+            # 读取结束标记（应该紧跟在图像数据后）
+            end_marker = self.read_response()
+            if not end_marker.startswith("$END"):
+                print(f"✗ 未收到正确的结束标记")
+                print(f"  期望: $END")
+                print(f"  实际: {end_marker[:50]}...")  # 只显示前50字符
+                # 清空缓冲区，准备下一帧
+                self.ser.reset_input_buffer()
+                return None
+
+            # ⚠️ 改进格式检测：根据data_length判断而不是魔数判断
+            # 如果data_length == width * height，则是灰度模式
+            # 如果data_length < width * height，则可能是JPEG压缩模式
+            expected_gray_size = width * height
+
+            if data_length == expected_gray_size:
+                # 灰度格式：直接转换
+                image = np.frombuffer(image_data, dtype=np.uint8)
+                if len(image) != expected_gray_size:
+                    print(f"✗ 灰度图像大小不匹配: {len(image)} != {expected_gray_size}")
+                    return None
+                image = image.reshape((height, width))
+                print(f"← 灰度图像: {width}x{height}, {data_length}字节")
+            elif data_length < expected_gray_size:
+                # 可能是JPEG格式（压缩后体积更小）
+                # 验证JPEG魔数和结束标记
+                if len(image_data) >= 2 and image_data[0] == 0xFF and image_data[1] == 0xD8:
+                    if len(image_data) >= 2 and image_data[-2] == 0xFF and image_data[-1] == 0xD9:
+                        # JPEG格式：使用OpenCV解码
+                        image = cv2.imdecode(np.frombuffer(image_data, dtype=np.uint8), cv2.IMREAD_GRAYSCALE)
+                        if image is None:
+                            print(f"✗ JPEG解码失败，数据长度: {data_length}")
+                            print(f"  起始: {image_data[:4].hex()}, 结束: {image_data[-4:].hex()}")
+                            return None
+                        print(f"← JPEG图像: {width}x{height}, 压缩后{data_length}字节, 解码为{image.shape}")
+                    else:
+                        print(f"✗ JPEG数据不完整（缺少结束标记0xFFD9）")
+                        print(f"  起始: {image_data[:4].hex()}, 结束: {image_data[-4:].hex()}")
+                        return None
+                else:
+                    print(f"✗ 未知格式: data_length={data_length}, 期望={expected_gray_size}")
+                    print(f"  起始: {image_data[:4].hex()}")
+                    return None
+            else:
+                # data_length > expected_gray_size，异常
+                print(f"✗ 数据长度异常: {data_length} > {expected_gray_size}")
+                return None
 
             return image
 
         except Exception as e:
             print(f"✗ 接收图像失败: {e}")
+            import traceback
+            traceback.print_exc()
+            # 清空串口缓冲区
+            if self.ser:
+                self.ser.reset_input_buffer()
             return None
 
     def collect_gesture(self, gesture_id, num_images):
@@ -156,25 +210,44 @@ class DataCollector:
         start_index = len(existing_files) + 1
 
         collected = 0
+        failed_count = 0
+        max_failures = 3  # 最多允许3次失败
 
         while collected < num_images:
             # 接收图像
             image = self.receive_image()
 
             if image is not None:
-                # 保存图像 - 使用序号命名
+                # ⚠️ 缩放到96x96用于训练
+                # JPEG模式接收240x240，灰度模式接收180x180，统一缩放到96x96
+                # 使用INTER_AREA插值，适合缩小图像
+                image_96 = cv2.resize(image, (96, 96), interpolation=cv2.INTER_AREA)
+
+                # 保存缩放后的图像 - 使用序号命名
                 image_index = start_index + collected
                 filename = f"{gesture_name}_{image_index:04d}.png"
                 filepath = os.path.join(gesture_dir, filename)
-                cv2.imwrite(filepath, image)
+                cv2.imwrite(filepath, image_96)  # 保存96x96
 
                 collected += 1
-                print(f"✓ 已保存: {filename} ({collected}/{num_images})")
+                failed_count = 0  # 重置失败计数
+                print(f"✓ 已保存: {filename} ({image.shape[1]}x{image.shape[0]}→96x96) ({collected}/{num_images})")
 
-                # 显示图像
-                cv2.imshow(f"Gesture {gesture_id}: {gesture_name}",
-                          cv2.resize(image, (288, 288)))  # 放大3倍显示
+                # 显示原始图像
+                cv2.imshow(f"Gesture {gesture_id}: {gesture_name}", image)
                 cv2.waitKey(1)
+            else:
+                # 接收失败，计数
+                failed_count += 1
+                print(f"✗ 图像接收失败 ({failed_count}/{max_failures})")
+
+                if failed_count >= max_failures:
+                    print(f"✗ 连续失败{max_failures}次，放弃采集")
+                    cv2.destroyAllWindows()
+                    return
+
+                # 等待一小段时间后重试
+                time.sleep(0.1)
 
         # 等待完成消息
         while True:

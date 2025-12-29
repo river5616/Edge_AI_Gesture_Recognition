@@ -6,9 +6,19 @@
 #include <stdint.h>
 
 // 图像参数
-#define IMAGE_WIDTH   320  // 使用 180x180（OV2640 支持且数据量适中）
-#define IMAGE_HEIGHT  240
-#define IMAGE_SIZE    (IMAGE_WIDTH * IMAGE_HEIGHT)
+#define USE_JPEG_MODE  0  // 与camera_task.c保持一致
+
+#if USE_JPEG_MODE
+    // JPEG模式：240x240分辨率，JPEG压缩后约5-15KB
+    #define IMAGE_WIDTH   240
+    #define IMAGE_HEIGHT  240
+    #define IMAGE_SIZE    (40 * 1024)  // 40KB缓冲区（足够大）
+#else
+    // RGB565灰度模式：180x180
+    #define IMAGE_WIDTH   96
+    #define IMAGE_HEIGHT  96
+    #define IMAGE_SIZE    (IMAGE_WIDTH * IMAGE_HEIGHT)
+#endif
 
 // 工作模式
 typedef enum {
@@ -22,6 +32,7 @@ typedef struct {
     uint8_t* data;        // 图像数据指针（不复制数据）
     uint16_t width;       // 图像宽度
     uint16_t height;      // 图像高度
+    uint32_t data_size;   // 实际数据大小（JPEG模式需要）
     uint32_t timestamp;   // 时间戳
     uint32_t frame_id;    // 帧ID
 } ImageMsg_t;

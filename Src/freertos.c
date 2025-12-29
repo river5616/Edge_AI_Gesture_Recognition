@@ -346,7 +346,7 @@ void AppTask_oled_disp(void *argument)
   {
     cnt1++;
     oled_disp();
-    vTaskDelayUntil(&pxPrevioisWakeTime, pdMS_TO_TICKS(50));
+    vTaskDelayUntil(&pxPrevioisWakeTime, pdMS_TO_TICKS(30));
   }
   /* USER CODE END AppTask_oled_disp */
 }

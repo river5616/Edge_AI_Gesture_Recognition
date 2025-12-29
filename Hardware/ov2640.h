@@ -58,6 +58,7 @@
 
 // 读取8位数据线 - 优化版：使用直接寄存器读取
 // 数据线分布：D0-PD5, D1-PB1, D2-PD4, D3-PC2, D4-PD3, D5-PF10, D6-PE2, D7-PB2
+// ⚠️ 恢复原始位序：D0->bit0, D1->bit1, ..., D7->bit7
 #define OV2640_DATA_READ() ( \
     ((GPIOD->IDR & GPIO_PIN_5) ? (1 << 0) : 0) | \
     ((GPIOB->IDR & GPIO_PIN_1) ? (1 << 1) : 0) | \

@@ -73,6 +73,12 @@ static uint8_t capture_frame(uint8_t* buffer)
         while(!OV2640_HREF_READ() && timeout > 0) timeout--;
         if(timeout == 0) return 1;
 
+        // ============================================
+        // 【修改点 1】进入临界区，关闭所有中断
+        // 防止 Systick 或 UART 中断打断 GPIO 读取时序
+        // ============================================
+        __disable_irq();
+
         // 读取一行像素
         for(x = 0; x < IMAGE_WIDTH; x++)
         {
@@ -99,6 +105,15 @@ static uint8_t capture_frame(uint8_t* buffer)
             // 转换为灰度并存储
             buffer[y * IMAGE_WIDTH + x] = rgb565_to_gray(rgb565);
         }
+
+        // ============================================
+        // 【修改点 1】退出临界区，恢复中断
+        // ============================================
+        __enable_irq();
+
+        // 这里可以加一点极短的延时，让刚才被屏蔽的中断（如Systick）有机会执行
+        // 但不要太长，以免错过下一行的 HREF
+        __NOP(); __NOP();
     }
 
     return 0;  // 成功

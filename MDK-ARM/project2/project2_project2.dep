@@ -53,11 +53,11 @@ I (..\Hardware\key.h)(0x6858BDF8)
 I (..\Hardware\OLED.h)(0x68010624)
 I (..\Hardware\OLED_Data.h)(0x68010624)
 I (..\Hardware\disp.h)(0x6864FC12)
-I (..\Hardware\ov2640.h)(0x69523DC5)
+I (..\Hardware\ov2640.h)(0x6952AE32)
 I (..\Hardware\sccb.h)(0x694CF701)
 I (..\App\camera_task.h)(0x6951D09A)
-I (..\App\task_common.h)(0x6952460C)
-I (..\App\uart_tx_task.h)(0x694D2952)
+I (..\App\task_common.h)(0x69529E0D)
+I (..\App\uart_tx_task.h)(0x69524985)
 I (..\App\uart_rx_task.h)(0x694D2952)
 I (..\App\inference_task.h)(0x694D2973)
 F (../Src/gpio.c)(0x6952218C)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m7 -mfpu=fpv5-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O1 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I ../Drivers/CMSIS/Device/ST/STM32H7xx/Include -I ../Drivers/CMSIS/Include -I ../Hardware -I ../App-D__UVISION_VERSION="543" -DSTM32H753xx -DUSE_PWR_LDO_SUPPLY -DUSE_HAL_DRIVER -DSTM32H753xx-o project2/gpio.o -MMD)
@@ -91,7 +91,7 @@ I (..\Drivers\STM32H7xx_HAL_Driver\Inc\stm32h7xx_hal_tim.h)(0x6762BB7A)
 I (..\Drivers\STM32H7xx_HAL_Driver\Inc\stm32h7xx_hal_tim_ex.h)(0x6762BB7A)
 I (..\Drivers\STM32H7xx_HAL_Driver\Inc\stm32h7xx_hal_uart.h)(0x6762BB7A)
 I (..\Drivers\STM32H7xx_HAL_Driver\Inc\stm32h7xx_hal_uart_ex.h)(0x6762BB7A)
-F (../Src/freertos.c)(0x6951CEC3)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m7 -mfpu=fpv5-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O1 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I ../Drivers/CMSIS/Device/ST/STM32H7xx/Include -I ../Drivers/CMSIS/Include -I ../Hardware -I ../App-D__UVISION_VERSION="543" -DSTM32H753xx -DUSE_PWR_LDO_SUPPLY -DUSE_HAL_DRIVER -DSTM32H753xx-o project2/freertos.o -MMD)
+F (../Src/freertos.c)(0x69528FFF)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m7 -mfpu=fpv5-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O1 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I ../Drivers/CMSIS/Device/ST/STM32H7xx/Include -I ../Drivers/CMSIS/Include -I ../Hardware -I ../App-D__UVISION_VERSION="543" -DSTM32H753xx -DUSE_PWR_LDO_SUPPLY -DUSE_HAL_DRIVER -DSTM32H753xx-o project2/freertos.o -MMD)
 I (..\Middlewares\Third_Party\FreeRTOS\Source\include\FreeRTOS.h)(0x6762BB09)
 I (..\Inc\FreeRTOSConfig.h)(0x694D3F8D)
 I (..\Middlewares\Third_Party\FreeRTOS\Source\include\projdefs.h)(0x6762BB09)
@@ -140,11 +140,11 @@ I (..\Hardware\key.h)(0x6858BDF8)
 I (..\Hardware\OLED.h)(0x68010624)
 I (..\Hardware\OLED_Data.h)(0x68010624)
 I (..\Hardware\disp.h)(0x6864FC12)
-I (..\Hardware\ov2640.h)(0x69523DC5)
+I (..\Hardware\ov2640.h)(0x6952AE32)
 I (..\Hardware\sccb.h)(0x694CF701)
 I (..\App\camera_task.h)(0x6951D09A)
-I (..\App\task_common.h)(0x6952460C)
-I (..\App\uart_tx_task.h)(0x694D2952)
+I (..\App\task_common.h)(0x69529E0D)
+I (..\App\uart_tx_task.h)(0x69524985)
 I (..\App\uart_rx_task.h)(0x694D2952)
 I (..\App\inference_task.h)(0x694D2973)
 F (../Src/dma.c)(0x694D3F8E)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m7 -mfpu=fpv5-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O1 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I ../Drivers/CMSIS/Device/ST/STM32H7xx/Include -I ../Drivers/CMSIS/Include -I ../Hardware -I ../App-D__UVISION_VERSION="543" -DSTM32H753xx -DUSE_PWR_LDO_SUPPLY -DUSE_HAL_DRIVER -DSTM32H753xx-o project2/dma.o -MMD)
@@ -240,7 +240,7 @@ I (..\Drivers\STM32H7xx_HAL_Driver\Inc\stm32h7xx_hal_tim.h)(0x6762BB7A)
 I (..\Drivers\STM32H7xx_HAL_Driver\Inc\stm32h7xx_hal_tim_ex.h)(0x6762BB7A)
 I (..\Drivers\STM32H7xx_HAL_Driver\Inc\stm32h7xx_hal_uart.h)(0x6762BB7A)
 I (..\Drivers\STM32H7xx_HAL_Driver\Inc\stm32h7xx_hal_uart_ex.h)(0x6762BB7A)
-F (../Src/usart.c)(0x694D3F8E)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m7 -mfpu=fpv5-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O1 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I ../Drivers/CMSIS/Device/ST/STM32H7xx/Include -I ../Drivers/CMSIS/Include -I ../Hardware -I ../App-D__UVISION_VERSION="543" -DSTM32H753xx -DUSE_PWR_LDO_SUPPLY -DUSE_HAL_DRIVER -DSTM32H753xx-o project2/usart.o -MMD)
+F (../Src/usart.c)(0x6952A693)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m7 -mfpu=fpv5-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O1 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I ../Drivers/CMSIS/Device/ST/STM32H7xx/Include -I ../Drivers/CMSIS/Include -I ../Hardware -I ../App-D__UVISION_VERSION="543" -DSTM32H753xx -DUSE_PWR_LDO_SUPPLY -DUSE_HAL_DRIVER -DSTM32H753xx-o project2/usart.o -MMD)
 I (..\Inc\usart.h)(0x694D3F8E)
 I (..\Inc\main.h)(0x694D3F8F)
 I (..\Drivers\STM32H7xx_HAL_Driver\Inc\stm32h7xx_hal.h)(0x6762BB7A)
@@ -361,9 +361,9 @@ I (..\Drivers\STM32H7xx_HAL_Driver\Inc\stm32h7xx_hal_tim.h)(0x6762BB7A)
 I (..\Drivers\STM32H7xx_HAL_Driver\Inc\stm32h7xx_hal_tim_ex.h)(0x6762BB7A)
 I (..\Drivers\STM32H7xx_HAL_Driver\Inc\stm32h7xx_hal_uart.h)(0x6762BB7A)
 I (..\Drivers\STM32H7xx_HAL_Driver\Inc\stm32h7xx_hal_uart_ex.h)(0x6762BB7A)
-F (..\App\camera_task.c)(0x6952460C)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m7 -mfpu=fpv5-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O1 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I ../Drivers/CMSIS/Device/ST/STM32H7xx/Include -I ../Drivers/CMSIS/Include -I ../Hardware -I ../App-D__UVISION_VERSION="543" -DSTM32H753xx -DUSE_PWR_LDO_SUPPLY -DUSE_HAL_DRIVER -DSTM32H753xx-o project2/camera_task.o -MMD)
+F (..\App\camera_task.c)(0x6952B0A3)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m7 -mfpu=fpv5-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O1 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I ../Drivers/CMSIS/Device/ST/STM32H7xx/Include -I ../Drivers/CMSIS/Include -I ../Hardware -I ../App-D__UVISION_VERSION="543" -DSTM32H753xx -DUSE_PWR_LDO_SUPPLY -DUSE_HAL_DRIVER -DSTM32H753xx-o project2/camera_task.o -MMD)
 I (..\App\camera_task.h)(0x6951D09A)
-I (..\App\task_common.h)(0x6952460C)
+I (..\App\task_common.h)(0x69529E0D)
 I (..\Inc\main.h)(0x694D3F8F)
 I (..\Drivers\STM32H7xx_HAL_Driver\Inc\stm32h7xx_hal.h)(0x6762BB7A)
 I (..\Inc\stm32h7xx_hal_conf.h)(0x69522190)
@@ -404,12 +404,13 @@ I (..\Middlewares\Third_Party\FreeRTOS\Source\include\mpu_wrappers.h)(0x6762BB09
 I (..\Middlewares\Third_Party\FreeRTOS\Source\include\task.h)(0x6762BB09)
 I (..\Middlewares\Third_Party\FreeRTOS\Source\include\list.h)(0x6762BB09)
 I (..\Middlewares\Third_Party\FreeRTOS\Source\CMSIS_RTOS_V2\cmsis_os2.h)(0x6762BB09)
-I (..\Hardware\ov2640.h)(0x69523DC5)
+I (..\Hardware\ov2640.h)(0x6952AE32)
 I (..\Hardware\sccb.h)(0x694CF701)
+I (..\App\camera_app.h)(0x69523B22)
 F (..\App\camera_task.h)(0x6951D09A)()
 F (..\App\uart_rx_task.c)(0x694D4E14)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m7 -mfpu=fpv5-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O1 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I ../Drivers/CMSIS/Device/ST/STM32H7xx/Include -I ../Drivers/CMSIS/Include -I ../Hardware -I ../App-D__UVISION_VERSION="543" -DSTM32H753xx -DUSE_PWR_LDO_SUPPLY -DUSE_HAL_DRIVER -DSTM32H753xx-o project2/uart_rx_task.o -MMD)
 I (..\App\uart_rx_task.h)(0x694D2952)
-I (..\App\task_common.h)(0x6952460C)
+I (..\App\task_common.h)(0x69529E0D)
 I (..\Inc\main.h)(0x694D3F8F)
 I (..\Drivers\STM32H7xx_HAL_Driver\Inc\stm32h7xx_hal.h)(0x6762BB7A)
 I (..\Inc\stm32h7xx_hal_conf.h)(0x69522190)
@@ -451,9 +452,9 @@ I (..\Middlewares\Third_Party\FreeRTOS\Source\include\task.h)(0x6762BB09)
 I (..\Middlewares\Third_Party\FreeRTOS\Source\include\list.h)(0x6762BB09)
 I (..\Middlewares\Third_Party\FreeRTOS\Source\CMSIS_RTOS_V2\cmsis_os2.h)(0x6762BB09)
 F (..\App\uart_rx_task.h)(0x694D2952)()
-F (..\App\uart_tx_task.c)(0x6951D91D)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m7 -mfpu=fpv5-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O1 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I ../Drivers/CMSIS/Device/ST/STM32H7xx/Include -I ../Drivers/CMSIS/Include -I ../Hardware -I ../App-D__UVISION_VERSION="543" -DSTM32H753xx -DUSE_PWR_LDO_SUPPLY -DUSE_HAL_DRIVER -DSTM32H753xx-o project2/uart_tx_task.o -MMD)
-I (..\App\uart_tx_task.h)(0x694D2952)
-I (..\App\task_common.h)(0x6952460C)
+F (..\App\uart_tx_task.c)(0x69524977)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m7 -mfpu=fpv5-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O1 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I ../Drivers/CMSIS/Device/ST/STM32H7xx/Include -I ../Drivers/CMSIS/Include -I ../Hardware -I ../App-D__UVISION_VERSION="543" -DSTM32H753xx -DUSE_PWR_LDO_SUPPLY -DUSE_HAL_DRIVER -DSTM32H753xx-o project2/uart_tx_task.o -MMD)
+I (..\App\uart_tx_task.h)(0x69524985)
+I (..\App\task_common.h)(0x69529E0D)
 I (..\Inc\main.h)(0x694D3F8F)
 I (..\Drivers\STM32H7xx_HAL_Driver\Inc\stm32h7xx_hal.h)(0x6762BB7A)
 I (..\Inc\stm32h7xx_hal_conf.h)(0x69522190)
@@ -494,9 +495,9 @@ I (..\Middlewares\Third_Party\FreeRTOS\Source\include\mpu_wrappers.h)(0x6762BB09
 I (..\Middlewares\Third_Party\FreeRTOS\Source\include\task.h)(0x6762BB09)
 I (..\Middlewares\Third_Party\FreeRTOS\Source\include\list.h)(0x6762BB09)
 I (..\Middlewares\Third_Party\FreeRTOS\Source\CMSIS_RTOS_V2\cmsis_os2.h)(0x6762BB09)
-F (..\App\uart_tx_task.h)(0x694D2952)()
+F (..\App\uart_tx_task.h)(0x69524985)()
 F (..\App\task_common.c)(0x694D48DA)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m7 -mfpu=fpv5-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O1 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I ../Drivers/CMSIS/Device/ST/STM32H7xx/Include -I ../Drivers/CMSIS/Include -I ../Hardware -I ../App-D__UVISION_VERSION="543" -DSTM32H753xx -DUSE_PWR_LDO_SUPPLY -DUSE_HAL_DRIVER -DSTM32H753xx-o project2/task_common.o -MMD)
-I (..\App\task_common.h)(0x6952460C)
+I (..\App\task_common.h)(0x69529E0D)
 I (..\Inc\main.h)(0x694D3F8F)
 I (..\Drivers\STM32H7xx_HAL_Driver\Inc\stm32h7xx_hal.h)(0x6762BB7A)
 I (..\Inc\stm32h7xx_hal_conf.h)(0x69522190)
@@ -537,10 +538,10 @@ I (..\Middlewares\Third_Party\FreeRTOS\Source\include\mpu_wrappers.h)(0x6762BB09
 I (..\Middlewares\Third_Party\FreeRTOS\Source\include\task.h)(0x6762BB09)
 I (..\Middlewares\Third_Party\FreeRTOS\Source\include\list.h)(0x6762BB09)
 I (..\Middlewares\Third_Party\FreeRTOS\Source\CMSIS_RTOS_V2\cmsis_os2.h)(0x6762BB09)
-F (..\App\task_common.h)(0x6952460C)()
+F (..\App\task_common.h)(0x69529E0D)()
 F (..\App\inference_task.c)(0x694D5EF0)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m7 -mfpu=fpv5-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O1 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I ../Drivers/CMSIS/Device/ST/STM32H7xx/Include -I ../Drivers/CMSIS/Include -I ../Hardware -I ../App-D__UVISION_VERSION="543" -DSTM32H753xx -DUSE_PWR_LDO_SUPPLY -DUSE_HAL_DRIVER -DSTM32H753xx-o project2/inference_task.o -MMD)
 I (..\App\inference_task.h)(0x694D2973)
-I (..\App\task_common.h)(0x6952460C)
+I (..\App\task_common.h)(0x69529E0D)
 I (..\Inc\main.h)(0x694D3F8F)
 I (..\Drivers\STM32H7xx_HAL_Driver\Inc\stm32h7xx_hal.h)(0x6762BB7A)
 I (..\Inc\stm32h7xx_hal_conf.h)(0x69522190)
@@ -581,7 +582,7 @@ I (..\Middlewares\Third_Party\FreeRTOS\Source\include\mpu_wrappers.h)(0x6762BB09
 I (..\Middlewares\Third_Party\FreeRTOS\Source\include\task.h)(0x6762BB09)
 I (..\Middlewares\Third_Party\FreeRTOS\Source\include\list.h)(0x6762BB09)
 I (..\Middlewares\Third_Party\FreeRTOS\Source\CMSIS_RTOS_V2\cmsis_os2.h)(0x6762BB09)
-I (..\App\uart_tx_task.h)(0x694D2952)
+I (..\App\uart_tx_task.h)(0x69524985)
 F (..\App\inference_task.h)(0x694D2973)()
 F (..\Hardware\headfile.h)(0x6951FC95)()
 F (..\Hardware\led.c)(0x694CD553)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m7 -mfpu=fpv5-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O1 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I ../Drivers/CMSIS/Device/ST/STM32H7xx/Include -I ../Drivers/CMSIS/Include -I ../Hardware -I ../App-D__UVISION_VERSION="543" -DSTM32H753xx -DUSE_PWR_LDO_SUPPLY -DUSE_HAL_DRIVER -DSTM32H753xx-o project2/led.o -MMD)
@@ -633,11 +634,11 @@ I (..\Hardware\key.h)(0x6858BDF8)
 I (..\Hardware\OLED.h)(0x68010624)
 I (..\Hardware\OLED_Data.h)(0x68010624)
 I (..\Hardware\disp.h)(0x6864FC12)
-I (..\Hardware\ov2640.h)(0x69523DC5)
+I (..\Hardware\ov2640.h)(0x6952AE32)
 I (..\Hardware\sccb.h)(0x694CF701)
 I (..\App\camera_task.h)(0x6951D09A)
-I (..\App\task_common.h)(0x6952460C)
-I (..\App\uart_tx_task.h)(0x694D2952)
+I (..\App\task_common.h)(0x69529E0D)
+I (..\App\uart_tx_task.h)(0x69524985)
 I (..\App\uart_rx_task.h)(0x694D2952)
 I (..\App\inference_task.h)(0x694D2973)
 F (..\Hardware\led.h)(0x694CD50D)()
@@ -690,11 +691,11 @@ I (..\Hardware\led.h)(0x694CD50D)
 I (..\Hardware\OLED.h)(0x68010624)
 I (..\Hardware\OLED_Data.h)(0x68010624)
 I (..\Hardware\disp.h)(0x6864FC12)
-I (..\Hardware\ov2640.h)(0x69523DC5)
+I (..\Hardware\ov2640.h)(0x6952AE32)
 I (..\Hardware\sccb.h)(0x694CF701)
 I (..\App\camera_task.h)(0x6951D09A)
-I (..\App\task_common.h)(0x6952460C)
-I (..\App\uart_tx_task.h)(0x694D2952)
+I (..\App\task_common.h)(0x69529E0D)
+I (..\App\uart_tx_task.h)(0x69524985)
 I (..\App\uart_rx_task.h)(0x694D2952)
 I (..\App\inference_task.h)(0x694D2973)
 F (..\Hardware\key.h)(0x6858BDF8)()
@@ -734,7 +735,7 @@ F (..\Hardware\OLED.h)(0x68010624)()
 F (..\Hardware\OLED_Data.c)(0x6877B290)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m7 -mfpu=fpv5-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O1 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I ../Drivers/CMSIS/Device/ST/STM32H7xx/Include -I ../Drivers/CMSIS/Include -I ../Hardware -I ../App-D__UVISION_VERSION="543" -DSTM32H753xx -DUSE_PWR_LDO_SUPPLY -DUSE_HAL_DRIVER -DSTM32H753xx-o project2/oled_data.o -MMD)
 I (..\Hardware\OLED_Data.h)(0x68010624)
 F (..\Hardware\OLED_Data.h)(0x68010624)()
-F (..\Hardware\disp.c)(0x6951FCB6)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m7 -mfpu=fpv5-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O1 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I ../Drivers/CMSIS/Device/ST/STM32H7xx/Include -I ../Drivers/CMSIS/Include -I ../Hardware -I ../App-D__UVISION_VERSION="543" -DSTM32H753xx -DUSE_PWR_LDO_SUPPLY -DUSE_HAL_DRIVER -DSTM32H753xx-o project2/disp.o -MMD)
+F (..\Hardware\disp.c)(0x69529C15)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m7 -mfpu=fpv5-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O1 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I ../Drivers/CMSIS/Device/ST/STM32H7xx/Include -I ../Drivers/CMSIS/Include -I ../Hardware -I ../App-D__UVISION_VERSION="543" -DSTM32H753xx -DUSE_PWR_LDO_SUPPLY -DUSE_HAL_DRIVER -DSTM32H753xx-o project2/disp.o -MMD)
 I (..\Hardware\disp.h)(0x6864FC12)
 I (..\Hardware\headfile.h)(0x6951FC95)
 I (..\Inc\main.h)(0x694D3F8F)
@@ -783,11 +784,11 @@ I (..\Hardware\led.h)(0x694CD50D)
 I (..\Hardware\key.h)(0x6858BDF8)
 I (..\Hardware\OLED.h)(0x68010624)
 I (..\Hardware\OLED_Data.h)(0x68010624)
-I (..\Hardware\ov2640.h)(0x69523DC5)
+I (..\Hardware\ov2640.h)(0x6952AE32)
 I (..\Hardware\sccb.h)(0x694CF701)
 I (..\App\camera_task.h)(0x6951D09A)
-I (..\App\task_common.h)(0x6952460C)
-I (..\App\uart_tx_task.h)(0x694D2952)
+I (..\App\task_common.h)(0x69529E0D)
+I (..\App\uart_tx_task.h)(0x69524985)
 I (..\App\uart_rx_task.h)(0x694D2952)
 I (..\App\inference_task.h)(0x694D2973)
 F (..\Hardware\disp.h)(0x6864FC12)()
@@ -823,8 +824,8 @@ I (..\Drivers\STM32H7xx_HAL_Driver\Inc\stm32h7xx_hal_tim_ex.h)(0x6762BB7A)
 I (..\Drivers\STM32H7xx_HAL_Driver\Inc\stm32h7xx_hal_uart.h)(0x6762BB7A)
 I (..\Drivers\STM32H7xx_HAL_Driver\Inc\stm32h7xx_hal_uart_ex.h)(0x6762BB7A)
 F (..\Hardware\sccb.h)(0x694CF701)()
-F (..\Hardware\ov2640.c)(0x6951F912)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m7 -mfpu=fpv5-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O1 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I ../Drivers/CMSIS/Device/ST/STM32H7xx/Include -I ../Drivers/CMSIS/Include -I ../Hardware -I ../App-D__UVISION_VERSION="543" -DSTM32H753xx -DUSE_PWR_LDO_SUPPLY -DUSE_HAL_DRIVER -DSTM32H753xx-o project2/ov2640.o -MMD)
-I (..\Hardware\ov2640.h)(0x69523DC5)
+F (..\Hardware\ov2640.c)(0x6952B118)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m7 -mfpu=fpv5-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O1 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I ../Drivers/CMSIS/Device/ST/STM32H7xx/Include -I ../Drivers/CMSIS/Include -I ../Hardware -I ../App-D__UVISION_VERSION="543" -DSTM32H753xx -DUSE_PWR_LDO_SUPPLY -DUSE_HAL_DRIVER -DSTM32H753xx-o project2/ov2640.o -MMD)
+I (..\Hardware\ov2640.h)(0x6952AE32)
 I (..\Inc\main.h)(0x694D3F8F)
 I (..\Drivers\STM32H7xx_HAL_Driver\Inc\stm32h7xx_hal.h)(0x6762BB7A)
 I (..\Inc\stm32h7xx_hal_conf.h)(0x69522190)
@@ -856,7 +857,7 @@ I (..\Drivers\STM32H7xx_HAL_Driver\Inc\stm32h7xx_hal_uart.h)(0x6762BB7A)
 I (..\Drivers\STM32H7xx_HAL_Driver\Inc\stm32h7xx_hal_uart_ex.h)(0x6762BB7A)
 I (..\Hardware\sccb.h)(0x694CF701)
 I (..\Hardware\ov2640cfg.h)(0x694D53B5)
-F (..\Hardware\ov2640.h)(0x69523DC5)()
+F (..\Hardware\ov2640.h)(0x6952AE32)()
 F (..\Hardware\ov2640cfg.c)(0x694D01A5)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m7 -mfpu=fpv5-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-gdwarf-4 -O1 -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-reserved-identifier -I ../Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I ../Drivers/CMSIS/Device/ST/STM32H7xx/Include -I ../Drivers/CMSIS/Include -I ../Hardware -I ../App-D__UVISION_VERSION="543" -DSTM32H753xx -DUSE_PWR_LDO_SUPPLY -DUSE_HAL_DRIVER -DSTM32H753xx-o project2/ov2640cfg.o -MMD)
 I (..\Hardware\ov2640cfg.h)(0x694D53B5)
 F (..\Hardware\ov2640cfg.h)(0x694D53B5)()

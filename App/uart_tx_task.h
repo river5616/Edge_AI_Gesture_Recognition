@@ -7,7 +7,7 @@
 void AppTask_uart_tx(void *argument);
 
 // 发送图像数据
-void UartTxTask_SendImage(uint8_t* image_data, uint16_t width, uint16_t height);
+void UartTxTask_SendImage(uint8_t* image_data, uint16_t width, uint16_t height, uint32_t data_size);
 
 // 发送FPS信息
 void UartTxTask_SendFPS(float fps);

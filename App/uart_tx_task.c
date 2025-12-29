@@ -12,20 +12,19 @@ extern UART_HandleTypeDef huart1;
 //}
 
 // 发送图像数据
-void UartTxTask_SendImage(uint8_t* image_data, uint16_t width, uint16_t height)
+void UartTxTask_SendImage(uint8_t* image_data, uint16_t width, uint16_t height, uint32_t data_size)
 {
     char header[128];
-    uint32_t data_length = width * height;
 
     // 获取互斥量
     if(osMutexAcquire(uartMutex, osWaitForever) == osOK)
     {
-        // 发送头部
-        sprintf(header, "$IMG,%d,%d,%u\r\n", width, height, data_length);
+        // 发送头部（data_size为实际数据大小）
+        sprintf(header, "$IMG,%d,%d,%u\r\n", width, height, data_size);
         HAL_UART_Transmit(&huart1, (uint8_t*)header, strlen(header), 1000);
 
-        // 发送图像数据
-        HAL_UART_Transmit(&huart1, image_data, data_length, 5000);
+        // 发送图像数据（使用实际大小）
+        HAL_UART_Transmit(&huart1, image_data, data_size, 10000);  // 增加超时时间
 
         // 发送结束标记
         HAL_UART_Transmit(&huart1, (uint8_t*)"$END\r\n", 6, 1000);
@@ -100,7 +99,7 @@ void AppTask_uart_tx(void *argument)
                 if(mode == MODE_COLLECTING)
                 {
                     // 数据采集模式：发送图像
-                    UartTxTask_SendImage(img_msg.data, img_msg.width, img_msg.height);
+                    UartTxTask_SendImage(img_msg.data, img_msg.width, img_msg.height, img_msg.data_size);
 
                     // 更新计数
                     g_current_images++;
@@ -119,7 +118,7 @@ void AppTask_uart_tx(void *argument)
                 {
                     // 推理模式：发送到推理队列（如果推理任务存在）
                     // 这里可以选择是否发送图像到PC（调试用）
-                    // UartTxTask_SendImage(img_msg.data, img_msg.width, img_msg.height);
+                    // UartTxTask_SendImage(img_msg.data, img_msg.width, img_msg.height, img_msg.data_size);
                 }
             }
         }
