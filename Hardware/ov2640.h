@@ -6,44 +6,44 @@
 
 // OV2640控制引脚定义 (根据你的引脚配置)
 #define OV2640_VSYNC_PIN       GPIO_PIN_3
-#define OV2640_VSYNC_PORT      GPIOA
+#define OV2640_VSYNC_PORT      GPIOF
 
-#define OV2640_HREF_PIN        GPIO_PIN_0
-#define OV2640_HREF_PORT       GPIOC
+#define OV2640_HREF_PIN        GPIO_PIN_12
+#define OV2640_HREF_PORT       GPIOF
 
-#define OV2640_PCLK_PIN        GPIO_PIN_4
-#define OV2640_PCLK_PORT       GPIOE
+#define OV2640_PCLK_PIN        GPIO_PIN_14
+#define OV2640_PCLK_PORT       GPIOD
 
-#define OV2640_RST_PIN         GPIO_PIN_3
-#define OV2640_RST_PORT        GPIOC
+#define OV2640_RST_PIN         GPIO_PIN_13
+#define OV2640_RST_PORT        GPIOF
 
-#define OV2640_PWDN_PIN        GPIO_PIN_5
-#define OV2640_PWDN_PORT       GPIOE
+#define OV2640_PWDN_PIN        GPIO_PIN_15
+#define OV2640_PWDN_PORT       GPIOD
 
 // 数据线定义
-#define OV2640_D0_PIN          GPIO_PIN_5
-#define OV2640_D0_PORT         GPIOD
+#define OV2640_D0_PIN          GPIO_PIN_8
+#define OV2640_D0_PORT         GPIOE
 
-#define OV2640_D1_PIN          GPIO_PIN_1
-#define OV2640_D1_PORT         GPIOB
+#define OV2640_D1_PIN          GPIO_PIN_9
+#define OV2640_D1_PORT         GPIOE
 
-#define OV2640_D2_PIN          GPIO_PIN_4
-#define OV2640_D2_PORT         GPIOD
+#define OV2640_D2_PIN          GPIO_PIN_10
+#define OV2640_D2_PORT         GPIOE
 
-#define OV2640_D3_PIN          GPIO_PIN_2
-#define OV2640_D3_PORT         GPIOC
+#define OV2640_D3_PIN          GPIO_PIN_11
+#define OV2640_D3_PORT         GPIOE
 
-#define OV2640_D4_PIN          GPIO_PIN_3
-#define OV2640_D4_PORT         GPIOD
+#define OV2640_D4_PIN          GPIO_PIN_12
+#define OV2640_D4_PORT         GPIOE
 
-#define OV2640_D5_PIN          GPIO_PIN_10
-#define OV2640_D5_PORT         GPIOF
+#define OV2640_D5_PIN          GPIO_PIN_13
+#define OV2640_D5_PORT         GPIOE
 
-#define OV2640_D6_PIN          GPIO_PIN_2
+#define OV2640_D6_PIN          GPIO_PIN_14
 #define OV2640_D6_PORT         GPIOE
 
-#define OV2640_D7_PIN          GPIO_PIN_2
-#define OV2640_D7_PORT         GPIOB
+#define OV2640_D7_PIN          GPIO_PIN_15
+#define OV2640_D7_PORT         GPIOE
 
 // 读取引脚状态的宏定义
 #define OV2640_VSYNC_READ()    HAL_GPIO_ReadPin(OV2640_VSYNC_PORT, OV2640_VSYNC_PIN)
@@ -59,16 +59,7 @@
 // 读取8位数据线 - 优化版：使用直接寄存器读取
 // 数据线分布：D0-PD5, D1-PB1, D2-PD4, D3-PC2, D4-PD3, D5-PF10, D6-PE2, D7-PB2
 // ⚠️ 恢复原始位序：D0->bit0, D1->bit1, ..., D7->bit7
-#define OV2640_DATA_READ() ( \
-    ((GPIOD->IDR & GPIO_PIN_5) ? (1 << 0) : 0) | \
-    ((GPIOB->IDR & GPIO_PIN_1) ? (1 << 1) : 0) | \
-    ((GPIOD->IDR & GPIO_PIN_4) ? (1 << 2) : 0) | \
-    ((GPIOC->IDR & GPIO_PIN_2) ? (1 << 3) : 0) | \
-    ((GPIOD->IDR & GPIO_PIN_3) ? (1 << 4) : 0) | \
-    ((GPIOF->IDR & GPIO_PIN_10) ? (1 << 5) : 0) | \
-    ((GPIOE->IDR & GPIO_PIN_2) ? (1 << 6) : 0) | \
-    ((GPIOB->IDR & GPIO_PIN_2) ? (1 << 7) : 0) \
-)
+#define OV2640_DATA_READ()     (GPIOE->IDR >> 8)
 
 // OV2640芯片ID
 #define OV2640_MID             0x7FA2

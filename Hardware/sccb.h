@@ -3,12 +3,13 @@
 
 #include "main.h"
 
-// SCCB引脚定义(根据你的配置)
-#define SCCB_SCL_PIN           GPIO_PIN_7
-#define SCCB_SCL_PORT          GPIOD
 
-#define SCCB_SDA_PIN           GPIO_PIN_6
-#define SCCB_SDA_PORT          GPIOD
+// SCCB引脚定义(根据你的配置)
+#define SCCB_SCL_PIN           GPIO_PIN_10
+#define SCCB_SCL_PORT          GPIOF
+
+#define SCCB_SDA_PIN           GPIO_PIN_7
+#define SCCB_SDA_PORT          GPIOE
 
 // SCCB控制宏
 #define SCCB_SCL_HIGH()        HAL_GPIO_WritePin(SCCB_SCL_PORT, SCCB_SCL_PIN, GPIO_PIN_SET)

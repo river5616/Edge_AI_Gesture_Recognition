@@ -62,7 +62,7 @@ uint8_t OV2640_Init(void)
     }
     // 开启 OV2640 内部彩条测试模式
     // 0x12 是 COM7 寄存器，Bit 1 是 Color Bar Enable
-    SCCB_WR_Reg(0x12, 0x80 | 0x02);
+    //SCCB_WR_Reg(0x12, 0x80 | 0x02);
     return 0;  // 成功
 }
 

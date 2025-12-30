@@ -57,7 +57,7 @@ uint8_t CameraTask_Init(void)
     SCCB_WR_Reg(0x11, clkdiv);   // 设置CLK分频
 
     // 设置自动曝光
-    OV2640_Auto_Exposure(2);
+    //OV2640_Auto_Exposure(2);
 
     return 0;  // 成功
 }
@@ -288,60 +288,114 @@ static uint8_t capture_frame(uint8_t* buffer)
             }
         }
 
-        // 读取一行像素
-        uint32_t timeout;  // 声明 timeout 变量
+
+        // ===============================================
+        // 【关键】进入临界区，关闭中断！
+        // 防止 Systick 或 UART 中断打断高速读取
+        // ===============================================
+        __disable_irq(); 
+
         for(x = 0; x < IMAGE_WIDTH; x++)
         {
-            // 读取RGB565像素（2个字节）
             uint8_t byte_high, byte_low;
-
-            // ⚠️ 改进时序：在PCLK下降沿后读取，确保数据稳定
-            // 等待PCLK下降沿
-            timeout = 10000;
-            while(OV2640_PCLK_READ() && timeout > 0) timeout--;
-            if(timeout == 0) {
-                capture_fail_reason = 4;
-                return 1;
-            }
-
-            // 等待PCLK上升沿
-            timeout = 10000;
-            while(!OV2640_PCLK_READ() && timeout > 0) timeout--;
-            if(timeout == 0) {
-                capture_fail_reason = 4;
-                return 1;
-            }
-
-            // ⚠️ 增加延迟：等待数据完全稳定（关键！）
-            for(volatile int i = 0; i < 20; i++) __NOP();
-
-            // 读取高字节
+            // -------------------------------------------
+            // 读取高字节 (Byte High)
+            // -------------------------------------------
+            // 1. 等待 PCLK 变高 (数据准备好)
+            while(!OV2640_PCLK_READ()); 
+            
+            // 2. 读取数据
             byte_high = OV2640_DATA_READ();
+            
+            // 3. 【致命修复点】必须等待 PCLK 变低！
+            // 否则 CPU 跑太快，会以为还是同一个时钟周期，导致重复读取
+            while(OV2640_PCLK_READ()); 
 
-            // 等待PCLK下降沿
-            timeout = 10000;
-            while(OV2640_PCLK_READ() && timeout > 0) timeout--;
 
-            // 等待PCLK上升沿
-            timeout = 10000;
-            while(!OV2640_PCLK_READ() && timeout > 0) timeout--;
-            if(timeout == 0) {
-                capture_fail_reason = 4;
-                return 1;
-            }
-
-            // ⚠️ 增加延迟：等待数据完全稳定
-            for(volatile int i = 0; i < 20; i++) __NOP();
-
-            // 读取低字节
+            // -------------------------------------------
+            // 读取低字节 (Byte Low)
+            // -------------------------------------------
+            // 4. 等待 PCLK 变高
+            while(!OV2640_PCLK_READ());
+            
+            // 5. 读取数据
             byte_low = OV2640_DATA_READ();
 
-            // ⚠️ 测试字节序：交换高低字节（用户反馈：字节序与疏密有关）
-            rgb565 = (byte_high << 8) | byte_low;  // 交换字节序
+            // 6. 【致命修复点】等待 PCLK 变低
+            while(OV2640_PCLK_READ()); 
 
-            // 转换为灰度并存储
+
+            // -------------------------------------------
+            // 组合 & 转换
+            // -------------------------------------------
+            rgb565 = (byte_high << 8) | byte_low;
+            
+            // 简单的灰度转换 (为了速度，使用移位近似算法)
+            // Gray = (R*77 + G*150 + B*29) >> 8
+            // 这里的公式可以简化，或者直接存原始数据测试
             buffer[y * IMAGE_WIDTH + x] = rgb565_to_gray(rgb565);
         }
+
+        // ===============================================
+        // 退出临界区，恢复中断
+        // ===============================================
+        __enable_irq();
+
+
+        // 读取一行像素
+        // uint32_t timeout;  // 声明 timeout 变量
+        // for(x = 0; x < IMAGE_WIDTH; x++)
+        // {
+        //     // 读取RGB565像素（2个字节）
+        //     uint8_t byte_high, byte_low;
+
+        //     // ⚠️ 改进时序：在PCLK下降沿后读取，确保数据稳定
+        //     // 等待PCLK下降沿
+        //     timeout = 10000;
+        //     while(OV2640_PCLK_READ() && timeout > 0) timeout--;
+        //     if(timeout == 0) {
+        //         capture_fail_reason = 4;
+        //         return 1;
+        //     }
+
+        //     // 等待PCLK上升沿
+        //     timeout = 10000;
+        //     while(!OV2640_PCLK_READ() && timeout > 0) timeout--;
+        //     if(timeout == 0) {
+        //         capture_fail_reason = 4;
+        //         return 1;
+        //     }
+
+        //     // ⚠️ 增加延迟：等待数据完全稳定（关键！）
+        //     for(volatile int i = 0; i < 20; i++) __NOP();
+
+        //     // 读取高字节
+        //     byte_high = OV2640_DATA_READ();
+
+        //     // 等待PCLK下降沿
+        //     timeout = 10000;
+        //     while(OV2640_PCLK_READ() && timeout > 0) timeout--;
+
+        //     // 等待PCLK上升沿
+        //     timeout = 10000;
+        //     while(!OV2640_PCLK_READ() && timeout > 0) timeout--;
+        //     if(timeout == 0) {
+        //         capture_fail_reason = 4;
+        //         return 1;
+        //     }
+
+        //     // ⚠️ 增加延迟：等待数据完全稳定
+        //     for(volatile int i = 0; i < 20; i++) __NOP();
+
+        //     // 读取低字节
+        //     byte_low = OV2640_DATA_READ();
+
+        //     // ⚠️ 测试字节序：交换高低字节（用户反馈：字节序与疏密有关）
+        //     rgb565 = (byte_high << 8) | byte_low;  // 交换字节序
+
+        //     // 转换为灰度并存储
+        //     buffer[y * IMAGE_WIDTH + x] = rgb565_to_gray(rgb565);
+        // }
         
     }
 

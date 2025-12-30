@@ -15,8 +15,8 @@
     #define IMAGE_SIZE    (40 * 1024)  // 40KB缓冲区（足够大）
 #else
     // RGB565灰度模式：180x180
-    #define IMAGE_WIDTH   96
-    #define IMAGE_HEIGHT  96
+    #define IMAGE_WIDTH   180
+    #define IMAGE_HEIGHT  180
     #define IMAGE_SIZE    (IMAGE_WIDTH * IMAGE_HEIGHT)
 #endif
 
