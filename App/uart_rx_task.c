@@ -2,10 +2,10 @@
 #include <string.h>
 #include <stdio.h>
 
-// 接收缓冲区
-static uint8_t rx_buffer[256];
-static uint16_t rx_index = 0;
-static uint8_t rx_byte;  // 单字节接收缓冲
+// 接收缓冲区（暴露给uart_callbacks.c使用）
+uint8_t rx_buffer[256];
+uint16_t rx_index = 0;
+uint8_t rx_byte;  // 单字节接收缓冲
 
 // 初始化
 void UartRxTask_Init(void)
@@ -14,8 +14,8 @@ void UartRxTask_Init(void)
     rx_index = 0;
 }
 
-// 解析命令
-static void parse_command(uint8_t* cmd_str, uint16_t len)
+// 解析命令（暴露给uart_callbacks.c使用）
+void parse_command(uint8_t* cmd_str, uint16_t len)
 {
     // 检查命令起始符
     if(cmd_str[0] != '$') return;
@@ -108,39 +108,4 @@ void AppTask_uart_rx(void *argument)
     }
 }
 
-/**
- * @brief  UART接收完成回调（中断中调用）
- * @param  huart: UART句柄
- * @retval None
- */
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
-{
-    if(huart->Instance == USART1)
-    {
-        // 将接收到的字节添加到缓冲区
-        if(rx_index < sizeof(rx_buffer) - 1)
-        {
-            rx_buffer[rx_index++] = rx_byte;
-
-            // 检查是否接收到完整命令（以\n结尾）
-            if(rx_byte == '\n')
-            {
-                rx_buffer[rx_index] = '\0';
-
-                // 解析命令
-                parse_command(rx_buffer, rx_index);
-
-                // 重置缓冲区
-                rx_index = 0;
-            }
-        }
-        else
-        {
-            // 缓冲区溢出，重置
-            rx_index = 0;
-        }
-
-        // 继续接收下一个字节
-        HAL_UART_Receive_IT(&huart1, &rx_byte, 1);
-    }
-}
+// 注意：HAL_UART_RxCpltCallback已移至uart_callbacks.c统一管理

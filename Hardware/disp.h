@@ -12,6 +12,14 @@
 #define line7 48
 #define line8 56
 
+// 显示视图定义
+#define VIEW_STATUS     0  // 状态信息视图
+#define VIEW_IMAGE      1  // 图像显示视图
+#define VIEW_UART_STATS 2  // UART接收统计视图
+
+// 外部变量声明
+extern u8 view;
+
 void oled_disp(void);
 
 

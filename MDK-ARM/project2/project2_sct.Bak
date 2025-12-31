@@ -9,11 +9,25 @@ LR_IROM1 0x08000000 0x00200000  {    ; load region size_region
    .ANY (+RO)
    .ANY (+XO)
   }
-  RW_RAM 0x24000000 0x00080000 {
+
+  ; DTCM RAM: 128KB, 最快的RAM，用于图像缓冲区
+  RW_IRAM1 0x20000000 0x00020000  {
    .ANY (+RW +ZI)
   }
-  RW_RAM 0x24000000 0x00080000 {
+
+  ; DTCM 自定义段（用于 openmv_rx_task 的图像缓冲区）
+  RW_DTCMRAM 0x20010000 0x00010000  {  ; 使用DTCM的后64KB
+   .ANY (.dtcmram)
+  }
+
+  ; AXI SRAM (D1 Domain): 512KB，用于DMA缓冲区
+  RW_IRAM2 0x24000000 0x00040000  {  ; 前256KB用于常规数据
    .ANY (+RW +ZI)
+  }
+
+  ; D1 RAM 自定义段（用于 openmv_rx_task 的DMA缓冲区）
+  RW_RAM_D1 0x24040000 0x00040000  {  ; 后256KB用于DMA
+   .ANY (.ram_d1)
   }
 }
 

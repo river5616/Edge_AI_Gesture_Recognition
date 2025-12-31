@@ -107,11 +107,12 @@ int main(void)
   MX_USART6_UART_Init();
   MX_UART5_Init();
   /* USER CODE BEGIN 2 */
+  HAL_UART_AbortReceive(&huart3);
+  
   OLED_Init();
   //CameraTask_Init();
-  camera_init_flag = 0;
-  camera_init_flag = CameraTask_Init();
-  
+  //OpenMVRxTask_Init();
+
   /* USER CODE END 2 */
 
   /* Init scheduler */

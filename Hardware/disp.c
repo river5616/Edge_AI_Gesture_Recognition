@@ -1,6 +1,7 @@
 #include "disp.h"
+#include "openmv_rx_task.h"
 
-u8 view; // 显示页面
+u8 view = VIEW_STATUS; // 显示页面，默认状态视图
 u8 cnt1,cnt2;
 u8 camera_init_flag;
 u8 capture_status = 0;  // capture_frame返回值
@@ -8,9 +9,17 @@ u8 capture_success_cnt = 0;  // 采集成功次数
 u8 capture_fail_reason = 0;  // 失败原因代码
 u8 href_state = 0;  // HREF引脚状态（调试用）
 
+// 静态变量：保存最新接收到的图像
+static uint8_t last_image[OPENMV_IMAGE_SIZE] = {0};
+static uint8_t has_image = 0;
+
+// 调试变量：接收字节数
+uint16_t g_debug_rx_bytes = 0;
+uint16_t g_debug_rx_bytes_max = 0;  // 最大接收字节数
+
 void oled_disp(void)
 {
-    if(view==0)
+    if(view == VIEW_STATUS)  // 状态信息视图
     {
         // 显示工作模式
         WorkMode_t mode = Task_GetMode();
@@ -22,36 +31,101 @@ void oled_disp(void)
             case MODE_INFERENCE:  mode_str = "INFE"; break;
             default:              mode_str = "????"; break;
         }
-        OLED_Printf(0,line1,6,"M:%s c1=%d",mode_str,cnt1);
+        OLED_Printf(0,line1,6,"M:%s c1=%d   ",mode_str,cnt1);
 
         // ⚠️ 增强显示：明确标识初始化状态
         const char* init_str = (camera_init_flag == 0) ? "OK" : "FAIL";
         OLED_Printf(0,line2,6,"INIT:%s f=%d",init_str,camera_init_flag);
 
         float fps = Task_GetFPS();
-        OLED_Printf(0,line3,6,"fps=%.1f c2=%d",fps,cnt2);
+        OLED_Printf(0,line3,6,"fps=%.1f c2=%d   ",fps,cnt2);
 
-        // 调试信息：st=状态, sc=成功计数
-        OLED_Printf(0,line4,6,"st=%d sc=%d",capture_status,capture_success_cnt);
+        // 调试：显示接收字节数（当前值和最大值）
+        OLED_Printf(0,line4,6,"RxB:%d/%d     ", g_debug_rx_bytes, g_debug_rx_bytes_max);
 
-        // ⚠️ 增强显示：失败原因解释
-        // fr: 1=VSYNC1超时, 2=VSYNC2超时, 3=HREF超时, 4=PCLK超时
-        //     5=未找到JPEG, 6=缓冲满, 7=JPEG不完整, 8=全局超时
-        const char* err_str;
-        switch(capture_fail_reason) {
-            case 0: err_str = "OK"; break;
-            case 1: err_str = "VS1"; break;  // VSYNC1超时
-            case 2: err_str = "VS2"; break;  // VSYNC2超时（摄像头无输出）
-            case 3: err_str = "HRF"; break;  // HREF超时
-            case 4: err_str = "PCK"; break;  // PCLK超时
-            case 5: err_str = "JPG"; break;  // 未找到JPEG
-            case 6: err_str = "BUF"; break;  // 缓冲满
-            case 7: err_str = "INC"; break;  // JPEG不完整
-            case 8: err_str = "TMO"; break;  // 全局超时
-            default: err_str = "???"; break;
-        }
-        OLED_Printf(0,line5,6,"E:%s hr=%d",err_str,href_state);
+        // 显示UART接收统计
+        OpenMVRxStats_t stats;
+        OpenMVRxTask_GetStats(&stats);
+        OLED_Printf(0,line5,6,"T:%lu E:%lu  ", stats.total_frames, stats.error_frames);
+
     }
+    else if(view == VIEW_IMAGE)  // 图像显示视图
+    {
+        // 临时方案：显示图像接收状态，不直接显示图像
+        // （因为需要格式转换，稍后实现）
+
+        OLED_Printf(0,line1,6,"IMAGE View");
+
+        // 安全检查：确保imageQueue已初始化
+        if(imageQueue != NULL)
+        {
+            // 获取队列中的消息数量
+            uint32_t msg_count = osMessageQueueGetCount(imageQueue);
+            OLED_Printf(0,line2,6,"Queue:%lu   ", msg_count);
+
+            // 尝试从队列获取最新图像信息（非阻塞）
+            ImageMsg_t img_msg;
+            if(osMessageQueueGet(imageQueue, &img_msg, NULL, 0) == osOK)
+            {
+                // 安全检查：确保指针有效
+                if(img_msg.data != NULL && img_msg.data_size == OPENMV_IMAGE_SIZE)
+                {
+                    // 显示图像信息
+                    OLED_Printf(0,line3,6,"Size:%lux%lu  ", img_msg.width, img_msg.height);
+                    OLED_Printf(0,line4,6,"Bytes:%lu  ", img_msg.data_size);
+                    OLED_Printf(0,line5,6,"FrameID:%lu  ", img_msg.frame_id);
+
+                    // 显示图像数据的前几个字节（验证数据）
+                    OLED_Printf(0,line6,6,"D0:%02X %02X %02X  ",
+                               img_msg.data[0], img_msg.data[1], img_msg.data[2]);
+
+                    has_image = 1;
+                }
+                else
+                {
+                    OLED_Printf(0,line3,6,"Invalid data!");
+                }
+            }
+            else
+            {
+                OLED_Printf(0,line3,6,"No new image");
+            }
+        }
+        else
+        {
+            OLED_Printf(0,line2,6,"Queue=NULL");
+        }
+
+        if(!has_image)
+        {
+            OLED_Printf(0,line7,6,"Waiting...");
+        }
+    }
+    else if(view == VIEW_UART_STATS)  // UART接收统计视图
+    {
+        // 获取UART接收统计信息
+        OpenMVRxStats_t stats;
+        OpenMVRxTask_GetStats(&stats);
+
+        OLED_Printf(0,line1,6,"UART3 Stats");
+        OLED_Printf(0,line2,6,"Total:%lu  ", stats.total_frames);
+        OLED_Printf(0,line3,6,"Error:%lu  ", stats.error_frames);
+        OLED_Printf(0,line4,6,"ChkErr:%lu  ", stats.checksum_errors);
+        OLED_Printf(0,line5,6,"Timout:%lu  ", stats.timeout_errors);
+        OLED_Printf(0,line6,6,"RxFPS:%.1f  ", stats.fps);
+
+        // 计算错误率
+        if(stats.total_frames > 0)
+        {
+            float error_rate = (float)stats.error_frames * 100.0f / stats.total_frames;
+            OLED_Printf(0,line7,6,"ErrRate:%.1f%%  ", error_rate);
+        }
+        else
+        {
+            OLED_Printf(0,line7,6,"ErrRate:N/A  ");
+        }
+    }
+
     OLED_Update();
 }
 

@@ -1,4 +1,5 @@
 #include "key.h"
+#include "disp.h"
 
 keys key[2];
 
@@ -40,6 +41,36 @@ void key_proc(void)
 	{
 		key[0].double_flag=0;
 
+	}
+
+	// KEY1：切换显示视图
+	if(key[1].single_flag)
+	{
+		key[1].single_flag=0;
+
+		// 循环切换视图：STATUS -> IMAGE -> UART_STATS -> STATUS
+		view++;
+		if(view > VIEW_UART_STATS)
+		{
+			view = VIEW_STATUS;
+		}
+
+		LED1_Toggle;
+		OLED_Clear();
+	}
+	if(key[1].long_flag)
+	{
+		key[1].long_flag=0;
+		// KEY1长按：直接跳转到图像视图
+		view = VIEW_IMAGE;
+		OLED_Clear();
+	}
+	if(key[1].double_flag)
+	{
+		key[1].double_flag=0;
+		// KEY1双击：跳转到UART统计视图
+		view = VIEW_UART_STATS;
+		OLED_Clear();
 	}
 }
 

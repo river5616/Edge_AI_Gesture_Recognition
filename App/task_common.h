@@ -5,20 +5,12 @@
 #include "cmsis_os.h"
 #include <stdint.h>
 
-// 图像参数
-#define USE_JPEG_MODE  0  // 与camera_task.c保持一致
 
-#if USE_JPEG_MODE
-    // JPEG模式：240x240分辨率，JPEG压缩后约5-15KB
-    #define IMAGE_WIDTH   240
-    #define IMAGE_HEIGHT  240
-    #define IMAGE_SIZE    (40 * 1024)  // 40KB缓冲区（足够大）
-#else
-    // RGB565灰度模式：180x180
-    #define IMAGE_WIDTH   180
-    #define IMAGE_HEIGHT  180
-    #define IMAGE_SIZE    (IMAGE_WIDTH * IMAGE_HEIGHT)
-#endif
+// RGB565灰度模式：
+#define IMAGE_WIDTH   64
+#define IMAGE_HEIGHT  64
+#define IMAGE_SIZE    (IMAGE_WIDTH * IMAGE_HEIGHT)
+
 
 // 工作模式
 typedef enum {

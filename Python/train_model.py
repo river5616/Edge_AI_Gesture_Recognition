@@ -79,20 +79,20 @@ class GestureNet(nn.Module):
     def __init__(self, num_classes=9):
         super(GestureNet, self).__init__()
 
-        # Input: 96x96x1
+        # Input: 64x64x1
         self.conv1 = nn.Sequential(
-            nn.Conv2d(1, 16, kernel_size=3, stride=2, padding=1, bias=False),  # 48x48x16
+            nn.Conv2d(1, 16, kernel_size=3, stride=2, padding=1, bias=False),  # 32x32x16
             nn.BatchNorm2d(16),
             nn.ReLU6(inplace=True)
         )
 
-        self.dw_conv1 = DepthwiseSeparableConv(16, 32)  # 48x48x32
-        self.pool1 = nn.MaxPool2d(2, 2)                  # 24x24x32
+        self.dw_conv1 = DepthwiseSeparableConv(16, 32)  # 32x32x32
+        self.pool1 = nn.MaxPool2d(2, 2)                  # 16x16x32
 
-        self.dw_conv2 = DepthwiseSeparableConv(32, 64)  # 24x24x64
-        self.pool2 = nn.MaxPool2d(2, 2)                  # 12x12x64
+        self.dw_conv2 = DepthwiseSeparableConv(32, 64)  # 16x16x64
+        self.pool2 = nn.MaxPool2d(2, 2)                  # 8x8x64
 
-        self.dw_conv3 = DepthwiseSeparableConv(64, 128) # 12x12x128
+        self.dw_conv3 = DepthwiseSeparableConv(64, 128) # 8x8x128
 
         self.global_avg_pool = nn.AdaptiveAvgPool2d(1)  # 1x1x128
 
@@ -164,8 +164,8 @@ def get_data_transforms(augment=True):
     """
     if augment:
         train_transform = transforms.Compose([
-            transforms.Resize((96, 96)),
-            transforms.RandomRotation(15),
+            transforms.Resize((64, 64)),
+            transforms.RandomRotation(30),
             transforms.RandomAffine(0, translate=(0.1, 0.1)),
             transforms.ColorJitter(brightness=0.2),
             transforms.ToTensor(),
@@ -173,13 +173,13 @@ def get_data_transforms(augment=True):
         ])
     else:
         train_transform = transforms.Compose([
-            transforms.Resize((96, 96)),
+            transforms.Resize((64, 64)),
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.5], std=[0.5])
         ])
 
     val_transform = transforms.Compose([
-        transforms.Resize((96, 96)),
+        transforms.Resize((64, 64)),
         transforms.ToTensor(),
         transforms.Normalize(mean=[0.5], std=[0.5])
     ])
@@ -413,7 +413,7 @@ def main():
 
     # 导出为ONNX (用于X-CUBE-AI)
     print("\n导出ONNX模型...")
-    dummy_input = torch.randn(1, 1, 96, 96).to(device)
+    dummy_input = torch.randn(1, 1, 64, 64).to(device)
     torch.onnx.export(model, dummy_input, "gesture_model.onnx",
                       export_params=True,
                       opset_version=11,

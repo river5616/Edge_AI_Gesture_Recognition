@@ -33,13 +33,12 @@ typedef int32_t    s32;
 #include "disp.h" // OLED��ʾ
 
 // ����ͷ���
-#include "ov2640.h"          // OV2640����
-#include "camera_task.h"     // ����ͷ����
 #include "uart_tx_task.h"
 #include "uart_rx_task.h"
 #include "task_common.h"     // ����������
 #include "inference_task.h"
-// #include "uart_protocol.h"   // ����Э��
+#include "openmv_rx_task.h"
+#include "uart_callbacks.h"
 
 // OLED
 extern u8 view; // ��ʾҳ��

@@ -89,10 +89,10 @@ const osThreadAttr_t Task_oled_disp_attributes = {
   .stack_size = 512 * 4,
   .priority = (osPriority_t) osPriorityBelowNormal1,
 };
-/* Definitions for Task_cam_capture */
-osThreadId_t Task_cam_captureHandle;
-const osThreadAttr_t Task_cam_capture_attributes = {
-  .name = "Task_cam_capture",
+/* Definitions for Task_openmv_rx */
+osThreadId_t Task_openmv_rxHandle;
+const osThreadAttr_t Task_openmv_rx_attributes = {
+  .name = "Task_openmv_rx",
   .stack_size = 2048 * 4,
   .priority = (osPriority_t) osPriorityAboveNormal5,
 };
@@ -162,7 +162,7 @@ void AppTask_led_proc(void *argument);
 void AppTask_key_read(void *argument);
 void AppTask_key_proc(void *argument);
 void AppTask_oled_disp(void *argument);
-void AppTask_cam_capture(void *argument);
+void AppTask_openmv_rx(void *argument);
 void AppTask_uart_tx(void *argument);
 void AppTask_uart_rx(void *argument);
 void AppTask_inference(void *argument);
@@ -247,8 +247,8 @@ void MX_FREERTOS_Init(void) {
   /* creation of Task_oled_disp */
   Task_oled_dispHandle = osThreadNew(AppTask_oled_disp, NULL, &Task_oled_disp_attributes);
 
-  /* creation of Task_cam_capture */
-  Task_cam_captureHandle = osThreadNew(AppTask_cam_capture, NULL, &Task_cam_capture_attributes);
+  /* creation of Task_openmv_rx */
+  Task_openmv_rxHandle = osThreadNew(AppTask_openmv_rx, NULL, &Task_openmv_rx_attributes);
 
   /* creation of Task_uart_tx */
   Task_uart_txHandle = osThreadNew(AppTask_uart_tx, NULL, &Task_uart_tx_attributes);
@@ -341,6 +341,7 @@ void AppTask_oled_disp(void *argument)
 {
   /* USER CODE BEGIN AppTask_oled_disp */
   TickType_t pxPrevioisWakeTime = xTaskGetTickCount();
+  //osThreadSuspend(NULL);
   /* Infinite loop */
   for(;;)
   {
@@ -351,24 +352,22 @@ void AppTask_oled_disp(void *argument)
   /* USER CODE END AppTask_oled_disp */
 }
 
-/* USER CODE BEGIN Header_AppTask_cam_capture */
+/* USER CODE BEGIN Header_AppTask_openmv_rx */
 /**
-* @brief Function implementing the Task_cam_capture thread.
+* @brief Function implementing the Task_openmv_rx thread.
 * @param argument: Not used
 * @retval None
 */
-/* USER CODE END Header_AppTask_cam_capture */
-__weak void AppTask_cam_capture(void *argument)
+/* USER CODE END Header_AppTask_openmv_rx */
+__weak void AppTask_openmv_rx(void *argument)
 {
-  /* USER CODE BEGIN AppTask_cam_capture */
-  TickType_t pxPreviousWakeTime = xTaskGetTickCount();
-
+  /* USER CODE BEGIN AppTask_openmv_rx */
   /* Infinite loop */
   for(;;)
   {
-    vTaskDelayUntil(&pxPreviousWakeTime, pdMS_TO_TICKS(1));
+    osDelay(1);
   }
-  /* USER CODE END AppTask_cam_capture */
+  /* USER CODE END AppTask_openmv_rx */
 }
 
 /* USER CODE BEGIN Header_AppTask_uart_tx */

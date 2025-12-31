@@ -235,20 +235,20 @@ class DataCollector:
             image = self.receive_image()
 
             if image is not None:
-                # ⚠️ 缩放到96x96用于训练
-                # JPEG模式接收240x240，灰度模式接收180x180，统一缩放到96x96
+                # ⚠️ 缩放到64x64用于训练
+                # JPEG模式接收240x240，灰度模式接收64x64，统一缩放到64x64
                 # 使用INTER_AREA插值，适合缩小图像
-                image_96 = cv2.resize(image, (96, 96), interpolation=cv2.INTER_AREA)
+                image_64 = cv2.resize(image, (64, 64), interpolation=cv2.INTER_AREA)
 
                 # 保存缩放后的图像 - 使用序号命名
                 image_index = start_index + collected
                 filename = f"{gesture_name}_{image_index:04d}.png"
                 filepath = os.path.join(gesture_dir, filename)
-                cv2.imwrite(filepath, image_96)  # 保存96x96
+                cv2.imwrite(filepath, image_64)  # 保存64x64
 
                 collected += 1
                 failed_count = 0  # 重置失败计数
-                print(f"✓ 已保存: {filename} ({image.shape[1]}x{image.shape[0]}→96x96) ({collected}/{num_images})")
+                print(f"✓ 已保存: {filename} ({image.shape[1]}x{image.shape[0]}→64x64) ({collected}/{num_images})")
 
                 # 显示原始图像
                 cv2.imshow(f"Gesture {gesture_id}: {gesture_name}", image)

@@ -39,4 +39,4 @@ project2/camera_task.o: ..\App\camera_task.c ..\App\camera_task.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\task.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\list.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\CMSIS_RTOS_V2\cmsis_os2.h \
-  ..\Hardware\ov2640.h ..\Hardware\sccb.h ..\App\camera_app.h
+  ..\Hardware\ov2640.h ..\Hardware\sccb.h

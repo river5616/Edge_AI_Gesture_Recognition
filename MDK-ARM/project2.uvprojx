@@ -603,16 +603,6 @@
           <GroupName>App</GroupName>
           <Files>
             <File>
-              <FileName>camera_task.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\App\camera_task.c</FilePath>
-            </File>
-            <File>
-              <FileName>camera_task.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\App\camera_task.h</FilePath>
-            </File>
-            <File>
               <FileName>uart_rx_task.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\App\uart_rx_task.c</FilePath>
@@ -651,6 +641,26 @@
               <FileName>inference_task.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\App\inference_task.h</FilePath>
+            </File>
+            <File>
+              <FileName>openmv_rx_task.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\App\openmv_rx_task.c</FilePath>
+            </File>
+            <File>
+              <FileName>openmv_rx_task.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\App\openmv_rx_task.h</FilePath>
+            </File>
+            <File>
+              <FileName>uart_callbacks.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\App\uart_callbacks.c</FilePath>
+            </File>
+            <File>
+              <FileName>uart_callbacks.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\App\uart_callbacks.h</FilePath>
             </File>
           </Files>
         </Group>
@@ -711,36 +721,6 @@
               <FileName>disp.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\Hardware\disp.h</FilePath>
-            </File>
-            <File>
-              <FileName>sccb.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Hardware\sccb.c</FilePath>
-            </File>
-            <File>
-              <FileName>sccb.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Hardware\sccb.h</FilePath>
-            </File>
-            <File>
-              <FileName>ov2640.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Hardware\ov2640.c</FilePath>
-            </File>
-            <File>
-              <FileName>ov2640.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Hardware\ov2640.h</FilePath>
-            </File>
-            <File>
-              <FileName>ov2640cfg.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Hardware\ov2640cfg.c</FilePath>
-            </File>
-            <File>
-              <FileName>ov2640cfg.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Hardware\ov2640cfg.h</FilePath>
             </File>
           </Files>
         </Group>
