@@ -40,11 +40,11 @@ void oled_disp(void)
             case MODE_INFERENCE:  mode_str = "INFE"; break;
             default:              mode_str = "????"; break;
         }
-        OLED_Printf(0,line1,6,"M:%s c1=%d    ",mode_str,cnt1);
+        OLED_Printf(0,line1,6,"M:%s c1=%d   ",mode_str,cnt1);
 
         // ⚠️ 增强显示：明确标识初始化状态
         const char* init_str = (camera_init_flag == 0) ? "OK" : "FAIL";
-        OLED_Printf(0,line2,6,"INIT:%s f=%d   ",init_str,camera_init_flag);
+        OLED_Printf(0,line2,6,"INIT:%s f=%d",init_str,camera_init_flag);
 
         OLED_Printf(0,line3,6,"fps=%.1f c2=%d   ",stats.fps,cnt2);
 
@@ -66,12 +66,12 @@ void oled_disp(void)
                 const char* gesture_name = gesture_names[s_display_gesture_id];
                 uint8_t conf_percent = (uint8_t)(s_display_gesture_confidence * 100);
 
-                OLED_Printf(0,line4,6,"Gest:%s C:%d%%   ", gesture_name, conf_percent);
+                OLED_Printf(0,line4,6,"Gest:%s C:%d%%  ", gesture_name, conf_percent);
             }
             else
             {
                 // 无效ID
-                OLED_Printf(0,line4,6,"Gest:?? C:0%%   ");
+                OLED_Printf(0,line4,6,"Gest:?? C:0%%  ");
             }
         }
         else
@@ -164,6 +164,58 @@ void oled_disp(void)
         else
         {
             OLED_Printf(0,line7,6,"ErrRate:N/A  ");
+        }
+    }
+    else if(view == VIEW_ALL_CONF)  // 所有手势置信度视图
+    {
+        WorkMode_t mode = Task_GetMode();
+
+        if(mode == MODE_INFERENCE)
+        {
+            // 获取所有9个手势的置信度
+            float all_confs[NUM_GESTURES];
+            InferenceTask_GetAllConfidences(all_confs);
+
+            // 显示标题
+            OLED_Printf(0,line1,6,"All Confidences");
+
+            // 手势名称（缩写）
+            const char* gesture_names[NUM_GESTURES] = {
+                "Fis", "Pal", "Thm", "OK ", "V  ", "Pnt", "3  ", "4  ", "Non"
+            };
+
+            // 分两页显示：第1页显示0-4，第2页显示5-8
+            // 使用 cnt2 的低位作为页面切换指示（每2秒自动翻页）
+            uint8_t page = (cnt2 / 200) % 2;  // 每2秒切换一次页面
+
+            if(page == 0)
+            {
+                // 第1页：显示手势 0-4
+                OLED_Printf(0,line2,6,"Page 1/2");
+                for(uint8_t i = 0; i < 5; i++)
+                {
+                    uint8_t conf_percent = (uint8_t)(all_confs[i] * 100);
+                    OLED_Printf(0, line3 + i*8, 6, "%d:%s %3d%%", i, gesture_names[i], conf_percent);
+                }
+            }
+            else
+            {
+                // 第2页：显示手势 5-8
+                OLED_Printf(0,line2,6,"Page 2/2");
+                for(uint8_t i = 5; i < 9; i++)
+                {
+                    uint8_t conf_percent = (uint8_t)(all_confs[i] * 100);
+                    OLED_Printf(0, line3 + (i-5)*8, 6, "%d:%s %3d%%", i, gesture_names[i], conf_percent);
+                }
+                // 留一行空白
+                OLED_Printf(0,line7,6,"              ");
+            }
+        }
+        else
+        {
+            OLED_Printf(0,line1,6,"All Confidences");
+            OLED_Printf(0,line3,6,"Mode: INFERENCE");
+            OLED_Printf(0,line4,6,"to view data");
         }
     }
 

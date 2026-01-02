@@ -118,16 +118,19 @@ void AppTask_uart_tx(void *argument)
             }
         }
 
-        // 每秒发送一次FPS
-        uint32_t current_time = osKernelGetTickCount();
-        if(current_time - last_fps_send >= 1000)
+        // 每秒发送一次FPS（仅在非推理模式下，避免干扰调试）
+        if(mode != MODE_INFERENCE)
         {
-            float fps = Task_GetFPS();
-            if(fps > 0.01f)  // 避免发送0
+            uint32_t current_time = osKernelGetTickCount();
+            if(current_time - last_fps_send >= 1000)
             {
-                UartTxTask_SendFPS(fps);
+                float fps = Task_GetFPS();
+                if(fps > 0.01f)  // 避免发送0
+                {
+                    UartTxTask_SendFPS(fps);
+                }
+                last_fps_send = current_time;
             }
-            last_fps_send = current_time;
         }
 
         // 短延时

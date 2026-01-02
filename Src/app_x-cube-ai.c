@@ -267,6 +267,53 @@ int MX_X_CUBE_AI_Inference(const uint8_t* image_data, uint8_t* gesture_id, float
     return 0;  // Success
 }
 
+/**
+ * @brief Run gesture recognition and get all class confidences
+ * @param image_data: input image data (uint8_t, 64x64 grayscale)
+ * @param gesture_id: output - recognized gesture ID (0-8)
+ * @param confidence: output - confidence level (0.0-1.0) of the max class
+ * @param all_confidences: output - array of 9 confidences (one per class)
+ * @return 0 on success, negative on error
+ */
+int MX_X_CUBE_AI_Inference_Full(const uint8_t* image_data, uint8_t* gesture_id,
+                                 float* confidence, float* all_confidences)
+{
+    ai_i32 batch;
+
+    // Check if network is initialized
+    if (!network) {
+        return -1;  // Network not initialized
+    }
+
+    // Check input parameters
+    if (!image_data || !gesture_id || !confidence || !all_confidences) {
+        return -2;  // Invalid parameters
+    }
+
+    // Step 1: Preprocess image data (uint8 -> float, normalize)
+    float* input_buffer = (float*)data_ins[0];
+    preprocess_image(image_data, input_buffer, AI_NETWORK_IN_1_SIZE);
+
+    // Step 2: Run inference
+    batch = ai_network_run(network, ai_input, ai_output);
+    if (batch != 1) {
+        return -3;  // Inference failed
+    }
+
+    // Step 3: Get output buffer and copy all confidences
+    float* output_buffer = (float*)data_outs[0];
+
+    // Copy all 9 confidences to output array
+    for (uint8_t i = 0; i < AI_NETWORK_OUT_1_SIZE; i++) {
+        all_confidences[i] = output_buffer[i];
+    }
+
+    // Step 4: Find max probability class
+    postprocess_output(output_buffer, AI_NETWORK_OUT_1_SIZE, gesture_id, confidence);
+
+    return 0;  // Success
+}
+
 int acquire_and_process_data(ai_i8* data[])
 {
   /* fill the inputs of the c-model

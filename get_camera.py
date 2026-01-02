@@ -11,6 +11,13 @@ NN_HEIGHT = 64
 # 注意：STM32 端也要配置成一模一样的波特率！
 UART_BAUD = 1500000
 # UART_BAUD = 921600
+
+# 3. 帧率控制 (设置发送间隔，单位ms)
+# 0 = 全速发送 (~32 FPS)
+# 30 = 约10 FPS
+# 62 = 约8 FPS
+# 100 = 约5 FPS
+FRAME_DELAY_MS = 0  # 默认全速，根据需要修改
 # ===========================================
 
 # 1. 初始化 LCD (使用新版 display 模块)
@@ -53,7 +60,7 @@ def send_image_packet(img_data):
     packet += img_data                  # 图像数据（使用+=而不是extend）
     packet += bytearray([0x5A, 0xA5])   # 帧尾
 
-    # ⚠️ 关键：一次性发送完整数据包
+    # 关键：一次性发送完整数据包
     uart.write(packet)
 
 print("系统启动: High-Speed UART Mode")
@@ -61,20 +68,28 @@ print("系统启动: High-Speed UART Mode")
 while(True):
     clock.tick()
 
-    # [1] 获取图像
+    # [1] 获取原始图像 (干净的)
     img = sensor.snapshot()
 
-    # [2] 显示到 LCD
+    # [2] 立即生成缩放后的图像 (用于发送给STM32)
+    # 在画字之前先Copy出来，保证 img_small 是干净的！
+    img_small = img.copy(x_scale=NN_WIDTH/img.width(), y_scale=(NN_HEIGHT/img.height()) + 0.001)
+
+    # [3] 计算亮度并在原图上叠加信息 (仅用于 LCD 显示)
+    stats = img.get_statistics()
+    mean_val = stats.mean()
+    # 这行代码修改的是 img，但此时 img_small 已经生成好了，互不影响
+    img.draw_string(1, 1, f"Br:{mean_val:.0f}", color=255, scale=1)
+
+    # [4] 显示带文字的原图到 LCD (给人看)
     lcd.write(img)
 
-    # [3] 缩放图像 (用于发送)
-    # 使用 fit_to_size (如果是新版固件) 或 copy+scale
-    # copy() 会自动处理缩放
-    img_small = img.copy(x_scale=NN_WIDTH/img.width(), y_scale=(NN_HEIGHT/img.height()) + 0.001)
-    # lcd.write(img_small)
-
-    # [4] 通过高速串口发送
+    # [5] 通过高速串口发送 (发送的是干净的小图)
     send_image_packet(img_small.bytearray())
 
-    # 打印帧率 (预期应在 20-40 FPS 之间)
+    # [6] 帧率控制延时
+    if FRAME_DELAY_MS > 0:
+        time.sleep_ms(FRAME_DELAY_MS)
+
+    # 打印帧率
     print(clock.fps())

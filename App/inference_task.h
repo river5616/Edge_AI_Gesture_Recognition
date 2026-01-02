@@ -3,6 +3,9 @@
 
 #include "task_common.h"
 
+// 手势类别数量
+#define NUM_GESTURES 9
+
 // 推理统计结构
 typedef struct {
     uint32_t total_count;    // 总推理次数
@@ -21,5 +24,8 @@ uint8_t InferenceTask_Run(uint8_t* image_data, uint8_t* result, float* confidenc
 
 // 获取推理统计信息
 void InferenceTask_GetStats(InferenceStats_t* stats);
+
+// 获取所有手势的置信度（用于OLED显示）
+void InferenceTask_GetAllConfidences(float* confidences);
 
 #endif
