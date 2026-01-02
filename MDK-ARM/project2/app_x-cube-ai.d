@@ -31,6 +31,4 @@ project2/app_x-cube-ai.o: ..\Src\app_x-cube-ai.c ..\Inc\app_x-cube-ai.h \
   ..\Middlewares\ST\AI\Inc\ai_datatypes_defines.h \
   ..\Middlewares\ST\AI\Inc\core_assert.h ..\Inc\network.h \
   ..\Inc\network_config.h ..\Inc\network_data.h \
-  ..\Inc\network_data_params.h ..\Inc\network_1.h \
-  ..\Inc\network_1_config.h ..\Inc\network_1_data.h \
-  ..\Inc\network_1_data_params.h
+  ..\Inc\network_data_params.h ..\Inc\usart.h

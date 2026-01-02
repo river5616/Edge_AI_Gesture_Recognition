@@ -1155,44 +1155,44 @@
   ],
   "environment": {
     "generated_model": {
-      "generated_time": "2026-01-02T07:47:05+0800",
+      "generated_time": "2026-01-02T08:53:20+0800",
       "model_files": [
         {
           "name": "network_data_params.h",
-          "signature": "0x6171b1fba90ca71e78dfd5428db3b0f7"
+          "signature": "0xed5a8ee08b379453c0c70906a3e972e5"
         },
         {
           "name": "network_data_params.c",
-          "signature": "0x119fc54685cb3b8267da281e91a59d04"
+          "signature": "0xe276fed31514ff74d7370de80c2a9442"
         },
         {
           "name": "network_data.h",
-          "signature": "0x989ce4bc7ed49e54f6401b048e34d2cf"
+          "signature": "0x38805b763942b872fe954dbba1020e9f"
         },
         {
           "name": "network_data.c",
-          "signature": "0xd9ace6b41363dd2aa354a94ec950fc15"
+          "signature": "0x076a7e31ceed2c7aa47660c8c300c956"
         },
         {
           "name": "network_config.h",
-          "signature": "0x05a2e109b91fb20497454f10afb54385"
+          "signature": "0x5998300ef4bb4f9aebff7fc54813a91a"
         },
         {
           "name": "network.h",
-          "signature": "0x85ed152f868e55e5f30123043f30e5a0"
+          "signature": "0x719027b3e2b1400766695b5c4679725e"
         },
         {
           "name": "network.c",
-          "signature": "0x0b17fdcbefd4c6eec5bbfea5f392425a"
+          "signature": "0x4983bf260f74fcb5c6fec22779d9123a"
         }
       ],
       "name": "network"
     },
-    "network_signature": "0xd8f421ca26e3be2f",
+    "network_signature": "0xd5d0e9fa7992edd3",
     "test_name": "",
     "tools": [
       {
-        "arguments": "generate --target stm32h7 --name network -m E:/Lesson/Embedded_Designed/project/stm32h753/project6/Python/gesture_model.onnx --compression none --verbosity 1 --workspace C:/Users/river/AppData/Local/Temp/mxAI_workspace22766500479520016629534351066013872 --output C:/Users/river/.stm32cubemx/network_output",
+        "arguments": "generate --target stm32h7 --name network -m E:/Lesson/Embedded_Designed/project/stm32h753/project6/Python/gesture_model.onnx --compression none --verbosity 1 --workspace C:/Users/river/AppData/Local/Temp/mxAI_workspace231638711582100251477408071504277 --output C:/Users/river/.stm32cubemx/network_output",
         "environment": [
           "STATS_TYPE=X-CUBE-AI"
         ],
