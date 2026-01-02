@@ -22,6 +22,9 @@ extern u8 view;
 
 void oled_disp(void);
 
+/*应用函数*/
+void OLED_ShowGestureResult(uint8_t GestureID, float Confidence);
+
 
 
 

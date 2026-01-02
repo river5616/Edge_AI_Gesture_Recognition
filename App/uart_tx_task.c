@@ -86,17 +86,18 @@ void AppTask_uart_tx(void *argument)
     // 无限循环
     for(;;)
     {
-        // 等待帧就绪信号
-        if(osSemaphoreAcquire(frameReadySem, 100) == osOK)
+        WorkMode_t mode = Task_GetMode();
+
+        // 只在采集模式下处理图像
+        if(mode == MODE_COLLECTING)
         {
-            ImageMsg_t img_msg;
-
-            // 从队列获取图像消息
-            if(osMessageQueueGet(imageQueue, &img_msg, NULL, 0) == osOK)
+            // 等待帧就绪信号
+            if(osSemaphoreAcquire(frameReadySem, 100) == osOK)
             {
-                WorkMode_t mode = Task_GetMode();
+                ImageMsg_t img_msg;
 
-                if(mode == MODE_COLLECTING)
+                // 从队列获取图像消息
+                if(osMessageQueueGet(imageQueue, &img_msg, NULL, 0) == osOK)
                 {
                     // 数据采集模式：发送图像
                     UartTxTask_SendImage(img_msg.data, img_msg.width, img_msg.height, img_msg.data_size);
@@ -114,12 +115,6 @@ void AppTask_uart_tx(void *argument)
                         HAL_UART_Transmit(&huart1, (uint8_t*)"$COMPLETE\r\n", 11, 1000);
                     }
                 }
-                else if(mode == MODE_INFERENCE)
-                {
-                    // 推理模式：发送到推理队列（如果推理任务存在）
-                    // 这里可以选择是否发送图像到PC（调试用）
-                    // UartTxTask_SendImage(img_msg.data, img_msg.width, img_msg.height, img_msg.data_size);
-                }
             }
         }
 
@@ -134,6 +129,7 @@ void AppTask_uart_tx(void *argument)
             }
             last_fps_send = current_time;
         }
+
         // 短延时
         vTaskDelayUntil(&pxPreviousWakeTime, pdMS_TO_TICKS(20));
     }

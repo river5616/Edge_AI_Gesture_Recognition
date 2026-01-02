@@ -115,7 +115,7 @@ osThreadId_t Task_inferenceHandle;
 const osThreadAttr_t Task_inference_attributes = {
   .name = "Task_inference",
   .stack_size = 4096 * 4,
-  .priority = (osPriority_t) osPriorityNormal6,
+  .priority = (osPriority_t) osPriorityLow,
 };
 /* Definitions for imageQueue */
 osMessageQueueId_t imageQueueHandle;
@@ -347,6 +347,7 @@ void AppTask_oled_disp(void *argument)
   {
     cnt1++;
     oled_disp();
+    //OLED_ShowGestureResult();
     vTaskDelayUntil(&pxPrevioisWakeTime, pdMS_TO_TICKS(30));
   }
   /* USER CODE END AppTask_oled_disp */

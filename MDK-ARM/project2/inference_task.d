@@ -39,4 +39,9 @@ project2/inference_task.o: ..\App\inference_task.c \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\task.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\list.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\CMSIS_RTOS_V2\cmsis_os2.h \
-  ..\App\uart_tx_task.h
+  ..\App\uart_tx_task.h ..\Inc\app_x-cube-ai.h \
+  ..\Middlewares\ST\AI\Inc\ai_platform.h ..\Hardware\disp.h \
+  ..\Hardware\headfile.h ..\Inc\memorymap.h ..\Inc\gpio.h \
+  ..\Hardware\led.h ..\Hardware\key.h ..\Hardware\OLED.h \
+  ..\Hardware\OLED_Data.h ..\App\uart_rx_task.h ..\App\openmv_rx_task.h \
+  ..\App\uart_callbacks.h

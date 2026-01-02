@@ -1,5 +1,7 @@
 #include "inference_task.h"
 #include "uart_tx_task.h"
+#include "app_x-cube-ai.h"
+#include "disp.h"
 #include <string.h>
 
 // AI模型相关（如果已集成X-CUBE-AI，取消注释）
@@ -15,80 +17,44 @@ static ai_buffer ai_output[AI_GESTURE_MODEL_OUT_NUM];
 static uint8_t activations[AI_GESTURE_MODEL_DATA_ACTIVATIONS_SIZE];
 */
 
+// 推理统计变量
+static uint32_t s_inference_count = 0;      // 推理次数
+static uint32_t s_inference_success = 0;    // 成功次数
+static uint32_t s_inference_fail = 0;       // 失败次数
+
 // 初始化AI模型
 uint8_t InferenceTask_Init(void)
 {
-    /* 如果已集成X-CUBE-AI，取消注释以下代码：
-
-    ai_error err;
-
-    // 创建网络
-    err = ai_gesture_model_create(&network, AI_GESTURE_MODEL_DATA_CONFIG);
-    if(err.type != AI_ERROR_NONE) {
-        return 1;
-    }
-
-    // 初始化网络
-    const ai_network_params params = {
-        AI_GESTURE_MODEL_DATA_WEIGHTS(ai_gesture_model_data_weights_get()),
-        AI_GESTURE_MODEL_DATA_ACTIVATIONS(activations)
-    };
-
-    if(!ai_gesture_model_init(network, &params)) {
-        return 2;
-    }
-
-    // 获取输入输出缓冲区信息
-    ai_gesture_model_get_info(network, &network_info);
-    ai_input[0] = network_info.inputs[0];
-    ai_output[0] = network_info.outputs[0];
-
+    // AI 模型已在 main.c 的 MX_X_CUBE_AI_Init() 中初始化完成
+    // 这里不需要额外操作
     return 0;  // 成功
-    */
-
-    // 暂时返回成功（未集成AI时）
-    return 0;
 }
 
 // 运行推理
 uint8_t InferenceTask_Run(uint8_t* image_data, uint8_t* result, float* confidence)
 {
-    /* 如果已集成X-CUBE-AI，取消注释以下代码：
+    // 调用 X-CUBE-AI 推理接口
+    int ret = MX_X_CUBE_AI_Inference(image_data, result, confidence);
 
-    // 准备输入数据
-    ai_input[0].data = AI_HANDLE_PTR(image_data);
-
-    // 准备输出缓冲区
-    float output_data[9];
-    ai_output[0].data = AI_HANDLE_PTR(output_data);
-
-    // 运行推理
-    ai_i32 batch = ai_gesture_model_run(network, &ai_input[0], &ai_output[0]);
-    if(batch != 1) {
-        return 1;  // 推理失败
+    if (ret == 0) {
+        return 0;  // 成功
+    } else {
+        // 推理失败，返回默认值
+        *result = 0;
+        *confidence = 0.0f;
+        return 1;  // 失败
     }
+}
 
-    // 找到最大概率的类别
-    uint8_t max_idx = 0;
-    float max_val = output_data[0];
-
-    for(uint8_t i = 1; i < 9; i++) {
-        if(output_data[i] > max_val) {
-            max_val = output_data[i];
-            max_idx = i;
-        }
+// 获取推理统计信息
+void InferenceTask_GetStats(InferenceStats_t* stats)
+{
+    if(stats != NULL)
+    {
+        stats->total_count = s_inference_count;
+        stats->success_count = s_inference_success;
+        stats->fail_count = s_inference_fail;
     }
-
-    *result = max_idx;
-    *confidence = max_val;
-
-    return 0;  // 成功
-    */
-
-    // 暂时返回模拟结果（未集成AI时）
-    *result = 0;
-    *confidence = 0.95f;
-    return 0;
 }
 
 /**
@@ -125,9 +91,18 @@ void AppTask_inference(void *argument)
                     uint8_t gesture_id;
                     float confidence;
 
+                    s_inference_count++;
+
                     // 运行推理
-                    if(InferenceTask_Run(img_msg.data, &gesture_id, &confidence) == 0)
+                    uint8_t ret = InferenceTask_Run(img_msg.data, &gesture_id, &confidence);
+
+                    if(ret == 0)
                     {
+                        s_inference_success++;
+
+                        // 在 OLED 上显示识别结果
+                        OLED_ShowGestureResult(gesture_id, confidence);
+
                         // 发送推理结果
                         UartTxTask_SendResult(gesture_id, confidence);
 
@@ -139,6 +114,16 @@ void AppTask_inference(void *argument)
                         };
                         osMessageQueuePut(resultQueue, &result, 0, 0);
                     }
+                    else
+                    {
+                        s_inference_fail++;
+
+                        // 推理失败，也显示一个错误状态
+                        OLED_ShowGestureResult(0xFF, 0.0f);  // 0xFF 表示失败
+                    }
+
+                    // 短暂延时，让其他任务有机会运行
+                    osDelay(10);  // 10ms延时，确保OLED等任务能及时更新
                 }
             }
         }

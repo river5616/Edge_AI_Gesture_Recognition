@@ -1,5 +1,6 @@
 #include "disp.h"
 #include "openmv_rx_task.h"
+#include "inference_task.h"
 
 u8 view = VIEW_STATUS; // 显示页面，默认状态视图
 u8 cnt1,cnt2;
@@ -17,8 +18,16 @@ static uint8_t has_image = 0;
 uint16_t g_debug_rx_bytes = 0;
 uint16_t g_debug_rx_bytes_max = 0;  // 最大接收字节数
 
+// 手势识别结果（用于显示）
+static uint8_t s_display_gesture_id = 0;
+static float s_display_gesture_confidence = 0.0f;
+static uint8_t s_display_gesture_valid = 0;  // 标记是否有有效的识别结果
+
 void oled_disp(void)
 {
+	// 获取UART接收统计信息
+	OpenMVRxStats_t stats;
+    OpenMVRxTask_GetStats(&stats);
     if(view == VIEW_STATUS)  // 状态信息视图
     {
         // 显示工作模式
@@ -31,22 +40,58 @@ void oled_disp(void)
             case MODE_INFERENCE:  mode_str = "INFE"; break;
             default:              mode_str = "????"; break;
         }
-        OLED_Printf(0,line1,6,"M:%s c1=%d   ",mode_str,cnt1);
+        OLED_Printf(0,line1,6,"M:%s c1=%d    ",mode_str,cnt1);
 
         // ⚠️ 增强显示：明确标识初始化状态
         const char* init_str = (camera_init_flag == 0) ? "OK" : "FAIL";
-        OLED_Printf(0,line2,6,"INIT:%s f=%d",init_str,camera_init_flag);
+        OLED_Printf(0,line2,6,"INIT:%s f=%d   ",init_str,camera_init_flag);
 
-        float fps = Task_GetFPS();
-        OLED_Printf(0,line3,6,"fps=%.1f c2=%d   ",fps,cnt2);
+        OLED_Printf(0,line3,6,"fps=%.1f c2=%d   ",stats.fps,cnt2);
 
-        // 调试：显示接收字节数（当前值和最大值）
-        OLED_Printf(0,line4,6,"RxB:%d/%d     ", g_debug_rx_bytes, g_debug_rx_bytes_max);
+        // 如果在推理模式且有识别结果，显示识别结果
+        if(mode == MODE_INFERENCE && s_display_gesture_valid)
+        {
+            if(s_display_gesture_id == 0xFF)
+            {
+                // 推理失败
+                OLED_Printf(0,line4,6,"Infer:FAIL    ");
+            }
+            else if(s_display_gesture_id < 9)
+            {
+                // 手势名称映射
+                const char* gesture_names[9] = {
+                    "G0", "G1", "G2", "G3", "G4", "G5", "G6", "G7", "G8"
+                };
+
+                const char* gesture_name = gesture_names[s_display_gesture_id];
+                uint8_t conf_percent = (uint8_t)(s_display_gesture_confidence * 100);
+
+                OLED_Printf(0,line4,6,"Gest:%s C:%d%%   ", gesture_name, conf_percent);
+            }
+            else
+            {
+                // 无效ID
+                OLED_Printf(0,line4,6,"Gest:?? C:0%%   ");
+            }
+        }
+        else
+        {
+            // 调试：显示接收字节数（当前值和最大值）
+            OLED_Printf(0,line4,6,"RxB:%d/%d     ", g_debug_rx_bytes, g_debug_rx_bytes_max);
+        }
 
         // 显示UART接收统计
         OpenMVRxStats_t stats;
         OpenMVRxTask_GetStats(&stats);
         OLED_Printf(0,line5,6,"T:%lu E:%lu  ", stats.total_frames, stats.error_frames);
+
+        // 在推理模式下显示推理统计
+        if(mode == MODE_INFERENCE)
+        {
+            InferenceStats_t infer_stats;
+            InferenceTask_GetStats(&infer_stats);
+            OLED_Printf(0,line6,6,"Inf:%lu/%lu  ", infer_stats.success_count, infer_stats.total_count);
+        }
 
     }
     else if(view == VIEW_IMAGE)  // 图像显示视图
@@ -103,10 +148,6 @@ void oled_disp(void)
     }
     else if(view == VIEW_UART_STATS)  // UART接收统计视图
     {
-        // 获取UART接收统计信息
-        OpenMVRxStats_t stats;
-        OpenMVRxTask_GetStats(&stats);
-
         OLED_Printf(0,line1,6,"UART3 Stats");
         OLED_Printf(0,line2,6,"Total:%lu  ", stats.total_frames);
         OLED_Printf(0,line3,6,"Error:%lu  ", stats.error_frames);
@@ -129,5 +170,17 @@ void oled_disp(void)
     OLED_Update();
 }
 
-
+/**
+  * 函    数：更新手势识别结果
+  * 参    数：GestureID 手势ID，范围：0~8
+  * 参    数：Confidence 置信度，范围：0.0~1.0
+  * 返 回 值：无
+  * 说    明：此函数仅更新全局变量，实际显示由oled_disp()统一处理
+  */
+void OLED_ShowGestureResult(uint8_t GestureID, float Confidence)
+{
+	s_display_gesture_id = GestureID;
+	s_display_gesture_confidence = Confidence;
+	s_display_gesture_valid = 1;
+}
 

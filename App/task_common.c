@@ -4,7 +4,7 @@
 // 这里只需要定义全局变量
 
 // 全局变量定义
-WorkMode_t g_work_mode = MODE_IDLE;
+WorkMode_t g_work_mode = MODE_INFERENCE;
 uint8_t g_gesture_id = 0;
 uint16_t g_target_images = 0;
 uint16_t g_current_images = 0;

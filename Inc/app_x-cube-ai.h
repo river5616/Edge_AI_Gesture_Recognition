@@ -27,6 +27,17 @@ extern "C" {
 
 void MX_X_CUBE_AI_Init(void);
 void MX_X_CUBE_AI_Process(void);
+
+/* Gesture recognition interface */
+/**
+ * @brief Run gesture recognition inference
+ * @param image_data: input image (uint8_t, 64x64 grayscale)
+ * @param gesture_id: output recognized gesture ID (0-8)
+ * @param confidence: output confidence level (0.0-1.0)
+ * @return 0 on success, negative on error
+ */
+int MX_X_CUBE_AI_Inference(const uint8_t* image_data, uint8_t* gesture_id, float* confidence);
+
 /* USER CODE BEGIN includes */
 /* USER CODE END includes */
 #ifdef __cplusplus
