@@ -11,10 +11,10 @@ import os
 import time
 from datetime import datetime
 
-# 手势类别（按照模型训练时的顺序）
+# 手势类别（按照模型训练时的顺序） - 7个手势精简版
 GESTURE_NAMES = {
-    0: "fist", 1: "palm", 2: "thumbs_up", 3: "ok", 4: "v_sign",
-    5: "point", 6: "three", 7: "four", 8: "nothing"
+    0: "fist", 1: "palm", 2: "thumbs_up", 3: "ok",
+    4: "gun", 5: "call_me", 6: "nothing"
 }
 
 class DataCollector:
@@ -54,13 +54,14 @@ class DataCollector:
             return self.ser.readline().decode('utf-8', errors='ignore').strip()
         return ""
 
-    def collect_gesture(self, gesture_id, num_images=100):
+    def collect_gesture(self, gesture_id, num_images=100, countdown=5):
         """
         采集指定手势的图像
 
         Args:
-            gesture_id: 手势ID (0-8)
+            gesture_id: 手势ID (0-6)
             num_images: 采集图像数量
+            countdown: 开始采集前的倒计时秒数（默认5秒）
         """
         if gesture_id not in GESTURE_NAMES:
             print(f"✗ 无效的手势ID: {gesture_id}")
@@ -81,6 +82,13 @@ class DataCollector:
         print(f"{'='*60}\n")
         print("请保持手势稳定，尽量变化角度、位置、距离...")
         print("按 Ctrl+C 可提前结束\n")
+
+        # 倒计时，给用户准备时间
+        print(f"⏱️  准备倒计时（左手拿摄像头，右手准备做手势）：")
+        for i in range(countdown, 0, -1):
+            print(f"   {i} 秒...", end='\r')
+            time.sleep(1)
+        print("   开始采集！      \n")
 
         collected = 0
         last_image = None
@@ -181,14 +189,14 @@ def main():
         print("  4. 手指变化：稍微弯曲、展开、收紧")
         print("  5. 背景变化：移动手部位置改变背景")
         print("\n特别注意易混淆的手势：")
-        print("  - palm (1) vs four (7)：五指 vs 四指")
-        print("  - point (5) vs v_sign (4)：一指 vs 两指")
-        print("  - 这些手势要特别多采集不同角度！")
+        print("  - gun (4) vs thumbs_up (2)：侧面看很相似，需多采集不同角度")
+        print("  - gun (4) vs call_me (5)：都是L形，需强调手指伸直程度")
+        print("  - 这些手势要特别多采集不同角度和距离！")
         print("="*60 + "\n")
 
         while True:
             try:
-                gesture_input = input("请输入要采集的手势ID (0-8)，或输入 'q' 退出: ").strip()
+                gesture_input = input("请输入要采集的手势ID (0-6)，或输入 'q' 退出: ").strip()
 
                 if gesture_input.lower() == 'q':
                     break
@@ -196,7 +204,7 @@ def main():
                 gesture_id = int(gesture_input)
 
                 if gesture_id not in GESTURE_NAMES:
-                    print("✗ 无效的手势ID，请输入 0-8")
+                    print("✗ 无效的手势ID，请输入 0-6")
                     continue
 
                 num_input = input(f"请输入采集数量（建议至少200，推荐500+）: ").strip()
@@ -206,8 +214,12 @@ def main():
                     print("✗ 数量必须大于0")
                     continue
 
+                # 询问倒计时时长
+                countdown_input = input(f"准备时间（秒，默认5秒，直接回车使用默认值）: ").strip()
+                countdown = int(countdown_input) if countdown_input else 5
+
                 # 开始采集
-                collector.collect_gesture(gesture_id, num_images)
+                collector.collect_gesture(gesture_id, num_images, countdown)
 
                 # 询问是否继续
                 continue_input = input("\n是否继续采集其他手势？(y/n): ").strip().lower()

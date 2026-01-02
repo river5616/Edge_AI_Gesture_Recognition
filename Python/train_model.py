@@ -16,11 +16,12 @@ import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix, classification_report
 import seaborn as sns
+import argparse
+from tqdm import tqdm
 
-# 手势类别
+# 手势类别 - 5个手势（移除 gun 和 call_me，它们容易与 thumbs_up 混淆）
 GESTURE_NAMES = {
-    0: "fist", 1: "palm", 2: "thumbs_up", 3: "ok", 4: "v_sign",
-    5: "point", 6: "three", 7: "four", 8: "nothing"
+    0: "fist", 1: "palm", 2: "thumbs_up", 3: "ok", 4: "nothing"
 }
 
 class GestureDataset(Dataset):
@@ -76,7 +77,7 @@ class DepthwiseSeparableConv(nn.Module):
 class GestureNet(nn.Module):
     """轻量级手势识别网络"""
 
-    def __init__(self, num_classes=9):
+    def __init__(self, num_classes=5):  # 5个手势
         super(GestureNet, self).__init__()
 
         # Input: 64x64x1
@@ -131,7 +132,7 @@ def load_dataset(dataset_dir):
     image_paths = []
     labels = []
 
-    for gesture_id in range(9):
+    for gesture_id in range(5):  # 5个手势
         gesture_name = GESTURE_NAMES[gesture_id]
         gesture_dir = os.path.join(dataset_dir, f"{gesture_id}_{gesture_name}")
 
@@ -165,11 +166,23 @@ def get_data_transforms(augment=True):
     if augment:
         train_transform = transforms.Compose([
             transforms.Resize((64, 64)),
-            transforms.RandomRotation(30),
-            transforms.RandomAffine(0, translate=(0.1, 0.1)),
-            transforms.ColorJitter(brightness=0.2),
+            # 更强的旋转
+            transforms.RandomRotation(40),
+            # 随机仿射变换（平移、缩放、剪切）
+            transforms.RandomAffine(
+                degrees=0,
+                translate=(0.15, 0.15),
+                scale=(0.85, 1.15),
+                shear=10
+            ),
+            # 亮度、对比度增强
+            transforms.ColorJitter(brightness=0.3, contrast=0.3),
+            # 转换为Tensor
             transforms.ToTensor(),
-            transforms.Normalize(mean=[0.5], std=[0.5])
+            # 标准化
+            transforms.Normalize(mean=[0.5], std=[0.5]),
+            # 随机擦除（模拟遮挡）
+            transforms.RandomErasing(p=0.3, scale=(0.02, 0.15), ratio=(0.3, 3.3))
         ])
     else:
         train_transform = transforms.Compose([
@@ -194,7 +207,10 @@ def train_epoch(model, dataloader, criterion, optimizer, device):
     correct = 0
     total = 0
 
-    for images, labels in dataloader:
+    # 添加进度条
+    pbar = tqdm(dataloader, desc='Training', leave=False)
+
+    for images, labels in pbar:
         images, labels = images.to(device), labels.to(device)
 
         # 前向传播
@@ -211,6 +227,9 @@ def train_epoch(model, dataloader, criterion, optimizer, device):
         _, predicted = outputs.max(1)
         total += labels.size(0)
         correct += predicted.eq(labels).sum().item()
+
+        # 更新进度条
+        pbar.set_postfix({'loss': f'{loss.item():.4f}', 'acc': f'{100.*correct/total:.2f}%'})
 
     epoch_loss = running_loss / len(dataloader)
     epoch_acc = 100. * correct / total
@@ -262,10 +281,10 @@ def plot_confusion_matrix(model, dataloader, device, save_path="confusion_matrix
     cm = confusion_matrix(all_labels, all_preds)
 
     # 绘制
-    plt.figure(figsize=(9, 8))
+    plt.figure(figsize=(6, 5))
     sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
-                xticklabels=[GESTURE_NAMES[i] for i in range(9)],
-                yticklabels=[GESTURE_NAMES[i] for i in range(9)])
+                xticklabels=[GESTURE_NAMES[i] for i in range(5)],  # 5个手势
+                yticklabels=[GESTURE_NAMES[i] for i in range(5)])
     plt.ylabel('True Label')
     plt.xlabel('Predicted Label')
     plt.title('Confusion Matrix')
@@ -278,15 +297,30 @@ def plot_confusion_matrix(model, dataloader, device, save_path="confusion_matrix
     # 打印分类报告
     print("\n分类报告:")
     print(classification_report(all_labels, all_preds,
-                                target_names=[GESTURE_NAMES[i] for i in range(9)]))
+                                target_names=[GESTURE_NAMES[i] for i in range(5)]))
 
 
 def main():
+    # 解析命令行参数
+    parser = argparse.ArgumentParser(description='训练手势识别模型 (GestureNet)')
+    parser.add_argument('--dataset', type=str, default='dataset', help='数据集目录')
+    parser.add_argument('--batch-size', type=int, default=32, help='批量大小')
+    parser.add_argument('--epochs', type=int, default=100, help='训练轮数')
+    parser.add_argument('--lr', type=float, default=0.001, help='学习率')
+    parser.add_argument('--model-name', type=str, default='gesture_v1.pth', help='模型保存名称')
+    parser.add_argument('--no-augment', action='store_true',
+                        help='跳过训练时数据增强（如果数据已预增强，使用此选项可大幅加速）')
+    parser.add_argument('--num-workers', type=int, default=0,
+                        help='数据加载线程数（Windows建议0，Linux可用4-8）')
+    parser.add_argument('--subset', type=float, default=1.0,
+                        help='使用数据集的子集比例（0.1-1.0），用于快速测试')
+    args = parser.parse_args()
+
     # 超参数
-    DATASET_DIR = "dataset"
-    BATCH_SIZE = 32
-    LEARNING_RATE = 0.001
-    NUM_EPOCHS = 100
+    DATASET_DIR = args.dataset
+    BATCH_SIZE = args.batch_size
+    LEARNING_RATE = args.lr
+    NUM_EPOCHS = args.epochs
     PATIENCE = 15  # 早停耐心值
 
     # 设备
@@ -301,6 +335,14 @@ def main():
         print("错误: 数据集为空！")
         return
 
+    # 使用数据子集（如果指定）
+    if args.subset < 1.0:
+        subset_size = int(len(image_paths) * args.subset)
+        image_paths, _, labels, _ = train_test_split(
+            image_paths, labels, train_size=subset_size, random_state=42, stratify=labels
+        )
+        print(f"\n⚡ 使用 {args.subset*100:.0f}% 数据子集: {len(image_paths)} 张图像")
+
     # 划分数据集
     train_paths, temp_paths, train_labels, temp_labels = train_test_split(
         image_paths, labels, test_size=0.3, random_state=42, stratify=labels
@@ -310,10 +352,18 @@ def main():
         temp_paths, temp_labels, test_size=0.5, random_state=42, stratify=temp_labels
     )
 
-    print(f"训练集: {len(train_paths)}, 验证集: {len(val_paths)}, 测试集: {len(test_paths)}")
+    print(f"训练集: {len(train_paths)} 张")
+    print(f"验证集: {len(val_paths)} 张")
+    print(f"测试集: {len(test_paths)} 张")
 
     # 数据变换
-    train_transform, val_transform = get_data_transforms(augment=True)
+    use_augment = not args.no_augment
+    if args.no_augment:
+        print("\n⚡ 跳过训练时数据增强（使用预增强数据）")
+    else:
+        print("\n🔄 使用训练时数据增强")
+
+    train_transform, val_transform = get_data_transforms(augment=use_augment)
 
     # 创建数据集
     train_dataset = GestureDataset(train_paths, train_labels, train_transform)
@@ -321,13 +371,13 @@ def main():
     test_dataset = GestureDataset(test_paths, test_labels, val_transform)
 
     # 创建数据加载器
-    train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=0)
-    val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=0)
-    test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=0)
+    train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=args.num_workers)
+    val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=args.num_workers)
+    test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=args.num_workers)
 
     # 创建模型
     print("创建模型...")
-    model = GestureNet(num_classes=9).to(device)
+    model = GestureNet(num_classes=5).to(device)  # 5个手势
 
     # 打印模型信息
     total_params = sum(p.numel() for p in model.parameters())
@@ -366,7 +416,7 @@ def main():
         # 保存最佳模型
         if val_acc > best_val_acc:
             best_val_acc = val_acc
-            torch.save(model.state_dict(), "best_model.pth")
+            torch.save(model.state_dict(), args.model_name)
             print(f"✓ 保存最佳模型 (Val Acc: {val_acc:.2f}%)")
             patience_counter = 0
         else:
@@ -378,7 +428,7 @@ def main():
             break
 
     # 加载最佳模型
-    model.load_state_dict(torch.load("best_model.pth"))
+    model.load_state_dict(torch.load(args.model_name))
 
     # 测试
     print("\n测试最佳模型...")
@@ -424,7 +474,7 @@ def main():
                                     'output': {0: 'batch_size'}})
     print("✓ ONNX模型已保存到: gesture_model.onnx")
 
-    print("\n训练完成!")
+    print(f"\n训练完成！最佳模型已保存到: {args.model_name}")
 
 
 if __name__ == "__main__":

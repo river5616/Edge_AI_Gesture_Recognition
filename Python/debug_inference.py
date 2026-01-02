@@ -22,11 +22,15 @@ except ImportError:
     print("   安装命令: pip install onnxruntime")
     ONNX_AVAILABLE = False
 
-# 手势类别
+# 手势类别 - 7个手势精简版
 GESTURE_NAMES = {
-    0: "fist", 1: "palm", 2: "thumbs_up", 3: "ok", 4: "v_sign",
-    5: "point", 6: "three", 7: "four", 8: "nothing"
+    0: "fist", 1: "palm", 2: "thumbs_up", 3: "ok",
+    4: "gun", 5: "call_me", 6: "nothing"
 }
+
+def get_gesture_name(gesture_id):
+    """获取手势名称，兼容旧模型的ID"""
+    return GESTURE_NAMES.get(gesture_id, f"UNKNOWN_{gesture_id}")
 
 class InferenceDebugger:
     def __init__(self, port, baudrate=921600, save_dir="debug_inference", onnx_model_path="gesture_model.onnx"):
@@ -272,7 +276,14 @@ class InferenceDebugger:
 
         # 保存原始图像
         match_marker = "MATCH" if match else "DIFF" if pc_gesture_id is not None else "NOPC"
-        img_filename = f"frame_{self.frame_count:04d}_{GESTURE_NAMES[stm32_result_id]}_stm{stm32_confidence:.1f}_{match_marker}.png"
+
+        # 处理未知手势ID（兼容旧的9手势模型）
+        gesture_name = GESTURE_NAMES.get(stm32_result_id, f"UNKNOWN_{stm32_result_id}")
+        if stm32_result_id not in GESTURE_NAMES:
+            print(f"⚠️ 警告: STM32输出了未知手势ID {stm32_result_id}（可能是旧的9手势模型）")
+            print(f"   请更新STM32固件为7手势模型！")
+
+        img_filename = f"frame_{self.frame_count:04d}_{gesture_name}_stm{stm32_confidence:.1f}_{match_marker}.png"
         img_path = os.path.join(self.save_dir, "images", img_filename)
         cv2.imwrite(img_path, image)
 
@@ -309,10 +320,10 @@ class InferenceDebugger:
             # 有PC端对比
             match_symbol = "✓ 一致" if match else "✗ 不一致"
             info_text = f"""
-STM32 识别结果: {GESTURE_NAMES[stm32_result_id]} (ID: {stm32_result_id})
+STM32 识别结果: {get_gesture_name(stm32_result_id)} (ID: {stm32_result_id})
 STM32 置信度: {stm32_confidence:.2f}
 
-PC 识别结果: {GESTURE_NAMES[pc_gesture_id]} (ID: {pc_gesture_id})
+PC 识别结果: {get_gesture_name(pc_gesture_id)} (ID: {pc_gesture_id})
 PC 置信度: {pc_confidence:.2f}
 
 对比结果: {match_symbol}
@@ -334,7 +345,7 @@ PC 置信度: {pc_confidence:.2f}
         else:
             # 无PC端对比
             info_text = f"""
-STM32 识别结果: {GESTURE_NAMES[stm32_result_id]} (ID: {stm32_result_id})
+STM32 识别结果: {get_gesture_name(stm32_result_id)} (ID: {stm32_result_id})
 STM32 置信度: {stm32_confidence:.2f}
 
 PC 对比: 未启用
@@ -369,15 +380,15 @@ PC 对比: 未启用
         # 控制台输出（包括对比结果）
         if pc_gesture_id is not None:
             if match:
-                print(f"✓ 帧 {self.frame_count}: {GESTURE_NAMES[stm32_result_id]} "
+                print(f"✓ 帧 {self.frame_count}: {get_gesture_name(stm32_result_id)} "
                       f"(STM32:{stm32_confidence:.1f} = PC:{pc_confidence:.1f}) "
                       f"| 亮度:{analysis['mean']:.1f} | {analysis['exposure']}")
             else:
-                print(f"✗ 帧 {self.frame_count}: STM32={GESTURE_NAMES[stm32_result_id]}({stm32_confidence:.1f}) "
-                      f"vs PC={GESTURE_NAMES[pc_gesture_id]}({pc_confidence:.1f}) "
+                print(f"✗ 帧 {self.frame_count}: STM32={get_gesture_name(stm32_result_id)}({stm32_confidence:.1f}) "
+                      f"vs PC={get_gesture_name(pc_gesture_id)}({pc_confidence:.1f}) "
                       f"| 亮度:{analysis['mean']:.1f} | {analysis['exposure']}")
         else:
-            print(f"✓ 帧 {self.frame_count}: {GESTURE_NAMES[stm32_result_id]} ({stm32_confidence:.1f}) "
+            print(f"✓ 帧 {self.frame_count}: {get_gesture_name(stm32_result_id)} ({stm32_confidence:.1f}) "
                   f"| 均值:{analysis['mean']:.1f} | {analysis['exposure']}")
 
         # 记录到日志（包括PC结果）
@@ -385,14 +396,14 @@ PC 对比: 未启用
             'frame': self.frame_count,
             'timestamp': timestamp,
             'stm32_result_id': stm32_result_id,
-            'stm32_result_name': GESTURE_NAMES[stm32_result_id],
+            'stm32_result_name': get_gesture_name(stm32_result_id),
             'stm32_confidence': stm32_confidence,
             'analysis': analysis
         }
 
         if pc_gesture_id is not None:
             log_entry['pc_result_id'] = pc_gesture_id
-            log_entry['pc_result_name'] = GESTURE_NAMES[pc_gesture_id]
+            log_entry['pc_result_name'] = get_gesture_name(pc_gesture_id)
             log_entry['pc_confidence'] = pc_confidence
             log_entry['match'] = match
 
@@ -446,7 +457,7 @@ PC 对比: 未启用
             for gid in sorted(gesture_counts.keys()):
                 count = gesture_counts[gid]
                 percentage = count / len(self.results_log) * 100
-                f.write(f"  {gid} ({GESTURE_NAMES[gid]}): {count} 次 ({percentage:.1f}%)\n")
+                f.write(f"  {gid} ({get_gesture_name(gid)}): {count} 次 ({percentage:.1f}%)\n")
 
             f.write("\n")
 
@@ -512,7 +523,7 @@ PC 对比: 未启用
             gid = log['stm32_result_id']
             gesture_counts[gid] = gesture_counts.get(gid, 0) + 1
 
-        gestures = [GESTURE_NAMES[gid] for gid in sorted(gesture_counts.keys())]
+        gestures = [get_gesture_name(gid) for gid in sorted(gesture_counts.keys())]
         counts = [gesture_counts[gid] for gid in sorted(gesture_counts.keys())]
 
         axes[0].bar(gestures, counts, color='skyblue')

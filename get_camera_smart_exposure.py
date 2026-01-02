@@ -170,5 +170,5 @@ while(True):
 
     # 打印帧率和亮度
     fps = clock.fps()
-    if int(clock.seconds()) % 2 == 0:  # 每2秒打印一次
-        print(f"FPS:{fps:.1f} | 亮度:{mean_val:.1f} | Exp:{current_exposure}us | Gain:{current_gain:.1f}dB")
+    #if int(clock.seconds()) % 2 == 0:  # 每2秒打印一次
+    print(f"FPS:{fps:.1f} | 亮度:{mean_val:.1f} | Exp:{current_exposure}us | Gain:{current_gain:.1f}dB")

@@ -115,7 +115,7 @@ osThreadId_t Task_inferenceHandle;
 const osThreadAttr_t Task_inference_attributes = {
   .name = "Task_inference",
   .stack_size = 4096 * 4,
-  .priority = (osPriority_t) osPriorityLow,
+  .priority = (osPriority_t) osPriorityNormal6,
 };
 /* Definitions for imageQueue */
 osMessageQueueId_t imageQueueHandle;

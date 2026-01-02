@@ -48,51 +48,58 @@ void oled_disp(void)
 
         OLED_Printf(0,line3,6,"fps=%.1f c2=%d   ",stats.fps,cnt2);
 
-        // 如果在推理模式且有识别结果，显示识别结果
-        if(mode == MODE_INFERENCE && s_display_gesture_valid)
-        {
-            if(s_display_gesture_id == 0xFF)
-            {
-                // 推理失败
-                OLED_Printf(0,line4,6,"Infer:FAIL    ");
-            }
-            else if(s_display_gesture_id < 9)
-            {
-                // 手势名称映射
-                const char* gesture_names[9] = {
-                    "G0", "G1", "G2", "G3", "G4", "G5", "G6", "G7", "G8"
-                };
-
-                const char* gesture_name = gesture_names[s_display_gesture_id];
-                uint8_t conf_percent = (uint8_t)(s_display_gesture_confidence * 100);
-
-                OLED_Printf(0,line4,6,"Gest:%s C:%d%%  ", gesture_name, conf_percent);
-            }
-            else
-            {
-                // 无效ID
-                OLED_Printf(0,line4,6,"Gest:?? C:0%%  ");
-            }
-        }
-        else
-        {
-            // 调试：显示接收字节数（当前值和最大值）
-            OLED_Printf(0,line4,6,"RxB:%d/%d     ", g_debug_rx_bytes, g_debug_rx_bytes_max);
-        }
-
-        // 显示UART接收统计
-        OpenMVRxStats_t stats;
-        OpenMVRxTask_GetStats(&stats);
+		// 调试：显示接收字节数（当前值和最大值）
+		OLED_Printf(0,line4,6,"RxB:%d/%d     ", g_debug_rx_bytes, g_debug_rx_bytes_max);
+        // 显示UART接收统计（移到line6）
         OLED_Printf(0,line5,6,"T:%lu E:%lu  ", stats.total_frames, stats.error_frames);
 
-        // 在推理模式下显示推理统计
+        // 在推理模式下显示推理统计（移到line7）
         if(mode == MODE_INFERENCE)
         {
             InferenceStats_t infer_stats;
             InferenceTask_GetStats(&infer_stats);
             OLED_Printf(0,line6,6,"Inf:%lu/%lu  ", infer_stats.success_count, infer_stats.total_count);
         }
+		// 如果在推理模式且有识别结果，显示识别结果（分两行）
+        if(mode == MODE_INFERENCE && s_display_gesture_valid)
+        {
+            if(s_display_gesture_id == 0xFF)
+            {
+                // 推理失败
+                OLED_Printf(0,line7,6,"Gesture:FAIL   ");
+                OLED_Printf(0,line8,6,"              ");
+            }
+            else if(s_display_gesture_id < 5)  // 5个手势
+            {
+                // 手势名称映射 - 5个手势（移除 gun 和 call_me）
+                const char* gesture_names[5] = {
+                    "Fist", "Palm", "ThUp", "OK", "None"
+                };
 
+                const char* gesture_name = gesture_names[s_display_gesture_id];
+
+                // 第4行：显示手势类型
+                OLED_Printf(0,line7,6,"G%d:%s       ", s_display_gesture_id, gesture_name);
+
+                // 第5行：显示置信度（浮点数，限制范围）
+                float conf_percent = s_display_gesture_confidence * 100.0f;
+
+                // 安全限制：确保范围在 0.0-100.0
+                if (conf_percent < 0.0f) {
+                    conf_percent = 0.0f;
+                } else if (conf_percent > 100.0f) {
+                    conf_percent = 100.0f;
+                }
+
+                OLED_Printf(0,line8,6,"Conf:%.1f%%  ", conf_percent);
+            }
+            else
+            {
+                // 无效ID
+                OLED_Printf(0,line4,6,"Gesture:??    ");
+                OLED_Printf(0,line5,6,"Conf:0.0%%    ");
+            }
+        }
     }
     else if(view == VIEW_IMAGE)  // 图像显示视图
     {
@@ -166,65 +173,13 @@ void oled_disp(void)
             OLED_Printf(0,line7,6,"ErrRate:N/A  ");
         }
     }
-    else if(view == VIEW_ALL_CONF)  // 所有手势置信度视图
-    {
-        WorkMode_t mode = Task_GetMode();
-
-        if(mode == MODE_INFERENCE)
-        {
-            // 获取所有9个手势的置信度
-            float all_confs[NUM_GESTURES];
-            InferenceTask_GetAllConfidences(all_confs);
-
-            // 显示标题
-            OLED_Printf(0,line1,6,"All Confidences");
-
-            // 手势名称（缩写）
-            const char* gesture_names[NUM_GESTURES] = {
-                "Fis", "Pal", "Thm", "OK ", "V  ", "Pnt", "3  ", "4  ", "Non"
-            };
-
-            // 分两页显示：第1页显示0-4，第2页显示5-8
-            // 使用 cnt2 的低位作为页面切换指示（每2秒自动翻页）
-            uint8_t page = (cnt2 / 200) % 2;  // 每2秒切换一次页面
-
-            if(page == 0)
-            {
-                // 第1页：显示手势 0-4
-                OLED_Printf(0,line2,6,"Page 1/2");
-                for(uint8_t i = 0; i < 5; i++)
-                {
-                    uint8_t conf_percent = (uint8_t)(all_confs[i] * 100);
-                    OLED_Printf(0, line3 + i*8, 6, "%d:%s %3d%%", i, gesture_names[i], conf_percent);
-                }
-            }
-            else
-            {
-                // 第2页：显示手势 5-8
-                OLED_Printf(0,line2,6,"Page 2/2");
-                for(uint8_t i = 5; i < 9; i++)
-                {
-                    uint8_t conf_percent = (uint8_t)(all_confs[i] * 100);
-                    OLED_Printf(0, line3 + (i-5)*8, 6, "%d:%s %3d%%", i, gesture_names[i], conf_percent);
-                }
-                // 留一行空白
-                OLED_Printf(0,line7,6,"              ");
-            }
-        }
-        else
-        {
-            OLED_Printf(0,line1,6,"All Confidences");
-            OLED_Printf(0,line3,6,"Mode: INFERENCE");
-            OLED_Printf(0,line4,6,"to view data");
-        }
-    }
 
     OLED_Update();
 }
 
 /**
   * 函    数：更新手势识别结果
-  * 参    数：GestureID 手势ID，范围：0~8
+  * 参    数：GestureID 手势ID，范围：0~6 (7个手势精简版)
   * 参    数：Confidence 置信度，范围：0.0~1.0
   * 返 回 值：无
   * 说    明：此函数仅更新全局变量，实际显示由oled_disp()统一处理

@@ -3,8 +3,8 @@
 
 #include "task_common.h"
 
-// 手势类别数量
-#define NUM_GESTURES 9
+// 手势类别数量 - 5个手势（移除 gun 和 call_me）
+#define NUM_GESTURES 5
 
 // 推理统计结构
 typedef struct {

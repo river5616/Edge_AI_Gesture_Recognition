@@ -260,9 +260,35 @@ int MX_X_CUBE_AI_Inference(const uint8_t* image_data, uint8_t* gesture_id, float
         return -3;  // Inference failed
     }
 
-    // Step 3: Postprocess output (find max probability class)
+    // Step 3: Get output and normalize
     float* output_buffer = (float*)data_outs[0];
-    postprocess_output(output_buffer, AI_NETWORK_OUT_1_SIZE, gesture_id, confidence);
+
+    // 计算所有输出的和（用于归一化）
+    float sum = 0.0f;
+    for (uint8_t i = 0; i < AI_NETWORK_OUT_1_SIZE; i++) {
+        sum += output_buffer[i];
+    }
+
+    // 避免除以0
+    if (sum < 0.0001f) {
+        sum = 1.0f;
+    }
+
+    // 归一化：将所有输出除以总和
+    float normalized_output[AI_NETWORK_OUT_1_SIZE];
+    for (uint8_t i = 0; i < AI_NETWORK_OUT_1_SIZE; i++) {
+        normalized_output[i] = output_buffer[i] / sum;
+
+        // 确保范围在 [0, 1]
+        if (normalized_output[i] < 0.0f) {
+            normalized_output[i] = 0.0f;
+        } else if (normalized_output[i] > 1.0f) {
+            normalized_output[i] = 1.0f;
+        }
+    }
+
+    // Step 4: Postprocess output (使用归一化后的值)
+    postprocess_output(normalized_output, AI_NETWORK_OUT_1_SIZE, gesture_id, confidence);
 
     return 0;  // Success
 }
@@ -300,16 +326,34 @@ int MX_X_CUBE_AI_Inference_Full(const uint8_t* image_data, uint8_t* gesture_id,
         return -3;  // Inference failed
     }
 
-    // Step 3: Get output buffer and copy all confidences
+    // Step 3: Get output buffer and normalize (manual softmax)
     float* output_buffer = (float*)data_outs[0];
 
-    // Copy all 9 confidences to output array
+    // 计算所有输出的和（用于归一化）
+    float sum = 0.0f;
     for (uint8_t i = 0; i < AI_NETWORK_OUT_1_SIZE; i++) {
-        all_confidences[i] = output_buffer[i];
+        sum += output_buffer[i];
     }
 
-    // Step 4: Find max probability class
-    postprocess_output(output_buffer, AI_NETWORK_OUT_1_SIZE, gesture_id, confidence);
+    // 避免除以0
+    if (sum < 0.0001f) {
+        sum = 1.0f;
+    }
+
+    // 归一化：将所有输出除以总和，确保和为1
+    for (uint8_t i = 0; i < AI_NETWORK_OUT_1_SIZE; i++) {
+        all_confidences[i] = output_buffer[i] / sum;
+
+        // 额外的安全检查：确保范围在 [0, 1]
+        if (all_confidences[i] < 0.0f) {
+            all_confidences[i] = 0.0f;
+        } else if (all_confidences[i] > 1.0f) {
+            all_confidences[i] = 1.0f;
+        }
+    }
+
+    // Step 4: Find max probability class (使用归一化后的值)
+    postprocess_output(all_confidences, AI_NETWORK_OUT_1_SIZE, gesture_id, confidence);
 
     return 0;  // Success
 }

@@ -1,41 +1,41 @@
 ST Edge AI Core v2.2.0-20266 2adc00962
-Created date          : 2026-01-02 08:53:21
-Parameters            : generate --target stm32h7 --name network -m E:/Lesson/Embedded_Designed/project/stm32h753/project6/Python/gesture_model.onnx --compression none --verbosity 1 --workspace C:/Users/river/AppData/Local/Temp/mxAI_workspace231638711582100251477408071504277 --output C:/Users/river/.stm32cubemx/network_output
+Created date          : 2026-01-03 03:53:34
+Parameters            : generate --target stm32h7 --name network -m E:/Lesson/Embedded_Designed/project/stm32h753/project6/Python/gesture_v1_5.onnx --compression none --verbosity 1 --workspace C:/Users/river/AppData/Local/Temp/mxAI_workspace3000522486178008218671994899436307 --output C:/Users/river/.stm32cubemx/network_output
 
 Exec/report summary (generate)
------------------------------------------------------------------------------------------------------------
-model file         :   E:\Lesson\Embedded_Designed\project\stm32h753\project6\Python\gesture_model.onnx    
-type               :   onnx                                                                                
-c_name             :   network                                                                             
-compression        :   none                                                                                
-options            :   allocate-inputs, allocate-outputs                                                   
-optimization       :   balanced                                                                            
-target/series      :   stm32h7                                                                             
-workspace dir      :   C:\Users\river\AppData\Local\Temp\mxAI_workspace231638711582100251477408071504277   
-output dir         :   C:\Users\river\.stm32cubemx\network_output                                          
-model_fmt          :   float                                                                               
-model_name         :   gesture_model                                                                       
-model_hash         :   0x480bc943c01390fca1925eaf1f9b9cdb                                                  
-params #           :   20,985 items (81.97 KiB)                                                            
------------------------------------------------------------------------------------------------------------
-input 1/1          :   'input', f32(1x64x64x1), 16.00 KBytes, activations                                  
-output 1/1         :   'output', f32(1x9), 36 Bytes, activations                                           
-macc               :   2,192,425                                                                           
-weights (ro)       :   84,388 B (82.41 KiB) (1 segment) / +448(+0.5%) vs float model                       
-activations (rw)   :   75,876 B (74.10 KiB) (1 segment) *                                                  
-ram (total)        :   75,876 B (74.10 KiB) = 75,876 + 0 + 0                                               
------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------
+model file         :   E:\Lesson\Embedded_Designed\project\stm32h753\project6\Python\gesture_v1_5.onnx      
+type               :   onnx                                                                                 
+c_name             :   network                                                                              
+compression        :   none                                                                                 
+options            :   allocate-inputs, allocate-outputs                                                    
+optimization       :   balanced                                                                             
+target/series      :   stm32h7                                                                              
+workspace dir      :   C:\Users\river\AppData\Local\Temp\mxAI_workspace3000522486178008218671994899436307   
+output dir         :   C:\Users\river\.stm32cubemx\network_output                                           
+model_fmt          :   float                                                                                
+model_name         :   gesture_v1_5                                                                         
+model_hash         :   0xa7e2a6cbbc0ce201650b3457b6bf7069                                                   
+params #           :   20,725 items (80.96 KiB)                                                             
+------------------------------------------------------------------------------------------------------------
+input 1/1          :   'input', f32(1x64x64x1), 16.00 KBytes, activations                                   
+output 1/1         :   'output', f32(1x5), 20 Bytes, activations                                            
+macc               :   2,192,165                                                                            
+weights (ro)       :   83,348 B (81.39 KiB) (1 segment) / +448(+0.5%) vs float model                        
+activations (rw)   :   75,876 B (74.10 KiB) (1 segment) *                                                   
+ram (total)        :   75,876 B (74.10 KiB) = 75,876 + 0 + 0                                                
+------------------------------------------------------------------------------------------------------------
 (*) 'input'/'output' buffers are allocated in the activations buffer
 
-Model name - gesture_model
+Model name - gesture_v1_5
 ------ ---------------------------------------------------------- ---------------------- -------------- --------- -------------------------------- --- ----------------- -------------------- ------------------- 
 m_id   layer (type,original)                                      oshape                 param/size          macc                     connected to   | c_size            c_macc               c_type              
 ------ ---------------------------------------------------------- ---------------------- -------------- --------- -------------------------------- --- ----------------- -------------------- ------------------- 
 30     fc_1_weight (Placeholder, Gemm)                            [b:64,c:128]           8,192/32,768                                                | +256(+0.8%)       +8,256(+100.0%)      Dense_[10]          
        fc_1_bias (Placeholder, Gemm)                              [b:64]                 64/256                                                      | -256(-100.0%)                          
 ------ ---------------------------------------------------------- ---------------------- -------------- --------- -------------------------------- --- ----------------- -------------------- ------------------- 
-32     fc_4_weight (Placeholder, Gemm)                            [b:9,c:64]             576/2,304                                                   | +36(+1.6%)        +585(+100.0%)        Dense_[o][12]       
-       fc_4_bias (Placeholder, Gemm)                              [b:9]                  9/36                                                        | -36(-100.0%)                           
+32     fc_4_weight (Placeholder, Gemm)                            [b:5,c:64]             320/1,280                                                   | +20(+1.6%)        +325(+100.0%)        Dense_[o][12]       
+       fc_4_bias (Placeholder, Gemm)                              [b:5]                  5/20                                                        | -20(-100.0%)                           
 ------ ---------------------------------------------------------- ---------------------- -------------- --------- -------------------------------- --- ----------------- -------------------- ------------------- 
 0      input (Input, )                                            [b:1,h:64,w:64,c:1]                                                                |                                        
 ------ ---------------------------------------------------------- ---------------------- -------------- --------- -------------------------------- --- ----------------- -------------------- ------------------- 
@@ -75,23 +75,23 @@ m_id   layer (type,original)                                      oshape        
 ------ ---------------------------------------------------------- ---------------------- -------------- --------- -------------------------------- --- ----------------- -------------------- ------------------- 
 31     _fc_fc_2_Relu_output_0 (Nonlinearity, Relu)                [b:1,c:64]                                   64           _fc_fc_1_Gemm_output_0   |                                        Nonlinearity_[11]   
 ------ ---------------------------------------------------------- ---------------------- -------------- --------- -------------------------------- --- ----------------- -------------------- ------------------- 
-32     output (Gemm, Gemm)                                        [b:1,c:9]                                   585           _fc_fc_2_Relu_output_0   |                   -585(-100.0%)        
+32     output (Gemm, Gemm)                                        [b:1,c:5]                                   325           _fc_fc_2_Relu_output_0   |                   -325(-100.0%)        
                                                                                                                                        fc_4_weight   | 
                                                                                                                                          fc_4_bias   | 
 ------ ---------------------------------------------------------- ---------------------- -------------- --------- -------------------------------- --- ----------------- -------------------- ------------------- 
-model/c-model: macc=2,192,313/2,192,425 +112(+0.0%) weights=83,940/84,388 +448(+0.5%) activations=--/75,876 io=--/0
+model/c-model: macc=2,192,053/2,192,165 +112(+0.0%) weights=82,900/83,348 +448(+0.5%) activations=--/75,876 io=--/0
 
 
 
 Generated C-graph summary
 ------------------------------------------------------------------------------------------------------------------------
-model name            : gesture_model
+model name            : gesture_v1_5
 c-name                : network
 c-node #              : 13
 c-array #             : 38
 activations size      : 75876 (1 segment)
-weights size          : 84388 (1 segment)
-macc                  : 2192425
+weights size          : 83348 (1 segment)
+macc                  : 2192165
 inputs                : ['input_output']
 outputs               : ['output_output']
 
@@ -134,9 +134,9 @@ c_id   name (*_array)                                       item/size     domain
 32     _fc_fc_2_Relu_output_0_output                        64/256        activations/**default**   float                   
 33     _global_avg_pool_GlobalAveragePool_output_0_output   128/512       activations/**default**   float                   
 34     input_output                                         4096/16384    activations/**default**   float         /input    
-35     output_bias                                          9/36          weights/weights           const float             
-36     output_output                                        9/36          activations/**default**   float         /output   
-37     output_weights                                       576/2304      weights/weights           const float             
+35     output_bias                                          5/20          weights/weights           const float             
+36     output_output                                        5/20          activations/**default**   float         /output   
+37     output_weights                                       320/1280      weights/weights           const float             
 ------ ---------------------------------------------------- ------------- ------------------------- ------------- --------- 
 
 C-Layers (13)
@@ -201,10 +201,10 @@ c_id   name (*_layer)                                id   layer_type      macc  
 11     _fc_fc_2_Relu_output_0                        31   Nonlinearity    64       0       I: _fc_fc_1_Gemm_output_0_output                        f32(1x64) (30)         
                                                                                            O: _fc_fc_2_Relu_output_0_output                        f32(1x64) (32)         
 ------ --------------------------------------------- ---- --------------- -------- ------- ------------------------------------------------------- ---------------------- 
-12     output                                        32   Dense           585      2340    I: _fc_fc_2_Relu_output_0_output                        f32(1x64) (32)         
-                                                                                           W: output_weights                                       f32(9x64) (37)         
-                                                                                           W: output_bias                                          f32(9) (35)            
-                                                                                           O: output_output                                        f32(1x9) (36)          
+12     output                                        32   Dense           325      1300    I: _fc_fc_2_Relu_output_0_output                        f32(1x64) (32)         
+                                                                                           W: output_weights                                       f32(5x64) (37)         
+                                                                                           W: output_bias                                          f32(5) (35)            
+                                                                                           O: output_output                                        f32(1x5) (36)          
 ------ --------------------------------------------- ---- --------------- -------- ------- ------------------------------------------------------- ---------------------- 
 
 
@@ -225,36 +225,36 @@ c_id    m_id   name (type)                                           #op        
 9       22     _global_avg_pool_G..l_output_0 (Pool)               8,192   smul_f32_f32 
 10      30     _fc_fc_1_Gemm_output_0 (Dense)                      8,256   smul_f32_f32 
 11      31     _fc_fc_2_Relu_output_0 (Nonlinearity)                  64     op_f32_f32 
-12      32     output (Dense)                                        585   smul_f32_f32 
+12      32     output (Dense)                                        325   smul_f32_f32 
 ------- ------ --------------------------------------------- ----------- -------------- 
-total                                                          2,192,425 
+total                                                          2,192,165 
 
 Number of operation types
 ---------------- ----------- ----------- 
 operation type             #           % 
 ---------------- ----------- ----------- 
-smul_f32_f32       2,143,209       97.8% 
+smul_f32_f32       2,142,949       97.8% 
 op_f32_f32            49,216        2.2% 
 
 Complexity report (model)
 ------ ------------------------------------------ ------------------------- ------------------------- ------ 
 m_id   name                                       c_macc                    c_rom                     c_id   
 ------ ------------------------------------------ ------------------------- ------------------------- ------ 
-30     fc_1_weight                                |                  0.4%   |||||||||||||||   39.1%   [10]   
-32     fc_4_weight                                |                  0.0%   ||                 2.8%   [12]   
+30     fc_1_weight                                |                  0.4%   |||||||||||||||   39.6%   [10]   
+32     fc_4_weight                                |                  0.0%   |                  1.6%   [12]   
 1      _conv1_conv1_0_Conv_output_0               ||||               6.7%   |                  0.8%   [0]    
 4      _conv1_conv1_2_Clip_output_0               |                  1.5%   |                  0.0%   [1]    
 5      _dw_conv1_depthwise_Conv_output_0          ||||               6.7%   |                  0.8%   [2]    
 10     _pool1_MaxPool_output_0                    ||||||||||||||||  28.4%   |                  2.6%   [3]    
 11     _dw_conv2_depthwise_Conv_output_0          ||                 3.4%   |                  1.5%   [4]    
-16     _pool2_MaxPool_output_0                    ||||||||||||||    26.2%   ||||              10.0%   [5]    
-17     _dw_conv3_depthwise_Conv_output_0          |                  1.7%   ||                 3.0%   [6]    
-18     _dw_conv3_pointwise_Conv_output_0          |||||||||||||     23.9%   ||||||||||||||||  39.4%   [7]    
+16     _pool2_MaxPool_output_0                    ||||||||||||||    26.2%   ||||              10.1%   [5]    
+17     _dw_conv3_depthwise_Conv_output_0          |                  1.7%   ||                 3.1%   [6]    
+18     _dw_conv3_pointwise_Conv_output_0          |||||||||||||     23.9%   ||||||||||||||||  39.9%   [7]    
 21     _dw_conv3_relu_Clip_output_0               |                  0.7%   |                  0.0%   [8]    
 22     _global_avg_pool_GlobalAvera..l_output_0   |                  0.4%   |                  0.0%   [9]    
 31     _fc_fc_2_Relu_output_0                     |                  0.0%   |                  0.0%   [11]   
 ------ ------------------------------------------ ------------------------- ------------------------- ------ 
-macc=2,192,425 weights=84,388 act=75,876 ram_io=0
+macc=2,192,165 weights=83,348 act=75,876 ram_io=0
  
  Requested memory size by section - "stm32h7" target
  ------------------------------ -------- -------- ------- -------- 
@@ -267,11 +267,11 @@ macc=2,192,425 weights=84,388 act=75,876 ram_io=0
  ------------------------------ -------- -------- ------- -------- 
  RT total**                       16,528      216   4,860      260 
  ------------------------------ -------- -------- ------- -------- 
- weights                               0   84,392       0        0 
+ weights                               0   83,352       0        0 
  activations                           0        0       0   75,876 
  io                                    0        0       0        0 
  ------------------------------ -------- -------- ------- -------- 
- TOTAL                            16,528   84,608   4,860   76,136 
+ TOTAL                            16,528   83,568   4,860   76,136 
  ------------------------------ -------- -------- ------- -------- 
  *  toolchain objects (libm/libgcc*)
  ** RT AI runtime objects (kernels+infrastructure)
@@ -280,9 +280,9 @@ macc=2,192,425 weights=84,388 act=75,876 ram_io=0
   --------------------------------------------------
                FLASH (ro)      %*   RAM (rw)      % 
   --------------------------------------------------
-  RT total         21,604   20.4%      5,120   6.3% 
+  RT total         21,604   20.6%      5,120   6.3% 
   --------------------------------------------------
-  TOTAL           105,996             80,996        
+  TOTAL           104,956             80,996        
   --------------------------------------------------
   *  rt/total
 

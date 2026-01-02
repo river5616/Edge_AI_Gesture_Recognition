@@ -9,10 +9,10 @@ import numpy as np
 from PIL import Image
 import sys
 
-# 手势类别
+# 手势类别 - 7个手势精简版
 GESTURE_NAMES = {
-    0: "fist", 1: "palm", 2: "thumbs_up", 3: "ok", 4: "v_sign",
-    5: "point", 6: "three", 7: "four", 8: "nothing"
+    0: "fist", 1: "palm", 2: "thumbs_up", 3: "ok",
+    4: "gun", 5: "call_me", 6: "nothing"
 }
 
 # 定义深度可分离卷积（与训练时相同）
@@ -39,7 +39,7 @@ class DepthwiseSeparableConv(nn.Module):
 class GestureNet(nn.Module):
     """轻量级手势识别网络"""
 
-    def __init__(self, num_classes=9):
+    def __init__(self, num_classes=7):
         super(GestureNet, self).__init__()
 
         # Input: 64x64x1

@@ -89,7 +89,7 @@ void AppTask_uart_tx(void *argument)
         WorkMode_t mode = Task_GetMode();
 
         // 只在采集模式下处理图像
-        if(mode == MODE_COLLECTING)
+        if(mode == MODE_IDLE || mode == MODE_COLLECTING)
         {
             // 等待帧就绪信号
             if(osSemaphoreAcquire(frameReadySem, 100) == osOK)
