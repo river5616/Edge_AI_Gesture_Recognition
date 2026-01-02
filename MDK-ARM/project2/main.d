@@ -39,8 +39,9 @@ project2/main.o: ..\Src\main.c ..\Inc\main.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\list.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\CMSIS_RTOS_V2\cmsis_os2.h \
   ..\Inc\dma.h ..\Inc\memorymap.h ..\Inc\tim.h ..\Inc\usart.h \
-  ..\Inc\gpio.h ..\Hardware\headfile.h ..\Hardware\led.h \
-  ..\Hardware\key.h ..\Hardware\OLED.h ..\Hardware\OLED_Data.h \
-  ..\Hardware\disp.h ..\App\uart_tx_task.h ..\App\task_common.h \
-  ..\App\uart_rx_task.h ..\App\inference_task.h ..\App\openmv_rx_task.h \
-  ..\App\uart_callbacks.h
+  ..\Inc\gpio.h ..\Inc\app_x-cube-ai.h \
+  ..\Middlewares\ST\AI\Inc\ai_platform.h ..\Hardware\headfile.h \
+  ..\Hardware\led.h ..\Hardware\key.h ..\Hardware\OLED.h \
+  ..\Hardware\OLED_Data.h ..\Hardware\disp.h ..\App\uart_tx_task.h \
+  ..\App\task_common.h ..\App\uart_rx_task.h ..\App\inference_task.h \
+  ..\App\openmv_rx_task.h ..\App\uart_callbacks.h

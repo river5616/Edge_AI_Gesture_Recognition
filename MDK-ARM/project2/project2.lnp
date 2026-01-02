@@ -5,11 +5,18 @@
 "project2\freertos.o"
 "project2\dma.o"
 "project2\memorymap.o"
+"project2\app_x-cube-ai.o"
 "project2\tim.o"
 "project2\usart.o"
 "project2\stm32h7xx_it.o"
 "project2\stm32h7xx_hal_msp.o"
 "project2\stm32h7xx_hal_timebase_tim.o"
+"project2\network.o"
+"project2\network_data.o"
+"project2\network_data_params.o"
+"project2\network_1.o"
+"project2\network_1_data.o"
+"project2\network_1_data_params.o"
 "project2\uart_rx_task.o"
 "project2\uart_tx_task.o"
 "project2\task_common.o"
@@ -52,7 +59,8 @@
 "project2\cmsis_os2.o"
 "project2\heap_4.o"
 "project2\port.o"
---strict --scatter "project2\project2.sct"
+"..\Middlewares\ST\AI\Lib\NetworkRuntime1020_CM7_Keil.lib"
+--strict --scatter ".\project2\project2.sct"
 --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers
 --list "project2.map" -o project2\project2.axf

@@ -24,6 +24,7 @@
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
+#include "app_x-cube-ai.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -81,13 +82,21 @@ int main(void)
   /* MPU Configuration--------------------------------------------------------*/
   MPU_Config();
 
+  /* Enable the CPU Cache */
+
+  /* Enable I-Cache---------------------------------------------------------*/
+  //SCB_EnableICache();
+
+  /* Enable D-Cache---------------------------------------------------------*/
+  //SCB_EnableDCache();
+
   /* MCU Configuration--------------------------------------------------------*/
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-
+	__HAL_RCC_CRC_CLK_ENABLE();
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -106,8 +115,9 @@ int main(void)
   MX_UART4_Init();
   MX_USART6_UART_Init();
   MX_UART5_Init();
+  MX_X_CUBE_AI_Init();
   /* USER CODE BEGIN 2 */
-  HAL_UART_AbortReceive(&huart3);
+  //HAL_UART_AbortReceive(&huart3);
   
   OLED_Init();
   //CameraTask_Init();

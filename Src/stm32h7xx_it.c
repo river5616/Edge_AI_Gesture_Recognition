@@ -256,7 +256,6 @@ void USART3_IRQHandler(void)
   /* USER CODE END USART3_IRQn 1 */
 }
 
-
 /**
   * @brief This function handles UART4 global interrupt.
   */

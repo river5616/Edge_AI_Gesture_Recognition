@@ -52,7 +52,7 @@ void OpenMVRxTask_Init(void)
     last_fps_time = osKernelGetTickCount();
 
     // Cache管理（确保DMA和CPU数据一致性）
-    SCB_CleanInvalidateDCache();
+    //SCB_CleanInvalidateDCache();  // 禁用
 }
 
 /**
@@ -166,7 +166,7 @@ static uint8_t process_packet(const uint8_t* packet, uint16_t length)
     memcpy(image_buffer[current_image_buf], image_data, OPENMV_IMAGE_SIZE);
 
     // Cache管理
-    SCB_CleanDCache_by_Addr((uint32_t*)image_buffer[current_image_buf], OPENMV_IMAGE_SIZE);
+    //SCB_CleanDCache_by_Addr((uint32_t*)image_buffer[current_image_buf], OPENMV_IMAGE_SIZE);
 
     // 7. 发送图像消息到队列
     ImageMsg_t img_msg = {
@@ -265,7 +265,7 @@ void USART3_IDLE_Callback(void)
     if(received > 0)
     {
         // Cache失效，确保读取到最新数据
-        SCB_InvalidateDCache_by_Addr((uint32_t*)dma_buffer, DMA_BUFFER_SIZE);
+        //SCB_InvalidateDCache_by_Addr((uint32_t*)dma_buffer, DMA_BUFFER_SIZE);
 
         // 解析数据
         parse_receive_buffer(dma_buffer, received);
