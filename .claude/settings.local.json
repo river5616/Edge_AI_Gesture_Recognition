@@ -1,0 +1,41 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c \"import torch; print\\('CUDA:', torch.cuda.is_available\\(\\)\\); print\\('Device:', torch.cuda.get_device_name\\(0\\) if torch.cuda.is_available\\(\\) else 'CPU'\\)\")",
+      "Bash(where python *)",
+      "Bash(where py *)",
+      "Bash(conda env *)",
+      "Bash(D:/Anaconda/Anaconda/envs/stm32_ai/python.exe *)",
+      "PowerShell(Join-Path *)",
+      "Bash(tee ablation1_train.log)",
+      "Bash(PYTHONIOENCODING=utf-8 D:/Anaconda/Anaconda/envs/stm32_ai/python.exe train_model_v2.py --dataset dataset_real --model-name gesture_v2_ablation1_spatial.pth --epochs 150 --batch-size 32 --loss focal --spatial-head)",
+      "Bash(break)",
+      "Bash(powershell *)",
+      "Bash(PYTHONIOENCODING=utf-8 D:/Anaconda/Anaconda/envs/stm32_ai/python.exe convert_to_onnx_v2.py --input gesture_v2_ablation1_spatial.pth --output gesture_v2_ablation1_spatial.onnx --model-type spatial)",
+      "Bash(PYTHONIOENCODING=utf-8 D:/Anaconda/Anaconda/envs/stm32_ai/python.exe quantize_onnx_int8.py --model gesture_v2_ablation1_spatial.onnx --dataset dataset_real --output gesture_v2_ablation1_spatial_int8.onnx)",
+      "Bash(PYTHONIOENCODING=utf-8 D:/Anaconda/Anaconda/envs/stm32_ai/python.exe eval_onnx_dataset.py --model gesture_v2_ablation1_spatial.onnx --dataset dataset_hard_test)",
+      "Bash(PYTHONIOENCODING=utf-8 D:/Anaconda/Anaconda/envs/stm32_ai/python.exe eval_onnx_dataset.py --model gesture_v2_ablation1_spatial_int8.onnx --dataset dataset_hard_test)",
+      "Bash(PYTHONIOENCODING=utf-8 D:/Anaconda/Anaconda/envs/stm32_ai/python.exe train_model_v2.py --dataset dataset_real --model-name gesture_v2_ablation2_smooth.pth --epochs 150 --batch-size 32 --loss smooth)",
+      "Bash(tee ablation2_train.log)",
+      "Bash(PYTHONIOENCODING=utf-8 D:/Anaconda/Anaconda/envs/stm32_ai/python.exe convert_to_onnx_v2.py --input gesture_v2_ablation2_smooth.pth --output gesture_v2_ablation2_smooth.onnx --model-type v2)",
+      "Bash(PYTHONIOENCODING=utf-8 D:/Anaconda/Anaconda/envs/stm32_ai/python.exe quantize_onnx_int8.py --model gesture_v2_ablation2_smooth.onnx --dataset dataset_real --output gesture_v2_ablation2_smooth_int8.onnx)",
+      "Bash(PYTHONIOENCODING=utf-8 D:/Anaconda/Anaconda/envs/stm32_ai/python.exe eval_onnx_dataset.py --model gesture_v2_ablation2_smooth.onnx --dataset dataset_hard_test)",
+      "Bash(PYTHONIOENCODING=utf-8 D:/Anaconda/Anaconda/envs/stm32_ai/python.exe eval_onnx_dataset.py --model gesture_v2_ablation2_smooth_int8.onnx --dataset dataset_hard_test2)",
+      "Bash(PYTHONIOENCODING=utf-8 D:/Anaconda/Anaconda/envs/stm32_ai/python.exe inspect_wrong_samples.py --csv gesture_v2_5_augment_new_int8_dataset_hard_test_wrong_samples.csv --out-prefix wrong_old --sort-by-conf)",
+      "Bash(PYTHONIOENCODING=utf-8 D:/Anaconda/Anaconda/envs/stm32_ai/python.exe -c ' *)",
+      "Bash(PYTHONIOENCODING=utf-8 D:/Anaconda/Anaconda/envs/stm32_ai/python.exe analyze_wrong_features.py --csv gesture_v2_5_augment_new_int8_dataset_hard_test_wrong_samples.csv --dataset dataset_hard_test --out wrong_features_old_int8.csv)",
+      "Bash(PYTHONIOENCODING=utf-8 D:/Anaconda/Anaconda/envs/stm32_ai/python.exe train_model_v2.py --dataset dataset_real --model-name gesture_v2_strongaug.pth --epochs 150 --batch-size 32 --loss focal --strong-aug)",
+      "Bash(tee strongaug_train.log)",
+      "Bash(PYTHONIOENCODING=utf-8 D:/Anaconda/Anaconda/envs/stm32_ai/python.exe convert_to_onnx_v2.py --input gesture_v2_strongaug.pth --output gesture_v2_strongaug.onnx --model-type v2)",
+      "Bash(PYTHONIOENCODING=utf-8 D:/Anaconda/Anaconda/envs/stm32_ai/python.exe quantize_onnx_int8.py --model gesture_v2_strongaug.onnx --dataset dataset_real --output gesture_v2_strongaug_int8.onnx)",
+      "Bash(PYTHONIOENCODING=utf-8 D:/Anaconda/Anaconda/envs/stm32_ai/python.exe eval_onnx_dataset.py --model gesture_v2_strongaug.onnx --dataset dataset_hard_test)",
+      "Bash(PYTHONIOENCODING=utf-8 D:/Anaconda/Anaconda/envs/stm32_ai/python.exe eval_onnx_dataset.py --model gesture_v2_strongaug_int8.onnx --dataset dataset_hard_test)",
+      "Bash(PYTHONIOENCODING=utf-8 D:/Anaconda/Anaconda/envs/stm32_ai/python.exe train_model_v2.py --dataset dataset_real --model-name gesture_v2_strongaug2.pth --epochs 150 --batch-size 32 --loss focal --strong-aug)",
+      "Bash(tee strongaug2_train.log)",
+      "Bash(PYTHONIOENCODING=utf-8 D:/Anaconda/Anaconda/envs/stm32_ai/python.exe convert_to_onnx_v2.py --input gesture_v2_strongaug2.pth --output gesture_v2_strongaug2.onnx --model-type v2)",
+      "Bash(PYTHONIOENCODING=utf-8 D:/Anaconda/Anaconda/envs/stm32_ai/python.exe quantize_onnx_int8.py --model gesture_v2_strongaug2.onnx --dataset dataset_real --output gesture_v2_strongaug2_int8.onnx)",
+      "Bash(PYTHONIOENCODING=utf-8 D:/Anaconda/Anaconda/envs/stm32_ai/python.exe eval_onnx_dataset.py --model gesture_v2_strongaug2.onnx --dataset dataset_hard_test)",
+      "Bash(PYTHONIOENCODING=utf-8 D:/Anaconda/Anaconda/envs/stm32_ai/python.exe eval_onnx_dataset.py --model gesture_v2_strongaug2_int8.onnx --dataset dataset_hard_test)"
+    ]
+  }
+}

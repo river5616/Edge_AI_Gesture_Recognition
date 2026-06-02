@@ -156,6 +156,21 @@ class GestureNetV2(nn.Module):
         return x
 
 
+class GestureNetV2Spatial(GestureNetV2):
+    """GestureNetV2 with 2x2 spatial pooling head."""
+
+    def __init__(self, num_classes=5):
+        super().__init__(num_classes=num_classes)
+        self.global_avg_pool = nn.AvgPool2d(kernel_size=4, stride=4)
+        self.fc = nn.Sequential(
+            nn.Dropout(0.5),
+            nn.Linear(128 * 2 * 2, 64),
+            nn.ReLU(inplace=True),
+            nn.Dropout(0.3),
+            nn.Linear(64, num_classes)
+        )
+
+
 class GestureNetV2Lite(nn.Module):
     """轻量版改进型手势识别网络 - 减少RAM占用
 
@@ -298,7 +313,7 @@ class RealtimeInference:
 
         # 尝试不同的模型架构
         errors = []
-        for model_class in [GestureNetV2, GestureNetV2Lite, GestureNet]:
+        for model_class in [GestureNetV2, GestureNetV2Spatial, GestureNetV2Lite, GestureNet]:
             try:
                 print(f"\n尝试加载为 {model_class.__name__}...")
                 model = model_class(num_classes=5)

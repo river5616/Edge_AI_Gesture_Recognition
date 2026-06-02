@@ -10,6 +10,23 @@ import argparse
 from test_pytorch_model_v2 import GestureNetV2, GestureNetV2Lite, GestureNet
 
 
+class GestureNetV2Spatial(GestureNetV2):
+    """GestureNetV2 with 2x2 spatial pooling head for ONNX export."""
+
+    def __init__(self, num_classes=5):
+        import torch.nn as nn
+        super().__init__(num_classes=num_classes)
+        # block3 output is fixed 8x8 for 64x64 input; AvgPool2d(4) exports to ONNX reliably.
+        self.global_avg_pool = nn.AvgPool2d(kernel_size=4, stride=4)
+        self.fc = nn.Sequential(
+            nn.Dropout(0.5),
+            nn.Linear(128 * 2 * 2, 64),
+            nn.ReLU(inplace=True),
+            nn.Dropout(0.3),
+            nn.Linear(64, num_classes)
+        )
+
+
 def convert_to_onnx(pytorch_model_path, onnx_model_path, model_type='v2'):
     """
     将PyTorch模型转换为ONNX格式
@@ -28,6 +45,9 @@ def convert_to_onnx(pytorch_model_path, onnx_model_path, model_type='v2'):
     if model_type == 'lite':
         model = GestureNetV2Lite(num_classes=5).to(device)
         print("使用模型架构: GestureNetV2Lite")
+    elif model_type == 'spatial':
+        model = GestureNetV2Spatial(num_classes=5).to(device)
+        print("使用模型架构: GestureNetV2Spatial")
     elif model_type == 'v2':
         model = GestureNetV2(num_classes=5).to(device)
         print("使用模型架构: GestureNetV2")
@@ -153,8 +173,8 @@ if __name__ == "__main__":
     parser.add_argument('--output', type=str, default='gesture_v2.onnx',
                         help='输出ONNX模型路径')
     parser.add_argument('--model-type', type=str, default='v2',
-                        choices=['v1', 'v2', 'lite'],
-                        help='模型类型: v1=GestureNet, v2=GestureNetV2, lite=GestureNetV2Lite')
+                        choices=['v1', 'v2', 'lite', 'spatial'],
+                        help='模型类型: v1=GestureNet, v2=GestureNetV2, lite=GestureNetV2Lite, spatial=V2+2x2 head')
     args = parser.parse_args()
 
     success = convert_to_onnx(args.input, args.output, args.model_type)

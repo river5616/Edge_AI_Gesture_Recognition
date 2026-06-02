@@ -1,18 +1,18 @@
 ST Edge AI Core v2.2.0-20266 2adc00962
-Created date          : 2026-01-03 03:53:34
-Parameters            : generate --target stm32h7 --name network -m E:/Lesson/Embedded_Designed/project/stm32h753/project6/Python/gesture_v1_5.onnx --compression none --verbosity 1 --workspace C:/Users/river/AppData/Local/Temp/mxAI_workspace3000522486178008218671994899436307 --output C:/Users/river/.stm32cubemx/network_output
+Created date          : 2026-05-24 11:00:55
+Parameters            : generate --target stm32h7 --name network -m D:/Project/embedded_designed_3/Python/gesture_v1_5.onnx --compression none --verbosity 1 --workspace C:/Users/Hasee/AppData/Local/Temp/mxAI_workspace3571471568140016135550023426624471 --output C:/Users/Hasee/.stm32cubemx/network_output
 
 Exec/report summary (generate)
 ------------------------------------------------------------------------------------------------------------
-model file         :   E:\Lesson\Embedded_Designed\project\stm32h753\project6\Python\gesture_v1_5.onnx      
+model file         :   D:\Project\embedded_designed_3\Python\gesture_v1_5.onnx                              
 type               :   onnx                                                                                 
 c_name             :   network                                                                              
 compression        :   none                                                                                 
 options            :   allocate-inputs, allocate-outputs                                                    
 optimization       :   balanced                                                                             
 target/series      :   stm32h7                                                                              
-workspace dir      :   C:\Users\river\AppData\Local\Temp\mxAI_workspace3000522486178008218671994899436307   
-output dir         :   C:\Users\river\.stm32cubemx\network_output                                           
+workspace dir      :   C:\Users\Hasee\AppData\Local\Temp\mxAI_workspace3571471568140016135550023426624471   
+output dir         :   C:\Users\Hasee\.stm32cubemx\network_output                                           
 model_fmt          :   float                                                                                
 model_name         :   gesture_v1_5                                                                         
 model_hash         :   0xa7e2a6cbbc0ce201650b3457b6bf7069                                                   
@@ -261,17 +261,17 @@ macc=2,192,165 weights=83,348 act=75,876 ram_io=0
  module                             text   rodata    data      bss 
  ------------------------------ -------- -------- ------- -------- 
  NetworkRuntime1020_CM7_GCC.a     15,484        0       0        0 
- network.o                           996      200   4,772      260 
+ network.o                           992      200   4,772      260 
  network_data.o                       48       16      88        0 
  lib (toolchain)*                      0        0       0        0 
  ------------------------------ -------- -------- ------- -------- 
- RT total**                       16,528      216   4,860      260 
+ RT total**                       16,524      216   4,860      260 
  ------------------------------ -------- -------- ------- -------- 
  weights                               0   83,352       0        0 
  activations                           0        0       0   75,876 
  io                                    0        0       0        0 
  ------------------------------ -------- -------- ------- -------- 
- TOTAL                            16,528   83,568   4,860   76,136 
+ TOTAL                            16,524   83,568   4,860   76,136 
  ------------------------------ -------- -------- ------- -------- 
  *  toolchain objects (libm/libgcc*)
  ** RT AI runtime objects (kernels+infrastructure)
@@ -280,19 +280,19 @@ macc=2,192,165 weights=83,348 act=75,876 ram_io=0
   --------------------------------------------------
                FLASH (ro)      %*   RAM (rw)      % 
   --------------------------------------------------
-  RT total         21,604   20.6%      5,120   6.3% 
+  RT total         21,600   20.6%      5,120   6.3% 
   --------------------------------------------------
-  TOTAL           104,956             80,996        
+  TOTAL           104,952             80,996        
   --------------------------------------------------
   *  rt/total
 
 
 Generated files (7)
 ------------------------------------------------------------------ 
-C:\Users\river\.stm32cubemx\network_output\network_data_params.h   
-C:\Users\river\.stm32cubemx\network_output\network_data_params.c   
-C:\Users\river\.stm32cubemx\network_output\network_data.h          
-C:\Users\river\.stm32cubemx\network_output\network_data.c          
-C:\Users\river\.stm32cubemx\network_output\network_config.h        
-C:\Users\river\.stm32cubemx\network_output\network.h               
-C:\Users\river\.stm32cubemx\network_output\network.c               
+C:\Users\Hasee\.stm32cubemx\network_output\network_data_params.h   
+C:\Users\Hasee\.stm32cubemx\network_output\network_data_params.c   
+C:\Users\Hasee\.stm32cubemx\network_output\network_data.h          
+C:\Users\Hasee\.stm32cubemx\network_output\network_data.c          
+C:\Users\Hasee\.stm32cubemx\network_output\network_config.h        
+C:\Users\Hasee\.stm32cubemx\network_output\network.h               
+C:\Users\Hasee\.stm32cubemx\network_output\network.c               

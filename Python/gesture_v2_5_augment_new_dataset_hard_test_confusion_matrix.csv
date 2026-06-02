@@ -1,0 +1,6 @@
+true\pred,fist,palm,thumbs_up,ok,nothing
+fist,97,0,3,0,0
+palm,1,98,0,0,1
+thumbs_up,16,0,81,3,0
+ok,0,8,0,92,0
+nothing,5,2,2,1,90

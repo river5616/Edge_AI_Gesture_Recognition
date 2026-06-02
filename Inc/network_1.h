@@ -2,7 +2,7 @@
   ******************************************************************************
   * @file    network_1.h
   * @author  AST Embedded Analytics Research Platform
-  * @date    2026-01-02T07:47:15+0800
+  * @date    2026-05-24T11:01:31+0800
   * @brief   AI Tool Automatic Code Generator for Embedded NN computing
   ******************************************************************************
   * @attention
@@ -23,7 +23,7 @@
 
 /******************************************************************************/
 #define AI_NETWORK_1_MODEL_NAME          "network_1"
-#define AI_NETWORK_1_ORIGIN_MODEL_NAME   "gesture_model"
+#define AI_NETWORK_1_ORIGIN_MODEL_NAME   "gesture_v2_5_augment_int8"
 
 /******************************************************************************/
 #define AI_NETWORK_1_ACTIVATIONS_ALIGNMENT   (4)
@@ -43,12 +43,12 @@ AI_DEPRECATED
 #define AI_NETWORK_1_IN_SIZE_BYTES { \
   AI_NETWORK_1_IN_1_SIZE_BYTES, \
 }
-#define AI_NETWORK_1_IN_1_FORMAT      (AI_BUFFER_FORMAT_FLOAT)
+#define AI_NETWORK_1_IN_1_FORMAT      (AI_BUFFER_FORMAT_S8)
 #define AI_NETWORK_1_IN_1_HEIGHT      (64)
 #define AI_NETWORK_1_IN_1_WIDTH       (64)
 #define AI_NETWORK_1_IN_1_CHANNEL     (1)
 #define AI_NETWORK_1_IN_1_SIZE        (4096)
-#define AI_NETWORK_1_IN_1_SIZE_BYTES  (16384)
+#define AI_NETWORK_1_IN_1_SIZE_BYTES  (4096)
 
 /******************************************************************************/
 #define AI_NETWORK_1_OUT_NUM       (1)
@@ -63,13 +63,13 @@ AI_DEPRECATED
 #define AI_NETWORK_1_OUT_SIZE_BYTES { \
   AI_NETWORK_1_OUT_1_SIZE_BYTES, \
 }
-#define AI_NETWORK_1_OUT_1_FORMAT      (AI_BUFFER_FORMAT_FLOAT)
-#define AI_NETWORK_1_OUT_1_CHANNEL     (9)
-#define AI_NETWORK_1_OUT_1_SIZE        (9)
-#define AI_NETWORK_1_OUT_1_SIZE_BYTES  (36)
+#define AI_NETWORK_1_OUT_1_FORMAT      (AI_BUFFER_FORMAT_S8)
+#define AI_NETWORK_1_OUT_1_CHANNEL     (5)
+#define AI_NETWORK_1_OUT_1_SIZE        (5)
+#define AI_NETWORK_1_OUT_1_SIZE_BYTES  (5)
 
 /******************************************************************************/
-#define AI_NETWORK_1_N_NODES (13)
+#define AI_NETWORK_1_N_NODES (71)
 
 
 AI_API_DECLARE_BEGIN

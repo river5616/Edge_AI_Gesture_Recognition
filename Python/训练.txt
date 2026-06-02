@@ -1,0 +1,126 @@
+(stm32_ai) PS D:\Project\embedded_designed_3\Python> python train_model_v2.py --dataset dataset_real --model-name gesture_v2_session_smooth_spatial_shuffle.pth --epochs 150 --batch-size 32 --loss smooth --split-mode session --session-size 100 --spatial-head --split-manifest-prefix split_session_shuffle
+使用设备: cuda
+加载数据集...
+加载了 7883 张图像
+
+各类别样本数量:
+  0 (fist): 1597 张
+  1 (palm): 1446 张
+  2 (thumbs_up): 1990 张
+  3 (ok): 1500 张
+  4 (nothing): 1350 张
+
+使用 session-based 划分 (session_size=100)
+  类别 0: train=1100, val=200, test=297
+  类别 1: train=946, val=200, test=300
+  类别 2: train=1390, val=300, test=300
+  类别 3: train=1000, val=200, test=300
+  类别 4: train=950, val=200, test=200
+训练集: 5386 张
+验证集: 1100 张
+测试集: 1397 张
+划分清单已保存: split_session_shuffle_train/val/test.csv
+
+🔄 使用训练时数据增强
+
+创建模型...
+✓ 使用空间池化版模型 (GestureNetV2Spatial, 2x2 head)
+
+模型参数量: 98,373
+可训练参数: 98,373
+模型大小估计: 384.27 KB (float32)
+使用 Label Smoothing Loss
+
+开始训练...
+Epoch [1/150] Train Loss: 1.4923, Train Acc: 34.89% | Val Loss: 1.3861, Val Acc: 42.55% | LR: 0.001000                                                             
+✓ 保存最佳模型 (验证准确率: 42.55%)
+Epoch [2/150] Train Loss: 1.2642, Train Acc: 52.95% | Val Loss: 1.4770, Val Acc: 44.09% | LR: 0.001000                                                             
+✓ 保存最佳模型 (验证准确率: 44.09%)
+Epoch [3/150] Train Loss: 1.1359, Train Acc: 62.76% | Val Loss: 1.3313, Val Acc: 49.82% | LR: 0.000999                                                             
+✓ 保存最佳模型 (验证准确率: 49.82%)
+Epoch [4/150] Train Loss: 1.0435, Train Acc: 69.20% | Val Loss: 1.5937, Val Acc: 46.64% | LR: 0.000998                                                             
+Epoch [5/150] Train Loss: 0.9679, Train Acc: 73.93% | Val Loss: 1.4880, Val Acc: 51.09% | LR: 0.000997                                                             
+✓ 保存最佳模型 (验证准确率: 51.09%)
+Epoch [6/150] Train Loss: 0.9068, Train Acc: 77.83% | Val Loss: 1.6995, Val Acc: 44.55% | LR: 0.000996                                                             
+Epoch [7/150] Train Loss: 0.8539, Train Acc: 80.93% | Val Loss: 1.5459, Val Acc: 53.55% | LR: 0.000995                                                             
+✓ 保存最佳模型 (验证准确率: 53.55%)
+Epoch [8/150] Train Loss: 0.8324, Train Acc: 82.90% | Val Loss: 1.1814, Val Acc: 60.00% | LR: 0.000993                                                             
+✓ 保存最佳模型 (验证准确率: 60.00%)
+Epoch [9/150] Train Loss: 0.7942, Train Acc: 85.13% | Val Loss: 1.1960, Val Acc: 64.00% | LR: 0.000991                                                             
+✓ 保存最佳模型 (验证准确率: 64.00%)
+Epoch [10/150] Train Loss: 0.7580, Train Acc: 87.04% | Val Loss: 1.1425, Val Acc: 66.45% | LR: 0.000989                                                            
+✓ 保存最佳模型 (验证准确率: 66.45%)
+Epoch [11/150] Train Loss: 0.7262, Train Acc: 88.54% | Val Loss: 1.5198, Val Acc: 56.45% | LR: 0.000987                                                            
+Epoch [12/150] Train Loss: 0.7229, Train Acc: 88.47% | Val Loss: 1.1905, Val Acc: 64.73% | LR: 0.000984                                                            
+Epoch [13/150] Train Loss: 0.7062, Train Acc: 89.99% | Val Loss: 1.0694, Val Acc: 69.18% | LR: 0.000982                                                            
+✓ 保存最佳模型 (验证准确率: 69.18%)
+Epoch [14/150] Train Loss: 0.6938, Train Acc: 90.22% | Val Loss: 1.2902, Val Acc: 63.18% | LR: 0.000979                                                            
+Epoch [15/150] Train Loss: 0.6750, Train Acc: 90.96% | Val Loss: 1.1021, Val Acc: 70.09% | LR: 0.000976                                                            
+✓ 保存最佳模型 (验证准确率: 70.09%)
+Epoch [16/150] Train Loss: 0.6777, Train Acc: 91.35% | Val Loss: 0.9964, Val Acc: 71.18% | LR: 0.000972                                                            
+✓ 保存最佳模型 (验证准确率: 71.18%)
+Epoch [17/150] Train Loss: 0.6539, Train Acc: 92.46% | Val Loss: 1.2671, Val Acc: 64.09% | LR: 0.000969                                                            
+Epoch [18/150] Train Loss: 0.6483, Train Acc: 92.46% | Val Loss: 1.0766, Val Acc: 69.91% | LR: 0.000965                                                            
+Epoch [19/150] Train Loss: 0.6356, Train Acc: 93.74% | Val Loss: 1.0138, Val Acc: 71.73% | LR: 0.000961                                                            
+✓ 保存最佳模型 (验证准确率: 71.73%)
+Epoch [20/150] Train Loss: 0.6302, Train Acc: 93.87% | Val Loss: 0.9793, Val Acc: 72.36% | LR: 0.000957                                                            
+✓ 保存最佳模型 (验证准确率: 72.36%)
+Epoch [21/150] Train Loss: 0.6296, Train Acc: 93.48% | Val Loss: 0.9475, Val Acc: 77.64% | LR: 0.000952                                                            
+✓ 保存最佳模型 (验证准确率: 77.64%)
+Epoch [22/150] Train Loss: 0.6191, Train Acc: 93.95% | Val Loss: 0.9294, Val Acc: 77.55% | LR: 0.000948                                                            
+Epoch [23/150] Train Loss: 0.6163, Train Acc: 94.06% | Val Loss: 1.1972, Val Acc: 67.55% | LR: 0.000943                                                            
+Epoch [24/150] Train Loss: 0.6188, Train Acc: 94.08% | Val Loss: 0.9892, Val Acc: 74.82% | LR: 0.000938                                                            
+Epoch [25/150] Train Loss: 0.6100, Train Acc: 94.34% | Val Loss: 1.0743, Val Acc: 71.36% | LR: 0.000933                                                            
+Epoch [26/150] Train Loss: 0.6066, Train Acc: 94.65% | Val Loss: 0.9878, Val Acc: 73.55% | LR: 0.000928                                                            
+Epoch [27/150] Train Loss: 0.6057, Train Acc: 95.02% | Val Loss: 0.9277, Val Acc: 79.18% | LR: 0.000922                                                            
+✓ 保存最佳模型 (验证准确率: 79.18%)
+Epoch [28/150] Train Loss: 0.5924, Train Acc: 95.53% | Val Loss: 0.9841, Val Acc: 73.82% | LR: 0.000917                                                            
+Epoch [29/150] Train Loss: 0.5958, Train Acc: 94.76% | Val Loss: 1.0336, Val Acc: 72.36% | LR: 0.000911                                                            
+Epoch [30/150] Train Loss: 0.5895, Train Acc: 95.34% | Val Loss: 0.8356, Val Acc: 80.73% | LR: 0.000905                                                            
+✓ 保存最佳模型 (验证准确率: 80.73%)
+Epoch [31/150] Train Loss: 0.5981, Train Acc: 94.93% | Val Loss: 1.0001, Val Acc: 74.45% | LR: 0.000898                                                            
+Epoch [32/150] Train Loss: 0.5908, Train Acc: 95.54% | Val Loss: 1.0913, Val Acc: 71.55% | LR: 0.000892                                                            
+Epoch [33/150] Train Loss: 0.5932, Train Acc: 95.27% | Val Loss: 1.0209, Val Acc: 73.91% | LR: 0.000885                                                            
+Epoch [34/150] Train Loss: 0.5731, Train Acc: 96.12% | Val Loss: 1.1072, Val Acc: 69.00% | LR: 0.000879                                                            
+Epoch [35/150] Train Loss: 0.5811, Train Acc: 95.69% | Val Loss: 1.0700, Val Acc: 73.82% | LR: 0.000872                                                            
+Epoch [36/150] Train Loss: 0.5725, Train Acc: 96.25% | Val Loss: 0.9938, Val Acc: 75.91% | LR: 0.000865                                                            
+Epoch [37/150] Train Loss: 0.5650, Train Acc: 96.40% | Val Loss: 0.9986, Val Acc: 76.45% | LR: 0.000857                                                            
+Epoch [38/150] Train Loss: 0.5677, Train Acc: 96.51% | Val Loss: 1.0352, Val Acc: 76.00% | LR: 0.000850                                                            
+Epoch [39/150] Train Loss: 0.5835, Train Acc: 95.62% | Val Loss: 0.9394, Val Acc: 77.73% | LR: 0.000842                                                            
+Epoch [40/150] Train Loss: 0.5744, Train Acc: 96.01% | Val Loss: 1.0087, Val Acc: 77.09% | LR: 0.000835                                                            
+Epoch [41/150] Train Loss: 0.5682, Train Acc: 96.27% | Val Loss: 0.9804, Val Acc: 75.64% | LR: 0.000827                                                            
+Epoch [42/150] Train Loss: 0.5686, Train Acc: 96.58% | Val Loss: 0.9279, Val Acc: 78.27% | LR: 0.000819                                                            
+Epoch [43/150] Train Loss: 0.5761, Train Acc: 96.01% | Val Loss: 1.0232, Val Acc: 75.00% | LR: 0.000811                                                            
+Epoch [44/150] Train Loss: 0.5593, Train Acc: 96.94% | Val Loss: 0.9113, Val Acc: 79.73% | LR: 0.000802                                                            
+Epoch [45/150] Train Loss: 0.5662, Train Acc: 96.42% | Val Loss: 1.0321, Val Acc: 73.45% | LR: 0.000794                                                            
+Epoch [46/150] Train Loss: 0.5572, Train Acc: 96.70% | Val Loss: 0.9134, Val Acc: 78.82% | LR: 0.000786                                                            
+Epoch [47/150] Train Loss: 0.5579, Train Acc: 96.83% | Val Loss: 1.1288, Val Acc: 71.00% | LR: 0.000777                                                            
+Epoch [48/150] Train Loss: 0.5546, Train Acc: 96.97% | Val Loss: 0.9781, Val Acc: 77.27% | LR: 0.000768                                                            
+Epoch [49/150] Train Loss: 0.5523, Train Acc: 97.10% | Val Loss: 1.1022, Val Acc: 70.73% | LR: 0.000759                                                            
+Epoch [50/150] Train Loss: 0.5489, Train Acc: 97.29% | Val Loss: 0.9065, Val Acc: 78.45% | LR: 0.000750                                                            
+
+早停: 验证准确率已 20 轮未提升
+
+训练曲线已保存到: training_curves_v2.png
+
+在测试集上评估最佳模型...
+D:\Project\embedded_designed_3\Python\train_model_v2.py:851: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  model.load_state_dict(torch.load(args.model_name))
+测试集准确率: 80.53%
+混淆矩阵已保存到: confusion_matrix_v2.png
+
+分类报告:
+              precision    recall  f1-score   support
+
+        fist       0.76      0.80      0.78       297
+        palm       0.85      0.68      0.76       300
+   thumbs_up       0.81      0.66      0.73       300
+          ok       0.78      0.96      0.86       300
+     nothing       0.86      0.98      0.92       200
+
+    accuracy                           0.81      1397
+   macro avg       0.81      0.82      0.81      1397
+weighted avg       0.81      0.81      0.80      1397
+
+
+训练完成！最佳模型已保存到: gesture_v2_session_smooth_spatial_shuffle.pth
