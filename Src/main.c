@@ -19,6 +19,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "cmsis_os.h"
+#include "adc.h"
 #include "dma.h"
 #include "memorymap.h"
 #include "tim.h"
@@ -115,14 +116,24 @@ int main(void)
   MX_UART4_Init();
   MX_USART6_UART_Init();
   MX_UART5_Init();
+  MX_ADC3_Init();
   MX_X_CUBE_AI_Init();
   /* USER CODE BEGIN 2 */
   //HAL_UART_AbortReceive(&huart3);
-  
+
   OLED_Init();
   //CameraTask_Init();
   //OpenMVRxTask_Init();
 
+  //adc_dma_flag = HAL_ADC_Start_DMA(&hadc3, (uint32_t*)&g_adc3Buffer, 32);
+
+  // 初始化手势控制系统
+  GestureControl_Init();
+
+  // 注册蓝牙命令回调
+  BT_RegisterCommandCallback(GestureControl_HandleBluetoothCmd);
+
+  ESP8266_Init();
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -256,6 +267,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
+
+  // TIM2定时器溢出中断 - 用于软件PWM
+  if (htim->Instance == TIM2) {
+    GestureControl_PWM_Update();
+  }
 
   /* USER CODE END Callback 1 */
 }

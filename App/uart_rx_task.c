@@ -94,8 +94,11 @@ void AppTask_uart_rx(void *argument)
 
     UartRxTask_Init();
 
-    // 启动UART中断接收
+    // 启动UART1中断接收（上位机命令）
     HAL_UART_Receive_IT(&huart1, &rx_byte, 1);
+
+    // 启动UART4中断接收（蓝牙命令）
+    BT_Init();
 
     // 无限循环 - 主要用于监控和定期任务
     for(;;)

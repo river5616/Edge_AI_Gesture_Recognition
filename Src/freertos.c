@@ -117,6 +117,13 @@ const osThreadAttr_t Task_inference_attributes = {
   .stack_size = 4096 * 4,
   .priority = (osPriority_t) osPriorityNormal6,
 };
+/* Definitions for Task_sensor */
+osThreadId_t Task_sensorHandle;
+const osThreadAttr_t Task_sensor_attributes = {
+  .name = "Task_sensor",
+  .stack_size = 512 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
+};
 /* Definitions for imageQueue */
 osMessageQueueId_t imageQueueHandle;
 const osMessageQueueAttr_t imageQueue_attributes = {
@@ -166,6 +173,7 @@ void AppTask_openmv_rx(void *argument);
 void AppTask_uart_tx(void *argument);
 void AppTask_uart_rx(void *argument);
 void AppTask_inference(void *argument);
+void AppTask_sensor(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -258,6 +266,9 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of Task_inference */
   Task_inferenceHandle = osThreadNew(AppTask_inference, NULL, &Task_inference_attributes);
+
+  /* creation of Task_sensor */
+  Task_sensorHandle = osThreadNew(AppTask_sensor, NULL, &Task_sensor_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -426,6 +437,24 @@ __weak void AppTask_inference(void *argument)
     osDelay(1);
   }
   /* USER CODE END AppTask_inference */
+}
+
+/* USER CODE BEGIN Header_AppTask_sensor */
+/**
+* @brief Function implementing the Task_sensor thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_AppTask_sensor */
+__weak void AppTask_sensor(void *argument)
+{
+  /* USER CODE BEGIN AppTask_sensor */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END AppTask_sensor */
 }
 
 /* Private application code --------------------------------------------------*/

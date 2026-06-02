@@ -32,7 +32,7 @@ void MX_X_CUBE_AI_Process(void);
 /**
  * @brief Run gesture recognition inference
  * @param image_data: input image (uint8_t, 64x64 grayscale)
- * @param gesture_id: output recognized gesture ID (0-6, 7个手势精简版)
+ * @param gesture_id: output recognized gesture ID (0-4, 5个手势: fist/palm/v_sign/ok/nothing)
  * @param confidence: output confidence level (0.0-1.0)
  * @return 0 on success, negative on error
  */
@@ -41,9 +41,9 @@ int MX_X_CUBE_AI_Inference(const uint8_t* image_data, uint8_t* gesture_id, float
 /**
  * @brief Run gesture recognition and get all class confidences
  * @param image_data: input image (uint8_t, 64x64 grayscale)
- * @param gesture_id: output recognized gesture ID (0-6, 7个手势精简版)
+ * @param gesture_id: output recognized gesture ID (0-4, 5个手势: fist/palm/v_sign/ok/nothing)
  * @param confidence: output confidence level (0.0-1.0) of the max class
- * @param all_confidences: output array of 7 confidences (one per class)
+ * @param all_confidences: output array of 5 confidences (one per class)
  * @return 0 on success, negative on error
  */
 int MX_X_CUBE_AI_Inference_Full(const uint8_t* image_data, uint8_t* gesture_id,

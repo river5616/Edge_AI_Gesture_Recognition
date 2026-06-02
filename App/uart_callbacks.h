@@ -2,6 +2,7 @@
 #define __UART_CALLBACKS_H
 
 #include "main.h"
+#include "usart.h"
 
 // UART回调函数（在uart_callbacks.c中统一实现）
 // 这些函数由HAL库自动调用，不需要用户手动调用

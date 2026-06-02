@@ -50,7 +50,7 @@ void key_proc(void)
 
 		// 循环切换视图：STATUS -> IMAGE -> UART_STATS -> ALL_CONF -> STATUS
 		view++;
-		if(view > VIEW_UART_STATS)
+		if(view > VIEW_SENSORS)
 		{
 			view = VIEW_STATUS;
 		}

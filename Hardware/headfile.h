@@ -32,13 +32,27 @@ typedef int32_t    s32;
 #include "OLED.h" // OLED���ܽӿ�
 #include "disp.h" // OLED��ʾ
 
-// ����ͷ���
+// 传感器驱动和初始化
+#include "sensors.h"
+#include "BH1750.h"
+#include "HCSR04.h"
+#include "MQ2.h"
+#include "MAX30102.h"
+#include "DHT11.h"      // DHT11温湿度传感器
+#include "algorithm.h"  // MAX30102算法
+#include "bluetooth.h"  // 蓝牙通信
+
+// 任务头文件
 #include "uart_tx_task.h"
 #include "uart_rx_task.h"
-#include "task_common.h"     // ����������
+#include "task_common.h"
 #include "inference_task.h"
 #include "openmv_rx_task.h"
 #include "uart_callbacks.h"
+#include "esp8266.h"
+#include "fingerprint_task.h"
+#include "AS608.h"
+#include "gesture_control.h"  // 手势控制模块
 
 // OLED
 extern u8 view; // ��ʾҳ��
@@ -50,9 +64,9 @@ extern uint8_t capture_success_cnt;  // 采集成功次数
 extern uint8_t capture_fail_reason;  // 失败原因代码
 extern uint8_t href_state;  // HREF引脚状态（调试用）
 
+extern uint32_t g_adc3Buffer[32];
 
-
-
+extern uint8_t adc_dma_flag;
 
 
 

@@ -12,15 +12,13 @@ import argparse
 from datetime import datetime
 import time
 
-# 手势类别名称 - 7个手势精简版
+# 手势类别名称 - 5个手势版本
 GESTURE_NAMES = {
     0: "fist",           # 拳头
     1: "palm",           # 张开手掌
-    2: "thumbs_up",      # 竖起大拇指
+    2: "v_sign",         # V手势（食指中指分开成V形）
     3: "ok",             # OK手势
-    4: "gun",            # 手枪手势
-    5: "call_me",        # 打电话手势
-    6: "nothing",        # 无
+    4: "nothing",        # 无手势/背景
 }
 
 class DataCollector:

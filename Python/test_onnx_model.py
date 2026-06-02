@@ -8,10 +8,13 @@ import onnxruntime as ort
 import numpy as np
 from PIL import Image
 
-# 手势类别
+# 手势类别 - 5个手势版本
 GESTURE_NAMES = {
-    0: "fist", 1: "palm", 2: "thumbs_up", 3: "ok", 4: "v_sign",
-    5: "point", 6: "three", 7: "four", 8: "nothing"
+    0: "fist",           # 拳头
+    1: "palm",           # 手掌
+    2: "v_sign",         # V手势（食指中指分开成V形）
+    3: "ok",             # OK手势
+    4: "nothing"         # 无手势/背景
 }
 
 def preprocess_image(image_path):
@@ -43,7 +46,7 @@ def run_inference(session, input_tensor):
     outputs = session.run([output_name], {input_name: input_tensor})
 
     # 获取输出
-    output = outputs[0][0]  # shape: (9,)
+    output = outputs[0][0]  # shape: (5,)
 
     # 找到最大值的索引
     predicted_class = np.argmax(output)
@@ -62,8 +65,8 @@ def main():
     test_images = [
         ("训练集 - fist_0001", "dataset/0_fist/fist_0001.png", 0),
         ("训练集 - fist_0010", "dataset/0_fist/fist_0010.png", 0),
-        ("训练集 - point_0001", "dataset/5_point/point_0001.png", 5),
-        ("实际采集 - frame_0002 (应该是 fist)", "debug_inference/images/frame_0002_point_conf3.1.png", 0),
+        ("训练集 - v_sign_0001", "dataset/2_v_sign/v_sign_0001.png", 2),
+        ("实际采集 - frame_0002 (应该是 fist)", "debug_inference/images/frame_0002_v_sign_conf3.1.png", 0),
     ]
 
     print("=" * 80)

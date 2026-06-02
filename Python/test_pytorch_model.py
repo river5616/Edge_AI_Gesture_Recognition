@@ -9,10 +9,13 @@ import numpy as np
 from PIL import Image
 import sys
 
-# 手势类别 - 7个手势精简版
+# 手势类别 - 5个手势版本
 GESTURE_NAMES = {
-    0: "fist", 1: "palm", 2: "thumbs_up", 3: "ok",
-    4: "gun", 5: "call_me", 6: "nothing"
+    0: "fist",           # 拳头
+    1: "palm",           # 手掌
+    2: "v_sign",         # V手势（食指中指分开成V形）
+    3: "ok",             # OK手势
+    4: "nothing"         # 无手势/背景
 }
 
 # 定义深度可分离卷积（与训练时相同）

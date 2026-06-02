@@ -50,6 +50,7 @@
 #include <stdio.h>
 #include <inttypes.h>
 #include <string.h>
+#include <math.h>
 
 #include "app_x-cube-ai.h"
 #include "main.h"
@@ -109,7 +110,7 @@ static void ai_log_err(const ai_error err, const char *fct)
 //  else
 //    printf("TEMPLATE - Error - type=0x%02x code=0x%02x\r\n", err.type, err.code);
 
-  // ❌ 移除死循环，避免程序卡死
+  // 移除死循环，避免程序卡死
   // do {} while (1);
 
   // 通过串口输出错误信息
@@ -210,8 +211,8 @@ static void preprocess_image(const uint8_t* src, float* dst, uint32_t size)
 
 /**
  * @brief Find the class with maximum probability
- * @param output_data: array of class probabilities (9 classes)
- * @param num_classes: number of classes (9)
+ * @param output_data: array of class probabilities (5 classes after softmax)
+ * @param num_classes: number of classes (5)
  * @param max_idx: output - index of maximum class
  * @param max_val: output - maximum probability value
  */
@@ -232,7 +233,7 @@ static void postprocess_output(const float* output_data, uint8_t num_classes,
 /**
  * @brief Run gesture recognition inference
  * @param image_data: input image data (uint8_t, 64x64 grayscale)
- * @param gesture_id: output - recognized gesture ID (0-8)
+ * @param gesture_id: output - recognized gesture ID (0-4: fist/palm/v_sign/ok/nothing)
  * @param confidence: output - confidence level (0.0-1.0)
  * @return 0 on success, negative on error
  */
@@ -260,34 +261,37 @@ int MX_X_CUBE_AI_Inference(const uint8_t* image_data, uint8_t* gesture_id, float
         return -3;  // Inference failed
     }
 
-    // Step 3: Get output and normalize
+    // Step 3: Get output and apply softmax
     float* output_buffer = (float*)data_outs[0];
 
-    // 计算所有输出的和（用于归一化）
-    float sum = 0.0f;
-    for (uint8_t i = 0; i < AI_NETWORK_OUT_1_SIZE; i++) {
-        sum += output_buffer[i];
-    }
-
-    // 避免除以0
-    if (sum < 0.0001f) {
-        sum = 1.0f;
-    }
-
-    // 归一化：将所有输出除以总和
-    float normalized_output[AI_NETWORK_OUT_1_SIZE];
-    for (uint8_t i = 0; i < AI_NETWORK_OUT_1_SIZE; i++) {
-        normalized_output[i] = output_buffer[i] / sum;
-
-        // 确保范围在 [0, 1]
-        if (normalized_output[i] < 0.0f) {
-            normalized_output[i] = 0.0f;
-        } else if (normalized_output[i] > 1.0f) {
-            normalized_output[i] = 1.0f;
+    // 计算softmax（用于概率归一化）
+    // 首先找到最大值（用于数值稳定性）
+    float max_val = output_buffer[0];
+    for (uint8_t i = 1; i < AI_NETWORK_OUT_1_SIZE; i++) {
+        if (output_buffer[i] > max_val) {
+            max_val = output_buffer[i];
         }
     }
 
-    // Step 4: Postprocess output (使用归一化后的值)
+    // 计算 exp(x - max) 并求和
+    float exp_sum = 0.0f;
+    float normalized_output[AI_NETWORK_OUT_1_SIZE];
+    for (uint8_t i = 0; i < AI_NETWORK_OUT_1_SIZE; i++) {
+        normalized_output[i] = expf(output_buffer[i] - max_val);
+        exp_sum += normalized_output[i];
+    }
+
+    // 避免除以0（理论上不会发生）
+    if (exp_sum < 1e-10f) {
+        exp_sum = 1.0f;
+    }
+
+    // 归一化：softmax = exp(x - max) / sum(exp(x - max))
+    for (uint8_t i = 0; i < AI_NETWORK_OUT_1_SIZE; i++) {
+        normalized_output[i] /= exp_sum;
+    }
+
+    // Step 4: Postprocess output (使用softmax归一化后的概率)
     postprocess_output(normalized_output, AI_NETWORK_OUT_1_SIZE, gesture_id, confidence);
 
     return 0;  // Success
@@ -296,9 +300,9 @@ int MX_X_CUBE_AI_Inference(const uint8_t* image_data, uint8_t* gesture_id, float
 /**
  * @brief Run gesture recognition and get all class confidences
  * @param image_data: input image data (uint8_t, 64x64 grayscale)
- * @param gesture_id: output - recognized gesture ID (0-8)
+ * @param gesture_id: output - recognized gesture ID (0-4: fist/palm/v_sign/ok/nothing)
  * @param confidence: output - confidence level (0.0-1.0) of the max class
- * @param all_confidences: output - array of 9 confidences (one per class)
+ * @param all_confidences: output - array of 5 confidences (one per class)
  * @return 0 on success, negative on error
  */
 int MX_X_CUBE_AI_Inference_Full(const uint8_t* image_data, uint8_t* gesture_id,
@@ -326,33 +330,36 @@ int MX_X_CUBE_AI_Inference_Full(const uint8_t* image_data, uint8_t* gesture_id,
         return -3;  // Inference failed
     }
 
-    // Step 3: Get output buffer and normalize (manual softmax)
+    // Step 3: Get output buffer and apply softmax
     float* output_buffer = (float*)data_outs[0];
 
-    // 计算所有输出的和（用于归一化）
-    float sum = 0.0f;
-    for (uint8_t i = 0; i < AI_NETWORK_OUT_1_SIZE; i++) {
-        sum += output_buffer[i];
-    }
-
-    // 避免除以0
-    if (sum < 0.0001f) {
-        sum = 1.0f;
-    }
-
-    // 归一化：将所有输出除以总和，确保和为1
-    for (uint8_t i = 0; i < AI_NETWORK_OUT_1_SIZE; i++) {
-        all_confidences[i] = output_buffer[i] / sum;
-
-        // 额外的安全检查：确保范围在 [0, 1]
-        if (all_confidences[i] < 0.0f) {
-            all_confidences[i] = 0.0f;
-        } else if (all_confidences[i] > 1.0f) {
-            all_confidences[i] = 1.0f;
+    // 计算softmax（用于概率归一化）
+    // 首先找到最大值（用于数值稳定性）
+    float max_val = output_buffer[0];
+    for (uint8_t i = 1; i < AI_NETWORK_OUT_1_SIZE; i++) {
+        if (output_buffer[i] > max_val) {
+            max_val = output_buffer[i];
         }
     }
 
-    // Step 4: Find max probability class (使用归一化后的值)
+    // 计算 exp(x - max) 并求和
+    float exp_sum = 0.0f;
+    for (uint8_t i = 0; i < AI_NETWORK_OUT_1_SIZE; i++) {
+        all_confidences[i] = expf(output_buffer[i] - max_val);
+        exp_sum += all_confidences[i];
+    }
+
+    // 避免除以0（理论上不会发生）
+    if (exp_sum < 1e-10f) {
+        exp_sum = 1.0f;
+    }
+
+    // 归一化：softmax = exp(x - max) / sum(exp(x - max))
+    for (uint8_t i = 0; i < AI_NETWORK_OUT_1_SIZE; i++) {
+        all_confidences[i] /= exp_sum;
+    }
+
+    // Step 4: Find max probability class (使用softmax归一化后的概率)
     postprocess_output(all_confidences, AI_NETWORK_OUT_1_SIZE, gesture_id, confidence);
 
     return 0;  // Success

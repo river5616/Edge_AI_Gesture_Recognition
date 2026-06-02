@@ -2,6 +2,7 @@
 #define __UART_RX_TASK_H
 
 #include "task_common.h"
+#include "bluetooth.h"
 
 // 串口接收任务入口函数
 void AppTask_uart_rx(void *argument);

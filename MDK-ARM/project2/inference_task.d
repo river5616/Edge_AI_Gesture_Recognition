@@ -17,6 +17,9 @@ project2/inference_task.o: ..\App\inference_task.c \
   ..\Drivers\STM32H7xx_HAL_Driver\Inc\stm32h7xx_hal_mdma.h \
   ..\Drivers\STM32H7xx_HAL_Driver\Inc\stm32h7xx_hal_exti.h \
   ..\Drivers\STM32H7xx_HAL_Driver\Inc\stm32h7xx_hal_cortex.h \
+  ..\Drivers\STM32H7xx_HAL_Driver\Inc\stm32h7xx_hal_adc.h \
+  ..\Drivers\STM32H7xx_HAL_Driver\Inc\stm32h7xx_ll_adc.h \
+  ..\Drivers\STM32H7xx_HAL_Driver\Inc\stm32h7xx_hal_adc_ex.h \
   ..\Drivers\STM32H7xx_HAL_Driver\Inc\stm32h7xx_hal_flash.h \
   ..\Drivers\STM32H7xx_HAL_Driver\Inc\stm32h7xx_hal_flash_ex.h \
   ..\Drivers\STM32H7xx_HAL_Driver\Inc\stm32h7xx_hal_hsem.h \
@@ -39,9 +42,13 @@ project2/inference_task.o: ..\App\inference_task.c \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\task.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\list.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\CMSIS_RTOS_V2\cmsis_os2.h \
-  ..\App\uart_tx_task.h ..\Inc\app_x-cube-ai.h \
+  ..\App\uart_tx_task.h ..\Hardware\bluetooth.h ..\Inc\app_x-cube-ai.h \
   ..\Middlewares\ST\AI\Inc\ai_platform.h ..\Hardware\disp.h \
   ..\Hardware\headfile.h ..\Inc\memorymap.h ..\Inc\gpio.h \
   ..\Hardware\led.h ..\Hardware\key.h ..\Hardware\OLED.h \
-  ..\Hardware\OLED_Data.h ..\App\uart_rx_task.h ..\App\openmv_rx_task.h \
-  ..\App\uart_callbacks.h
+  ..\Hardware\OLED_Data.h ..\Hardware\sensors.h ..\Hardware\BH1750.h \
+  ..\Hardware\HCSR04.h ..\Hardware\MQ2.h ..\Inc\adc.h \
+  ..\Hardware\MAX30102.h ..\Hardware\DHT11.h ..\Hardware\algorithm.h \
+  ..\App\uart_rx_task.h ..\App\openmv_rx_task.h ..\App\uart_callbacks.h \
+  ..\Inc\usart.h ..\App\esp8266.h ..\App\fingerprint_task.h \
+  ..\App\AS608.h ..\App\gesture_control.h

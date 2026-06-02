@@ -2,6 +2,7 @@
 #include "uart_tx_task.h"
 #include "app_x-cube-ai.h"
 #include "disp.h"
+#include "gesture_control.h"
 #include <string.h>
 
 // AI模型相关（如果已集成X-CUBE-AI，取消注释）
@@ -122,6 +123,9 @@ void AppTask_inference(void *argument)
 
                         // 在 OLED 上显示识别结果
                         OLED_ShowGestureResult(gesture_id, confidence);
+
+                        // 处理手势控制LED/风扇
+                        GestureControl_HandleGesture(gesture_id, confidence);
 
                         // 发送图像数据（用于调试分析）
                         UartTxTask_SendImage(img_msg.data, img_msg.width, img_msg.height, img_msg.data_size);

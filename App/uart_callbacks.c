@@ -9,6 +9,9 @@
 #include "uart_callbacks.h"
 #include "uart_rx_task.h"
 #include "openmv_rx_task.h"
+#include "bluetooth.h"
+#include "AS608.h"
+
 #include <string.h>
 
 // DMA缓冲区大小（与openmv_rx_task.c中的定义一致）
@@ -66,6 +69,50 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
             osThreadFlagsSet(openmv_task_handle, 0x01);
         }
     }
+
+    // ========== UART4：蓝牙命令接收（中断模式） ==========
+    else if(huart->Instance == UART4)
+    {
+        // 检查是否为单字符命令（大写字母A-Z）
+        if(bt_rx_byte >= 'A' && bt_rx_byte <= 'Z')
+        {
+            // 立即处理单字符命令
+            BT_ProcessCommand(bt_rx_byte);
+            bt_rx_index = 0;  // 重置缓冲区
+        }
+        else if(bt_rx_byte == '\n')
+        {
+            // 如果收到换行符，处理缓冲区中的命令
+            if(bt_rx_index >= 1 && bt_rx_buffer[0] >= 'A' && bt_rx_buffer[0] <= 'Z')
+            {
+                BT_ProcessCommand(bt_rx_buffer[0]);
+            }
+            bt_rx_index = 0;  // 重置缓冲区
+        }
+        else
+        {
+            // 其他字符存入缓冲区
+            if(bt_rx_index < 64 - 1)
+            {
+                bt_rx_buffer[bt_rx_index++] = bt_rx_byte;
+            }
+            else
+            {
+                // 缓冲区溢出，重置
+                bt_rx_index = 0;
+            }
+        }
+
+        // 继续接收下一个字节
+        HAL_UART_Receive_IT(&huart4, &bt_rx_byte, 1);
+    }
+
+    // ========== USART6：AS608指纹模块接收（中断模式） ==========
+    else if(huart->Instance == USART6)
+    {
+        // 调用AS608的接收完成回调
+        //AS608_UART_RxCpltCallback(huart);
+    }
 }
 
 /**
@@ -102,6 +149,17 @@ void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
         // USART3错误处理：重新启动DMA接收
         HAL_UART_DMAStop(&huart3);
         HAL_UART_Receive_DMA(&huart3, dma_buffer, DMA_BUFFER_SIZE);
+    }
+    else if(huart->Instance == UART4)
+    {
+        // UART4错误处理：重新启动蓝牙接收
+        bt_rx_index = 0;  // 重置缓冲区索引
+        HAL_UART_Receive_IT(&huart4, &bt_rx_byte, 1);
+    }
+    else if(huart->Instance == USART6)
+    {
+        // USART6错误处理：AS608指纹模块错误后重新启动接收
+        HAL_UART_Receive_IT(&huart6, NULL, 0);
     }
 }
 

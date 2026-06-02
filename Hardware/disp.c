@@ -10,6 +10,9 @@ u8 capture_success_cnt = 0;  // 采集成功次数
 u8 capture_fail_reason = 0;  // 失败原因代码
 u8 href_state = 0;  // HREF引脚状态（调试用）
 
+// 全局传感器数据（由sensor_task更新）
+SensorData_t g_sensorData = {0};
+
 // 静态变量：保存最新接收到的图像
 static uint8_t last_image[OPENMV_IMAGE_SIZE] = {0};
 static uint8_t has_image = 0;
@@ -22,6 +25,9 @@ uint16_t g_debug_rx_bytes_max = 0;  // 最大接收字节数
 static uint8_t s_display_gesture_id = 0;
 static float s_display_gesture_confidence = 0.0f;
 static uint8_t s_display_gesture_valid = 0;  // 标记是否有有效的识别结果
+
+uint8_t adc_dma_flag;
+
 
 void oled_disp(void)
 {
@@ -71,9 +77,9 @@ void oled_disp(void)
             }
             else if(s_display_gesture_id < 5)  // 5个手势
             {
-                // 手势名称映射 - 5个手势（移除 gun 和 call_me）
+                // 手势名称映射 - 5个手势（fist/palm/v_sign/ok/nothing）
                 const char* gesture_names[5] = {
-                    "Fist", "Palm", "ThUp", "OK", "None"
+                    "Fist", "Palm", "V", "OK", "None"
                 };
 
                 const char* gesture_name = gesture_names[s_display_gesture_id];
@@ -173,13 +179,50 @@ void oled_disp(void)
             OLED_Printf(0,line7,6,"ErrRate:N/A  ");
         }
     }
+    else if(view == VIEW_SENSORS)  // 传感器数据视图
+    {
+        /* 显示标题 */
+        OLED_Printf(0,line1,6,"=Sensors=");
+
+        /* 显示温湿度（DHT11） */
+        if (g_sensorData.dht11Valid) {
+            OLED_Printf(0,line2,6,"T:%dC H:%d%%  ", g_sensorData.temperature, g_sensorData.humidity);
+        } else {
+            OLED_Printf(0,line2,6,"T:--C H:--%% ");
+        }
+
+        /* 显示光照强度 */
+        OLED_Printf(0,line3,6,"L:%3dLux", (uint16_t)g_sensorData.lightLux);
+
+        /* 显示距离 */
+        if (g_sensorData.distance < 500) {
+            OLED_Printf(0,line4,6,"D:%3dcm", g_sensorData.distance);
+        } else {
+            OLED_Printf(0,line4,6,"D:---cm");
+        }
+
+        /* 显示MQ2数据 */
+        OLED_Printf(0,line5,6,"MQ2:%3.1f", g_sensorData.mq2PPM);
+
+        /* 显示心率和血氧 */
+        if (g_sensorData.heartRateValid) {
+            OLED_Printf(0,line6,6,"HR:%d   ", g_sensorData.heartRate);
+        } else {
+            OLED_Printf(0,line6,6,"HR:--   ");
+        }
+		if (g_sensorData.spo2Valid) {
+            OLED_Printf(7*6,line6,6,"SpO2:%d%%  ", g_sensorData.spo2);
+        } else {
+            OLED_Printf(7*6,line6,6,"SpO2:--    ");
+        }
+    }
 
     OLED_Update();
 }
 
 /**
   * 函    数：更新手势识别结果
-  * 参    数：GestureID 手势ID，范围：0~6 (7个手势精简版)
+  * 参    数：GestureID 手势ID，范围：0~4 (5个手势: fist/palm/v_sign/ok/nothing)
   * 参    数：Confidence 置信度，范围：0.0~1.0
   * 返 回 值：无
   * 说    明：此函数仅更新全局变量，实际显示由oled_disp()统一处理
