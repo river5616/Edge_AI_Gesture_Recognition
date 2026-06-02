@@ -1,0 +1,128 @@
+(stm32_ai) PS D:\Project\embedded_designed_3\Python> python eval_onnx_dataset.py --model gesture_v2_5_augment_new.onnx --dataset dataset_hard_test
+Model: gesture_v2_5_augment_new.onnx
+Dataset: dataset_hard_test
+Samples: 500
+Input: input, layout=NCHW
+Output: output
+
+Accuracy: 91.60% (458/500)
+
+Classification report:
+              precision    recall  f1-score   support
+
+        fist     0.8151    0.9700    0.8858       100
+        palm     0.9074    0.9800    0.9423       100
+   thumbs_up     0.9419    0.8100    0.8710       100
+          ok     0.9583    0.9200    0.9388       100
+     nothing     0.9890    0.9000    0.9424       100
+
+    accuracy                         0.9160       500
+   macro avg     0.9223    0.9160    0.9161       500
+weighted avg     0.9223    0.9160    0.9161       500
+
+Confusion matrix rows=true cols=pred:
+             fist    palm thumbs_      ok nothing
+     fist      97       0       3       0       0
+     palm       1      98       0       0       1
+thumbs_up      16       0      81       3       0
+       ok       0       8       0      92       0
+  nothing       5       2       2       1      90
+
+Wrong samples: 42
+     fist -> thumbs_up conf=0.674 margin=0.349 dataset_hard_test\0_fist\fist_0029.png
+     fist -> thumbs_up conf=0.834 margin=0.669 dataset_hard_test\0_fist\fist_0030.png
+     fist -> thumbs_up conf=0.909 margin=0.863 dataset_hard_test\0_fist\fist_0031.png
+     palm -> nothing   conf=0.908 margin=0.849 dataset_hard_test\1_palm\palm_0020.png
+     palm -> fist      conf=0.697 margin=0.422 dataset_hard_test\1_palm\palm_0086.png
+thumbs_up -> fist      conf=0.737 margin=0.476 dataset_hard_test\2_thumbs_up\thumbs_up_0052.png
+thumbs_up -> fist      conf=0.776 margin=0.555 dataset_hard_test\2_thumbs_up\thumbs_up_0053.png
+thumbs_up -> fist      conf=0.884 margin=0.768 dataset_hard_test\2_thumbs_up\thumbs_up_0054.png
+thumbs_up -> fist      conf=0.946 margin=0.893 dataset_hard_test\2_thumbs_up\thumbs_up_0055.png
+thumbs_up -> ok        conf=0.443 margin=0.061 dataset_hard_test\2_thumbs_up\thumbs_up_0056.png
+thumbs_up -> fist      conf=0.551 margin=0.104 dataset_hard_test\2_thumbs_up\thumbs_up_0057.png
+thumbs_up -> fist      conf=0.634 margin=0.272 dataset_hard_test\2_thumbs_up\thumbs_up_0063.png
+thumbs_up -> fist      conf=0.827 margin=0.738 dataset_hard_test\2_thumbs_up\thumbs_up_0064.png
+thumbs_up -> ok        conf=0.536 margin=0.271 dataset_hard_test\2_thumbs_up\thumbs_up_0065.png
+thumbs_up -> fist      conf=0.416 margin=0.014 dataset_hard_test\2_thumbs_up\thumbs_up_0066.png
+thumbs_up -> fist      conf=0.940 margin=0.892 dataset_hard_test\2_thumbs_up\thumbs_up_0072.png
+thumbs_up -> fist      conf=0.614 margin=0.232 dataset_hard_test\2_thumbs_up\thumbs_up_0076.png
+thumbs_up -> fist      conf=0.476 margin=0.035 dataset_hard_test\2_thumbs_up\thumbs_up_0078.png
+thumbs_up -> fist      conf=0.550 margin=0.105 dataset_hard_test\2_thumbs_up\thumbs_up_0079.png
+thumbs_up -> fist      conf=0.592 margin=0.222 dataset_hard_test\2_thumbs_up\thumbs_up_0080.png
+thumbs_up -> ok        conf=0.594 margin=0.363 dataset_hard_test\2_thumbs_up\thumbs_up_0081.png
+thumbs_up -> fist      conf=0.701 margin=0.527 dataset_hard_test\2_thumbs_up\thumbs_up_0082.png
+thumbs_up -> fist      conf=0.458 margin=0.017 dataset_hard_test\2_thumbs_up\thumbs_up_0083.png
+thumbs_up -> fist      conf=0.565 margin=0.141 dataset_hard_test\2_thumbs_up\thumbs_up_0099.png
+       ok -> palm      conf=0.533 margin=0.069 dataset_hard_test\3_ok\ok_0002.png
+       ok -> palm      conf=0.753 margin=0.506 dataset_hard_test\3_ok\ok_0005.png
+       ok -> palm      conf=0.730 margin=0.462 dataset_hard_test\3_ok\ok_0006.png
+       ok -> palm      conf=0.944 margin=0.888 dataset_hard_test\3_ok\ok_0007.png
+       ok -> palm      conf=0.920 margin=0.840 dataset_hard_test\3_ok\ok_0008.png
+       ok -> palm      conf=0.647 margin=0.308 dataset_hard_test\3_ok\ok_0012.png
+
+Saved confusion matrix: gesture_v2_5_augment_new_dataset_hard_test_confusion_matrix.csv
+Saved wrong samples: gesture_v2_5_augment_new_dataset_hard_test_wrong_samples.csv
+(stm32_ai) PS D:\Project\embedded_designed_3\Python> python eval_onnx_dataset.py --model gesture_v2_5_augment_new_int8.onnx --dataset dataset_hard_test
+Model: gesture_v2_5_augment_new_int8.onnx
+Dataset: dataset_hard_test
+Samples: 500
+Input: input, layout=NCHW
+Output: output
+
+Accuracy: 90.20% (451/500)
+
+Classification report:
+              precision    recall  f1-score   support
+
+        fist     0.8205    0.9600    0.8848       100
+        palm     0.9100    0.9100    0.9100       100
+   thumbs_up     0.9213    0.8200    0.8677       100
+          ok     0.9286    0.9100    0.9192       100
+     nothing     0.9479    0.9100    0.9286       100
+
+    accuracy                         0.9020       500
+   macro avg     0.9057    0.9020    0.9021       500
+weighted avg     0.9057    0.9020    0.9021       500
+
+Confusion matrix rows=true cols=pred:
+             fist    palm thumbs_      ok nothing
+     fist      96       0       4       0       0
+     palm       1      91       0       3       5
+thumbs_up      15       0      82       3       0
+       ok       0       9       0      91       0
+  nothing       5       0       3       1      91
+
+Wrong samples: 49
+     fist -> thumbs_up conf=0.652 margin=0.305 dataset_hard_test\0_fist\fist_0029.png
+     fist -> thumbs_up conf=0.799 margin=0.599 dataset_hard_test\0_fist\fist_0030.png
+     fist -> thumbs_up conf=0.933 margin=0.888 dataset_hard_test\0_fist\fist_0031.png
+     fist -> thumbs_up conf=0.531 margin=0.063 dataset_hard_test\0_fist\fist_0043.png
+     palm -> nothing   conf=0.487 margin=0.153 dataset_hard_test\1_palm\palm_0017.png
+     palm -> nothing   conf=0.616 margin=0.244 dataset_hard_test\1_palm\palm_0019.png
+     palm -> nothing   conf=0.942 margin=0.914 dataset_hard_test\1_palm\palm_0020.png
+     palm -> nothing   conf=0.639 margin=0.339 dataset_hard_test\1_palm\palm_0021.png
+     palm -> nothing   conf=0.520 margin=0.243 dataset_hard_test\1_palm\palm_0023.png
+     palm -> ok        conf=0.652 margin=0.305 dataset_hard_test\1_palm\palm_0040.png
+     palm -> ok        conf=0.543 margin=0.121 dataset_hard_test\1_palm\palm_0078.png
+     palm -> fist      conf=0.700 margin=0.445 dataset_hard_test\1_palm\palm_0086.png
+     palm -> ok        conf=0.864 margin=0.763 dataset_hard_test\1_palm\palm_0096.png
+thumbs_up -> fist      conf=0.500 margin=0.000 dataset_hard_test\2_thumbs_up\thumbs_up_0003.png
+thumbs_up -> fist      conf=0.706 margin=0.414 dataset_hard_test\2_thumbs_up\thumbs_up_0052.png
+thumbs_up -> fist      conf=0.756 margin=0.513 dataset_hard_test\2_thumbs_up\thumbs_up_0053.png
+thumbs_up -> fist      conf=0.895 margin=0.790 dataset_hard_test\2_thumbs_up\thumbs_up_0054.png
+thumbs_up -> fist      conf=0.925 margin=0.850 dataset_hard_test\2_thumbs_up\thumbs_up_0055.png
+thumbs_up -> fist      conf=0.550 margin=0.257 dataset_hard_test\2_thumbs_up\thumbs_up_0056.png
+thumbs_up -> fist      conf=0.622 margin=0.246 dataset_hard_test\2_thumbs_up\thumbs_up_0057.png
+thumbs_up -> fist      conf=0.621 margin=0.246 dataset_hard_test\2_thumbs_up\thumbs_up_0063.png
+thumbs_up -> fist      conf=0.864 margin=0.762 dataset_hard_test\2_thumbs_up\thumbs_up_0064.png
+thumbs_up -> ok        conf=0.415 margin=0.092 dataset_hard_test\2_thumbs_up\thumbs_up_0065.png
+thumbs_up -> fist      conf=0.940 margin=0.888 dataset_hard_test\2_thumbs_up\thumbs_up_0072.png
+thumbs_up -> fist      conf=0.677 margin=0.359 dataset_hard_test\2_thumbs_up\thumbs_up_0076.png
+thumbs_up -> fist      conf=0.590 margin=0.186 dataset_hard_test\2_thumbs_up\thumbs_up_0079.png
+thumbs_up -> fist      conf=0.640 margin=0.299 dataset_hard_test\2_thumbs_up\thumbs_up_0080.png
+thumbs_up -> ok        conf=0.548 margin=0.217 dataset_hard_test\2_thumbs_up\thumbs_up_0081.png
+thumbs_up -> fist      conf=0.720 margin=0.516 dataset_hard_test\2_thumbs_up\thumbs_up_0082.png
+thumbs_up -> ok        conf=0.468 margin=0.055 dataset_hard_test\2_thumbs_up\thumbs_up_0083.png
+
+Saved confusion matrix: gesture_v2_5_augment_new_int8_dataset_hard_test_confusion_matrix.csv
+Saved wrong samples: gesture_v2_5_augment_new_int8_dataset_hard_test_wrong_samples.csv

@@ -19,10 +19,12 @@ from sklearn.metrics import confusion_matrix, classification_report
 import seaborn as sns
 import argparse
 from tqdm import tqdm
+import re
+from collections import defaultdict
 
-# 手势类别 - 5个手势（移除 gun 和 call_me，它们容易与 point 混淆）
+# 手势类别 - 5个手势（移除 gun 和 call_me，它们容易与 thumbs_up 混淆）
 GESTURE_NAMES = {
-    0: "fist", 1: "palm", 2: "v_sign", 3: "ok", 4: "nothing"
+    0: "fist", 1: "palm", 2: "thumbs_up", 3: "ok", 4: "nothing"
 }
 
 
@@ -247,6 +249,62 @@ class GestureNetV2(nn.Module):
         return x
 
 
+class GestureNetV2Spatial(nn.Module):
+    """GestureNetV2 with 2x2 spatial pooling head.
+
+    Keeps coarse spatial layout before the classifier, useful for distinguishing
+    gestures whose key feature is position-sensitive, such as thumb protrusion
+    and OK-circle location.
+    """
+
+    def __init__(self, num_classes=5):
+        super(GestureNetV2Spatial, self).__init__()
+
+        self.conv1 = nn.Sequential(
+            nn.Conv2d(1, 24, kernel_size=3, stride=2, padding=1, bias=False),
+            nn.BatchNorm2d(24),
+            nn.ReLU6(inplace=True)
+        )
+
+        self.block1 = nn.Sequential(
+            DepthwiseSeparableConv(24, 48, use_se=True),
+            ResidualBlock(48),
+            nn.MaxPool2d(2, 2)
+        )
+
+        self.block2 = nn.Sequential(
+            DepthwiseSeparableConv(48, 96, use_se=True),
+            ResidualBlock(96),
+            nn.MaxPool2d(2, 2)
+        )
+
+        self.block3 = nn.Sequential(
+            DepthwiseSeparableConv(96, 128, use_se=True),
+            ResidualBlock(128)
+        )
+
+        # block3 output is fixed 8x8 for 64x64 input; AvgPool2d(4) exports to ONNX reliably.
+        self.spatial_pool = nn.AvgPool2d(kernel_size=4, stride=4)
+
+        self.fc = nn.Sequential(
+            nn.Dropout(0.5),
+            nn.Linear(128 * 2 * 2, 64),
+            nn.ReLU(inplace=True),
+            nn.Dropout(0.3),
+            nn.Linear(64, num_classes)
+        )
+
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.block1(x)
+        x = self.block2(x)
+        x = self.block3(x)
+        x = self.spatial_pool(x)
+        x = x.view(x.size(0), -1)
+        x = self.fc(x)
+        return x
+
+
 class FocalLoss(nn.Module):
     """Focal Loss - 处理难分类样本"""
 
@@ -325,17 +383,183 @@ def load_dataset(dataset_dir):
     return image_paths, labels
 
 
-def get_data_transforms(augment=True):
+def extract_session_id(image_path, session_size):
+    """Approximate capture sessions from sequential filenames.
+
+    Example: fist_0001.png..fist_0100.png are session 0 if session_size=100.
+    This prevents near-duplicate consecutive frames from leaking across splits.
+    """
+    stem = os.path.splitext(os.path.basename(image_path))[0]
+    match = re.search(r'_(\d+)$', stem)
+    if not match:
+        return stem
+
+    index = int(match.group(1))
+    return (index - 1) // session_size
+
+
+def split_dataset_random(image_paths, labels):
+    train_paths, temp_paths, train_labels, temp_labels = train_test_split(
+        image_paths, labels, test_size=0.3, random_state=42, stratify=labels
+    )
+
+    val_paths, test_paths, val_labels, test_labels = train_test_split(
+        temp_paths, temp_labels, test_size=0.5, random_state=42, stratify=temp_labels
+    )
+
+    return train_paths, val_paths, test_paths, train_labels, val_labels, test_labels
+
+
+def split_dataset_by_session(image_paths, labels, session_size=100, shuffle_sessions=True):
+    grouped = defaultdict(list)
+    for path, label in zip(image_paths, labels):
+        session_id = extract_session_id(path, session_size)
+        grouped[(label, session_id)].append((path, label))
+
+    train_paths, val_paths, test_paths = [], [], []
+    train_labels, val_labels, test_labels = [], [], []
+
+    for gesture_id in range(5):
+        groups = [
+            samples for (label, _session_id), samples in grouped.items()
+            if label == gesture_id
+        ]
+        groups.sort(key=lambda samples: samples[0][0])
+        if shuffle_sessions:
+            rng = np.random.default_rng(42 + gesture_id)
+            order = rng.permutation(len(groups))
+            groups = [groups[i] for i in order]
+
+        if len(groups) < 3:
+            print(f"警告: 类别 {gesture_id} session 数量不足，回退到随机划分")
+            class_paths = [p for p, y in zip(image_paths, labels) if y == gesture_id]
+            class_labels = [gesture_id] * len(class_paths)
+            c_train, c_temp, y_train, y_temp = train_test_split(
+                class_paths, class_labels, test_size=0.3, random_state=42
+            )
+            c_val, c_test, y_val, y_test = train_test_split(
+                c_temp, y_temp, test_size=0.5, random_state=42
+            )
+        else:
+            n = len(groups)
+            n_train = max(1, int(round(n * 0.7)))
+            n_val = max(1, int(round(n * 0.15)))
+            if n_train + n_val >= n:
+                n_train = max(1, n - 2)
+                n_val = 1
+
+            train_groups = groups[:n_train]
+            val_groups = groups[n_train:n_train + n_val]
+            test_groups = groups[n_train + n_val:]
+
+            def flatten(split_groups):
+                items = [item for group in split_groups for item in group]
+                return [p for p, _label in items], [label for _p, label in items]
+
+            c_train, y_train = flatten(train_groups)
+            c_val, y_val = flatten(val_groups)
+            c_test, y_test = flatten(test_groups)
+
+        train_paths.extend(c_train)
+        train_labels.extend(y_train)
+        val_paths.extend(c_val)
+        val_labels.extend(y_val)
+        test_paths.extend(c_test)
+        test_labels.extend(y_test)
+
+        print(f"  类别 {gesture_id}: train={len(c_train)}, val={len(c_val)}, test={len(c_test)}")
+
+    return train_paths, val_paths, test_paths, train_labels, val_labels, test_labels
+
+
+def save_split_manifest(output_path, paths, labels, session_size):
+    with open(output_path, 'w', encoding='utf-8') as f:
+        f.write("label,gesture,session_id,path\n")
+        for path, label in zip(paths, labels):
+            session_id = extract_session_id(path, session_size)
+            f.write(f"{label},{GESTURE_NAMES[label]},{session_id},{path}\n")
+
+
+class RandomGamma:
+    """Random gamma correction on tensor in [0,1]. PIL-friendly via PIL.Image input."""
+
+    def __init__(self, gamma_range=(0.6, 1.6), p=0.7):
+        self.lo, self.hi = gamma_range
+        self.p = p
+
+    def __call__(self, pil_img):
+        import random
+        if random.random() > self.p:
+            return pil_img
+        gamma = random.uniform(self.lo, self.hi)
+        arr = np.asarray(pil_img, dtype=np.float32) / 255.0
+        arr = np.clip(arr, 0.0, 1.0) ** gamma
+        arr = (arr * 255.0).clip(0, 255).astype(np.uint8)
+        return transforms.ToPILImage()(arr)
+
+
+class RandomLowContrast:
+    """Aggressively crush contrast around image mean to simulate low-light loss of detail."""
+
+    def __init__(self, factor_range=(0.3, 0.7), p=0.5):
+        self.lo, self.hi = factor_range
+        self.p = p
+
+    def __call__(self, pil_img):
+        import random
+        if random.random() > self.p:
+            return pil_img
+        factor = random.uniform(self.lo, self.hi)
+        arr = np.asarray(pil_img, dtype=np.float32)
+        mean = arr.mean()
+        arr = (arr - mean) * factor + mean
+        arr = arr.clip(0, 255).astype(np.uint8)
+        return transforms.ToPILImage()(arr)
+
+
+class RandomGaussianNoise:
+    """Add gaussian noise to simulate low-light sensor noise."""
+
+    def __init__(self, sigma_range=(3.0, 15.0), p=0.5):
+        self.lo, self.hi = sigma_range
+        self.p = p
+
+    def __call__(self, pil_img):
+        import random
+        if random.random() > self.p:
+            return pil_img
+        sigma = random.uniform(self.lo, self.hi)
+        arr = np.asarray(pil_img, dtype=np.float32)
+        noise = np.random.normal(0, sigma, arr.shape)
+        arr = (arr + noise).clip(0, 255).astype(np.uint8)
+        return transforms.ToPILImage()(arr)
+
+
+def get_data_transforms(augment=True, strong_aug=False):
     """
     获取数据变换（改进版 - 更强的增强）
 
     Args:
         augment: 是否进行数据增强
+        strong_aug: 是否使用强光照增强（针对偏亮+低对比度+暗光噪声错样本）
 
     Returns:
         train_transform, val_transform
     """
     if augment:
+        if strong_aug:
+            color_jitter = transforms.ColorJitter(brightness=0.5, contrast=0.5)
+            extra_aug = [
+                RandomGamma(gamma_range=(0.6, 1.6), p=0.7),
+                RandomLowContrast(factor_range=(0.3, 0.7), p=0.5),
+                RandomGaussianNoise(sigma_range=(3.0, 15.0), p=0.5),
+            ]
+            erase_p = 0.4
+        else:
+            color_jitter = transforms.ColorJitter(brightness=0.3, contrast=0.3)
+            extra_aug = []
+            erase_p = 0.3
+
         train_transform = transforms.Compose([
             transforms.Resize((64, 64)),
             # 更强的旋转
@@ -347,16 +571,15 @@ def get_data_transforms(augment=True):
                 scale=(0.85, 1.15),
                 shear=10
             ),
+            *extra_aug,
             # 亮度、对比度增强
-            transforms.ColorJitter(brightness=0.3, contrast=0.3),
-            # 随机水平翻转（仅对对称手势有效）
-            # transforms.RandomHorizontalFlip(p=0.5),  # 注释掉，因为手势有左右区别
+            color_jitter,
             # 转换为Tensor
             transforms.ToTensor(),
             # 标准化
             transforms.Normalize(mean=[0.5], std=[0.5]),
             # 随机擦除（模拟遮挡）
-            transforms.RandomErasing(p=0.3, scale=(0.02, 0.15), ratio=(0.3, 3.3))
+            transforms.RandomErasing(p=erase_p, scale=(0.02, 0.15), ratio=(0.3, 3.3))
         ])
     else:
         train_transform = transforms.Compose([
@@ -500,6 +723,18 @@ def main():
                         help='使用数据集的子集比例（0.1-1.0），用于快速测试')
     parser.add_argument('--lite', action='store_true',
                         help='使用轻量版V2模型（减少40%% RAM，准确率略降1-2%%）')
+    parser.add_argument('--spatial-head', action='store_true',
+                        help='使用2x2空间池化分类头，保留粗空间位置信息')
+    parser.add_argument('--split-mode', type=str, default='random', choices=['random', 'session'],
+                        help='数据划分方式: random=逐图随机, session=按连续编号区间划分')
+    parser.add_argument('--session-size', type=int, default=100,
+                        help='session划分时每个连续编号区间的图片数')
+    parser.add_argument('--no-session-shuffle', action='store_true',
+                        help='session划分时不随机打乱session，按编号前后顺序切分')
+    parser.add_argument('--split-manifest-prefix', type=str, default=None,
+                        help='保存train/val/test划分清单的前缀')
+    parser.add_argument('--strong-aug', action='store_true',
+                        help='启用强光照增强（brightness/contrast 0.3→0.5, 加 RandomGamma 0.6-1.6）')
     args = parser.parse_args()
 
     # 超参数
@@ -530,17 +765,29 @@ def main():
         print(f"\n⚡ 使用 {args.subset*100:.0f}% 数据子集: {len(image_paths)} 张图像")
 
     # 划分数据集
-    train_paths, temp_paths, train_labels, temp_labels = train_test_split(
-        image_paths, labels, test_size=0.3, random_state=42, stratify=labels
-    )
-
-    val_paths, test_paths, val_labels, test_labels = train_test_split(
-        temp_paths, temp_labels, test_size=0.5, random_state=42, stratify=temp_labels
-    )
+    if args.split_mode == 'session':
+        print(f"\n使用 session-based 划分 (session_size={args.session_size})")
+        train_paths, val_paths, test_paths, train_labels, val_labels, test_labels = split_dataset_by_session(
+            image_paths,
+            labels,
+            session_size=args.session_size,
+            shuffle_sessions=not args.no_session_shuffle
+        )
+    else:
+        print("\n使用随机分层划分")
+        train_paths, val_paths, test_paths, train_labels, val_labels, test_labels = split_dataset_random(
+            image_paths, labels
+        )
 
     print(f"训练集: {len(train_paths)} 张")
     print(f"验证集: {len(val_paths)} 张")
     print(f"测试集: {len(test_paths)} 张")
+
+    if args.split_manifest_prefix:
+        save_split_manifest(f"{args.split_manifest_prefix}_train.csv", train_paths, train_labels, args.session_size)
+        save_split_manifest(f"{args.split_manifest_prefix}_val.csv", val_paths, val_labels, args.session_size)
+        save_split_manifest(f"{args.split_manifest_prefix}_test.csv", test_paths, test_labels, args.session_size)
+        print(f"划分清单已保存: {args.split_manifest_prefix}_train/val/test.csv")
 
     # 数据变换
     use_augment = not args.no_augment
@@ -549,7 +796,7 @@ def main():
     else:
         print("\n🔄 使用训练时数据增强")
 
-    train_transform, val_transform = get_data_transforms(augment=use_augment)
+    train_transform, val_transform = get_data_transforms(augment=use_augment, strong_aug=getattr(args, 'strong_aug', False))
 
     # 创建数据集
     train_dataset = GestureDataset(train_paths, train_labels, train_transform)
@@ -563,12 +810,19 @@ def main():
 
     # 创建模型
     print("\n创建模型...")
+    if args.lite and args.spatial_head:
+        print("错误: --lite 和 --spatial-head 暂不同时支持")
+        return
+
     if args.lite:
         model = GestureNetV2Lite(num_classes=5).to(device)  # 5个手势
         print("✓ 使用轻量版模型 (GestureNetV2Lite)")
         print("  - 通道数: 16→32→64→96 (相比标准版的 24→48→96→128)")
         print("  - 预期RAM: ~350KB (相比标准版的 ~600KB)")
         print("  - 预期准确率: 93-94% (相比标准版的 94-95%)")
+    elif args.spatial_head:
+        model = GestureNetV2Spatial(num_classes=5).to(device)
+        print("✓ 使用空间池化版模型 (GestureNetV2Spatial, 2x2 head)")
     else:
         model = GestureNetV2(num_classes=5).to(device)  # 5个手势
         print("✓ 使用标准版模型 (GestureNetV2)")

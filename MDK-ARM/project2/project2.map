@@ -12059,65 +12059,65 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   Object Name
 
-       300          0          0          0        100       8605   adc.o
+       300          0          0          0        100       8666   adc.o
       1980        124        808          0      16640      10285   algorithm.o
-       688         84          0          4      75896       8733   app_x-cube-ai.o
-      1556          0          0          0          0       8348   bh1750.o
-       604         48          3          0         71       5662   bluetooth.o
-      1864          0          0          0       1756      44486   cmsis_os2.o
-       868          0          0          0          0       6734   dht11.o
-      1420        196        450          0         55       5113   disp.o
-        84          0          0          0          0       5480   dma.o
-       700          0       1187          0          0       1859   esp8266.o
-       676          0        663          0         92       6948   freertos.o
-      1890        184        135          6         11       8753   gesture_control.o
-       672          0          0          0          0       3406   gpio.o
-       338          0          0          0          0       4499   hcsr04.o
-       640          0          0          0     120029       5239   heap_4.o
-       364          4          0          0         33       3504   inference_task.o
-       398          0          0          0         40       2592   key.o
-       156          0          0          0          0       2213   list.o
-       410          0          0          0          0       9217   main.o
-      1974          0          0          0          0       9959   max30102.o
-       466         24          0          0          0       4943   mq2.o
-      1096          0        200       4772        260      19992   network.o
-        54          0         16         88          0       3233   network_data.o
-         0          0      83352          0          0        764   network_data_params.o
-      1144          0          0          0       1024      35707   oled.o
+       688         84          0          4      75896       8794   app_x-cube-ai.o
+      1556          0          0          0          0       8409   bh1750.o
+       604         48          3          0         71       5723   bluetooth.o
+      1864          0          0          0       1756      44547   cmsis_os2.o
+       868          0          0          0          0       6795   dht11.o
+      1420        196        450          0         55       5174   disp.o
+        84          0          0          0          0       5541   dma.o
+       700          0       1187          0          0       1920   esp8266.o
+       676          0        663          0         92       7009   freertos.o
+      1890        184        135          6         11       8814   gesture_control.o
+       672          0          0          0          0       3467   gpio.o
+       338          0          0          0          0       4560   hcsr04.o
+       640          0          0          0     120029       5300   heap_4.o
+       364          4          0          0         33       3565   inference_task.o
+       398          0          0          0         40       2653   key.o
+       156          0          0          0          0       2274   list.o
+       410          0          0          0          0       9278   main.o
+      1974          0          0          0          0      10020   max30102.o
+       466         24          0          0          0       5004   mq2.o
+      1096          0        200       4772        260      20053   network.o
+        54          0         16         88          0       3294   network_data.o
+         0          0      83352          0          0        825   network_data_params.o
+      1144          0          0          0       1024      35768   oled.o
          0          0       2090          0          0        776   oled_data.o
-       950          4          0      16398         33       6455   openmv_rx_task.o
-       908         16          0          4          5       4111   port.o
-      3376          0          0          0         64      25697   queue.o
-       632          8          0          0       8220       2788   sensor_task.o
-        26          0          0          0          0        442   sensors.o
+       950          4          0      16398         33       6516   openmv_rx_task.o
+       908         16          0          4          5       4172   port.o
+      3376          0          0          0         64      25758   queue.o
+       632          8          0          0       8220       2849   sensor_task.o
+        26          0          0          0          0        503   sensors.o
         64         26        664          0      32768        856   startup_stm32h753xx.o
-       192          0          0          5          4      14996   stm32h7xx_hal.o
-      2448         12          0          0          0      25274   stm32h7xx_hal_adc.o
-       308          0          0          0          0      12502   stm32h7xx_hal_cortex.o
-      8104         12          0          0          0      18199   stm32h7xx_hal_dma.o
-       454          0          0          0          0       6944   stm32h7xx_hal_gpio.o
-        42          0          0          0          0       5517   stm32h7xx_hal_msp.o
-        72          0          0          0          0      10652   stm32h7xx_hal_pwr_ex.o
-      2800         24          0          0          0      11819   stm32h7xx_hal_rcc.o
-      4976        238          0          0          0      18133   stm32h7xx_hal_rcc_ex.o
-      1472          0          0          0          0      67096   stm32h7xx_hal_tim.o
-       214          0          0          0          0      25873   stm32h7xx_hal_tim_ex.o
-       168          0          0          0         76       9786   stm32h7xx_hal_timebase_tim.o
-      5728        300         36          0          0      37793   stm32h7xx_hal_uart.o
-       352          0         16          0          0      11117   stm32h7xx_hal_uart_ex.o
-       158          0          0          0          0       7198   stm32h7xx_it.o
-       204          0         16          8          0       5841   system_stm32h7xx.o
-        38          0          0          0         10       1174   task_common.o
-      4330         20          0          0       1280      39927   tasks.o
-       176          0          0          0         76       9782   tim.o
-      1168         26          0          0        300      17379   timers.o
-       530          0          0          0          0       6713   uart_callbacks.o
-       626        172         61          0        259       5930   uart_rx_task.o
-       680         60         30          0          1       4957   uart_tx_task.o
-      1558          0          0          0       1100      13561   usart.o
+       192          0          0          5          4      15057   stm32h7xx_hal.o
+      2448         12          0          0          0      25335   stm32h7xx_hal_adc.o
+       308          0          0          0          0      12563   stm32h7xx_hal_cortex.o
+      8104         12          0          0          0      18260   stm32h7xx_hal_dma.o
+       454          0          0          0          0       7005   stm32h7xx_hal_gpio.o
+        42          0          0          0          0       5578   stm32h7xx_hal_msp.o
+        72          0          0          0          0      10713   stm32h7xx_hal_pwr_ex.o
+      2800         24          0          0          0      11880   stm32h7xx_hal_rcc.o
+      4976        238          0          0          0      18194   stm32h7xx_hal_rcc_ex.o
+      1472          0          0          0          0      67157   stm32h7xx_hal_tim.o
+       214          0          0          0          0      25934   stm32h7xx_hal_tim_ex.o
+       168          0          0          0         76       9847   stm32h7xx_hal_timebase_tim.o
+      5728        300         36          0          0      37854   stm32h7xx_hal_uart.o
+       352          0         16          0          0      11178   stm32h7xx_hal_uart_ex.o
+       158          0          0          0          0       7259   stm32h7xx_it.o
+       204          0         16          8          0       5902   system_stm32h7xx.o
+        38          0          0          0         10       1235   task_common.o
+      4330         20          0          0       1280      39988   tasks.o
+       176          0          0          0         76       9843   tim.o
+      1168         26          0          0        300      17440   timers.o
+       530          0          0          0          0       6774   uart_callbacks.o
+       626        172         61          0        259       5991   uart_rx_task.o
+       680         60         30          0          1       5018   uart_tx_task.o
+      1558          0          0          0       1100      13622   usart.o
 
     ----------------------------------------------------------------------
-     64060       1634      89792      21296     260280     655562   Object Totals
+     64060       1634      89792      21296     260280     658795   Object Totals
          0          0         32          0          0          0   (incl. Generated)
        964         52         33         11         77          0   (incl. Padding)
 
@@ -12265,8 +12265,8 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   
 
-     86008       2340      90820      21296     260376     660550   Grand Totals
-     86008       2340      90820       1888     260376     660550   ELF Image Totals (compressed)
+     86008       2340      90820      21296     260376     663783   Grand Totals
+     86008       2340      90820       1888     260376     663783   ELF Image Totals (compressed)
      86008       2340      90820       1888          0          0   ROM Totals
 
 ==============================================================================

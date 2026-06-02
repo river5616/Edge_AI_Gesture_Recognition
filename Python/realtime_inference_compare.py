@@ -18,13 +18,13 @@ from collections import deque
 
 # 手势类别 - 7个手势
 GESTURE_NAMES = {
-    0: "fist", 1: "palm", 2: "v_sign", 3: "ok", 4: "nothing"
+    0: "fist", 1: "palm", 2: "thumbs_up", 3: "ok", 4: "nothing"
 }
 
 GESTURE_COLORS = {
     0: (255, 0, 0),      # 蓝色 - fist
     1: (0, 255, 0),      # 绿色 - palm
-    2: (0, 0, 255),      # 红色 - point
+    2: (0, 0, 255),      # 红色 - thumbs_up
     3: (255, 255, 0),    # 青色 - ok
     4: (128, 128, 128)   # 灰色 - nothing
 }

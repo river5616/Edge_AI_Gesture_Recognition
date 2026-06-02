@@ -18,13 +18,13 @@ from collections import deque
 
 # 手势类别 - 7个手势
 GESTURE_NAMES = {
-    0: "fist", 1: "palm", 2: "v_sign", 3: "ok", 4: "nothing"
+    0: "fist", 1: "palm", 2: "thumbs_up", 3: "ok", 4: "nothing"
 }
 
 GESTURE_COLORS = {
     0: (255, 0, 0),      # 蓝色 - fist
     1: (0, 255, 0),      # 绿色 - palm
-    2: (0, 0, 255),      # 红色 - point
+    2: (0, 0, 255),      # 红色 - thumbs_up
     3: (255, 255, 0),    # 青色 - ok
     4: (128, 128, 128)   # 灰色 - nothing
 }
@@ -154,6 +154,21 @@ class GestureNetV2(nn.Module):
         x = x.view(x.size(0), -1)
         x = self.fc(x)
         return x
+
+
+class GestureNetV2Spatial(GestureNetV2):
+    """GestureNetV2 with 2x2 spatial pooling head."""
+
+    def __init__(self, num_classes=5):
+        super().__init__(num_classes=num_classes)
+        self.global_avg_pool = nn.AvgPool2d(kernel_size=4, stride=4)
+        self.fc = nn.Sequential(
+            nn.Dropout(0.5),
+            nn.Linear(128 * 2 * 2, 64),
+            nn.ReLU(inplace=True),
+            nn.Dropout(0.3),
+            nn.Linear(64, num_classes)
+        )
 
 
 class GestureNetV2Lite(nn.Module):
@@ -298,7 +313,7 @@ class RealtimeInference:
 
         # 尝试不同的模型架构
         errors = []
-        for model_class in [GestureNetV2, GestureNetV2Lite, GestureNet]:
+        for model_class in [GestureNetV2, GestureNetV2Spatial, GestureNetV2Lite, GestureNet]:
             try:
                 print(f"\n尝试加载为 {model_class.__name__}...")
                 model = model_class(num_classes=5)

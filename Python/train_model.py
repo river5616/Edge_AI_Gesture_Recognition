@@ -19,9 +19,9 @@ import seaborn as sns
 import argparse
 from tqdm import tqdm
 
-# 手势类别 - 5个手势（移除 gun 和 call_me，它们容易与 point 混淆）
+# 手势类别 - 5个手势（移除 gun 和 call_me，它们容易与 thumbs_up 混淆）
 GESTURE_NAMES = {
-    0: "fist", 1: "palm", 2: "v_sign", 3: "ok", 4: "nothing"
+    0: "fist", 1: "palm", 2: "thumbs_up", 3: "ok", 4: "nothing"
 }
 
 class GestureDataset(Dataset):

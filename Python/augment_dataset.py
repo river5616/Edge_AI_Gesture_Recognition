@@ -81,13 +81,13 @@ def augment_image(image):
         augmented.append((f'blur{ksize}', blurred))
 
     # 9. 水平翻转（小心使用，某些手势不对称）
-    # v_sign (2), ok (3) 不应翻转（不对称手势）
+    # thumbs_up (2), ok (3), point (5), three (6) 不应翻转
     flipped = cv2.flip(image, 1)
     augmented.append(('flip', flipped))
 
     return augmented
 
-def augment_dataset(input_dir, output_dir, augment_factor=10, exclude_flip_for=[2, 3]):
+def augment_dataset(input_dir, output_dir, augment_factor=10, exclude_flip_for=[2, 3, 5, 6]):
     """
     增强整个数据集
 
@@ -95,7 +95,7 @@ def augment_dataset(input_dir, output_dir, augment_factor=10, exclude_flip_for=[
         input_dir: 输入数据集目录
         output_dir: 输出增强后的数据集目录
         augment_factor: 每张图像生成多少个增强版本
-        exclude_flip_for: 不进行水平翻转的手势ID列表（v_sign和ok不对称）
+        exclude_flip_for: 不进行水平翻转的手势ID列表
     """
     input_path = Path(input_dir)
     output_path = Path(output_dir)
