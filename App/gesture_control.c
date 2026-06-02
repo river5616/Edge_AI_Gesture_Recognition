@@ -264,7 +264,7 @@ void GestureControl_HandleGesture(uint8_t gesture_id, float confidence)
             GestureControl_SetDuty(DUTY_0_PERCENT);
             break;
 
-        case GESTURE_V:     // V手势 -> 10%
+        case GESTURE_V:     // thumbs_up点赞手势 -> 10%
             GestureControl_SetDuty(DUTY_10_PERCENT);
             break;
 

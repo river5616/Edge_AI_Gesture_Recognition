@@ -17,6 +17,7 @@
 #define VIEW_IMAGE      1  // 图像显示视图
 #define VIEW_UART_STATS 2  // UART接收统计视图
 #define VIEW_SENSORS    3  // 传感器数据视图
+#define VIEW_ALL_CONF   4  // 所有手势置信度视图
 
 // 传感器数据结构（用于disp.c显示）
 typedef struct {

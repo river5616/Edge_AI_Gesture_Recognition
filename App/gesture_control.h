@@ -19,14 +19,14 @@ typedef enum {
 /* 占空比等级枚举 */
 typedef enum {
     DUTY_0_PERCENT = 0,    // 0% - fist手势
-    DUTY_10_PERCENT = 10,  // 10% - v手势
+    DUTY_10_PERCENT = 10,  // 10% - thumbs_up点赞手势
     DUTY_30_PERCENT = 30   // 30% - palm手势
 } DutyLevel_t;
 
 /* 手势ID定义（与推理输出一致） */
 #define GESTURE_FIST  0
 #define GESTURE_PALM  1
-#define GESTURE_V     2
+#define GESTURE_V     2   // thumbs_up点赞手势（沿用旧宏名 GESTURE_V）
 #define GESTURE_OK    3
 #define GESTURE_NONE  4
 

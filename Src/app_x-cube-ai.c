@@ -50,39 +50,45 @@
 #include <stdio.h>
 #include <inttypes.h>
 #include <string.h>
-#include <math.h>
 
 #include "app_x-cube-ai.h"
 #include "main.h"
 #include "ai_datatypes_defines.h"
-#include "network.h"
-#include "network_data.h"
+#include "network_1.h"
+#include "network_1_data.h"
 
 /* USER CODE BEGIN includes */
 
 #include "usart.h"
+#include <math.h>
+
+/* int8 量化参数（来自 network_1_generate_report.txt） */
+/* 输入:  QLinear(scale=0.007874016, zero_point=0, int8) */
+/* 输出:  QLinear(scale=0.147128820, zero_point=0, int8) */
+#define AI_INPUT_QUANT_SCALE   0.007874016f
+#define AI_OUTPUT_QUANT_SCALE  0.147128820f
 /* USER CODE END includes */
 
 /* IO buffers ----------------------------------------------------------------*/
 
-#if !defined(AI_NETWORK_INPUTS_IN_ACTIVATIONS)
-AI_ALIGNED(4) ai_i8 data_in_1[AI_NETWORK_IN_1_SIZE_BYTES];
-ai_i8* data_ins[AI_NETWORK_IN_NUM] = {
+#if !defined(AI_NETWORK_1_INPUTS_IN_ACTIVATIONS)
+AI_ALIGNED(4) ai_i8 data_in_1[AI_NETWORK_1_IN_1_SIZE_BYTES];
+ai_i8* data_ins[AI_NETWORK_1_IN_NUM] = {
 data_in_1
 };
 #else
-ai_i8* data_ins[AI_NETWORK_IN_NUM] = {
+ai_i8* data_ins[AI_NETWORK_1_IN_NUM] = {
 NULL
 };
 #endif
 
-#if !defined(AI_NETWORK_OUTPUTS_IN_ACTIVATIONS)
-AI_ALIGNED(4) ai_i8 data_out_1[AI_NETWORK_OUT_1_SIZE_BYTES];
-ai_i8* data_outs[AI_NETWORK_OUT_NUM] = {
+#if !defined(AI_NETWORK_1_OUTPUTS_IN_ACTIVATIONS)
+AI_ALIGNED(4) ai_i8 data_out_1[AI_NETWORK_1_OUT_1_SIZE_BYTES];
+ai_i8* data_outs[AI_NETWORK_1_OUT_NUM] = {
 data_out_1
 };
 #else
-ai_i8* data_outs[AI_NETWORK_OUT_NUM] = {
+ai_i8* data_outs[AI_NETWORK_1_OUT_NUM] = {
 NULL
 };
 #endif
@@ -90,13 +96,13 @@ NULL
 /* Activations buffers -------------------------------------------------------*/
 
 AI_ALIGNED(32)
-static uint8_t pool0[AI_NETWORK_DATA_ACTIVATION_1_SIZE];
+static uint8_t pool0[AI_NETWORK_1_DATA_ACTIVATION_1_SIZE];
 
 ai_handle data_activations0[] = {pool0};
 
 /* AI objects ----------------------------------------------------------------*/
 
-static ai_handle network = AI_HANDLE_NULL;
+static ai_handle network_1 = AI_HANDLE_NULL;
 
 static ai_buffer* ai_input;
 static ai_buffer* ai_output;
@@ -136,37 +142,37 @@ static int ai_boostrap(ai_handle *act_addr)
   ai_error err;
 
   /* Create and initialize an instance of the model */
-  err = ai_network_create_and_init(&network, act_addr, NULL);
+  err = ai_network_1_create_and_init(&network_1, act_addr, NULL);
   if (err.type != AI_ERROR_NONE) {
-    ai_log_err(err, "ai_network_create_and_init");
+    ai_log_err(err, "ai_network_1_create_and_init");
     return -1;
   }
 
-  ai_input = ai_network_inputs_get(network, NULL);
-  ai_output = ai_network_outputs_get(network, NULL);
+  ai_input = ai_network_1_inputs_get(network_1, NULL);
+  ai_output = ai_network_1_outputs_get(network_1, NULL);
 
-#if defined(AI_NETWORK_INPUTS_IN_ACTIVATIONS)
+#if defined(AI_NETWORK_1_INPUTS_IN_ACTIVATIONS)
   /*  In the case where "--allocate-inputs" option is used, memory buffer can be
    *  used from the activations buffer. This is not mandatory.
    */
-  for (int idx=0; idx < AI_NETWORK_IN_NUM; idx++) {
+  for (int idx=0; idx < AI_NETWORK_1_IN_NUM; idx++) {
 	data_ins[idx] = ai_input[idx].data;
   }
 #else
-  for (int idx=0; idx < AI_NETWORK_IN_NUM; idx++) {
+  for (int idx=0; idx < AI_NETWORK_1_IN_NUM; idx++) {
 	  ai_input[idx].data = data_ins[idx];
   }
 #endif
 
-#if defined(AI_NETWORK_OUTPUTS_IN_ACTIVATIONS)
+#if defined(AI_NETWORK_1_OUTPUTS_IN_ACTIVATIONS)
   /*  In the case where "--allocate-outputs" option is used, memory buffer can be
    *  used from the activations buffer. This is no mandatory.
    */
-  for (int idx=0; idx < AI_NETWORK_OUT_NUM; idx++) {
+  for (int idx=0; idx < AI_NETWORK_1_OUT_NUM; idx++) {
 	data_outs[idx] = ai_output[idx].data;
   }
 #else
-  for (int idx=0; idx < AI_NETWORK_OUT_NUM; idx++) {
+  for (int idx=0; idx < AI_NETWORK_1_OUT_NUM; idx++) {
 	ai_output[idx].data = data_outs[idx];
   }
 #endif
@@ -178,10 +184,10 @@ static int ai_run(void)
 {
   ai_i32 batch;
 
-  batch = ai_network_run(network, ai_input, ai_output);
+  batch = ai_network_1_run(network_1, ai_input, ai_output);
   if (batch != 1) {
-    ai_log_err(ai_network_get_error(network),
-        "ai_network_run");
+    ai_log_err(ai_network_1_get_error(network_1),
+        "ai_network_1_run");
     return -1;
   }
 
@@ -191,21 +197,30 @@ static int ai_run(void)
 /* USER CODE BEGIN 2 */
 
 /**
- * @brief Preprocess image data: convert uint8 to float and normalize
+ * @brief Preprocess image data: normalize to [-1,1] then quantize to int8
  * @param src: source image data (uint8_t, 64x64 pixels)
- * @param dst: destination float buffer (AI input buffer)
+ * @param dst: destination int8 buffer (AI input buffer)
  * @param size: number of pixels (should be 4096 for 64x64)
  *
- * @note Normalization formula: output = (input / 255.0 - 0.5) / 0.5
- *       This maps [0, 255] to [-1, 1], matching PyTorch training preprocessing
+ * @note 训练时 PyTorch 用 Normalize(mean=[0.5], std=[0.5]) 把像素映射到 [-1,1]。
+ *       int8 模型输入量化参数 QLinear(scale=0.007874016, zero_point=0)。
+ *       量化公式: q = round(x_float / scale) + zero_point，并饱和到 [-128,127]。
+ *       由于 scale≈1/127，[-1,1] 恰好映射到约 [-127,127]，与训练分布一致。
  */
-static void preprocess_image(const uint8_t* src, float* dst, uint32_t size)
+static void preprocess_image(const uint8_t* src, ai_i8* dst, uint32_t size)
 {
     for (uint32_t i = 0; i < size; i++) {
-        // 与PyTorch训练时的Normalize(mean=[0.5], std=[0.5])保持一致
-        // 先归一化到[0,1]，再应用 (x - 0.5) / 0.5 映射到[-1,1]
-        float normalized = (float)src[i] / 255.0f;  // [0, 255] -> [0, 1]
-        dst[i] = (normalized - 0.5f) / 0.5f;         // [0, 1] -> [-1, 1]
+        // 1) 归一化到 [-1,1]，与训练预处理保持一致
+        float normalized = (float)src[i] / 255.0f;   // [0,255] -> [0,1]
+        float x = (normalized - 0.5f) / 0.5f;          // [0,1]  -> [-1,1]
+
+        // 2) 量化到 int8（zero_point=0）
+        int32_t q = (int32_t)lrintf(x / AI_INPUT_QUANT_SCALE);
+
+        // 3) 饱和到 int8 范围
+        if (q > 127)  q = 127;
+        if (q < -128) q = -128;
+        dst[i] = (ai_i8)q;
     }
 }
 
@@ -233,7 +248,7 @@ static void postprocess_output(const float* output_data, uint8_t num_classes,
 /**
  * @brief Run gesture recognition inference
  * @param image_data: input image data (uint8_t, 64x64 grayscale)
- * @param gesture_id: output - recognized gesture ID (0-4: fist/palm/v_sign/ok/nothing)
+ * @param gesture_id: output - recognized gesture ID (0-4: fist/palm/thumbs_up/ok/nothing)
  * @param confidence: output - confidence level (0.0-1.0)
  * @return 0 on success, negative on error
  */
@@ -242,7 +257,7 @@ int MX_X_CUBE_AI_Inference(const uint8_t* image_data, uint8_t* gesture_id, float
     ai_i32 batch;
 
     // Check if network is initialized
-    if (!network) {
+    if (!network_1) {
         return -1;  // Network not initialized
     }
 
@@ -251,33 +266,38 @@ int MX_X_CUBE_AI_Inference(const uint8_t* image_data, uint8_t* gesture_id, float
         return -2;  // Invalid parameters
     }
 
-    // Step 1: Preprocess image data (uint8 -> float, normalize)
-    float* input_buffer = (float*)data_ins[0];
-    preprocess_image(image_data, input_buffer, AI_NETWORK_IN_1_SIZE);
+    // Step 1: Preprocess image data (uint8 -> int8, normalize + quantize)
+    ai_i8* input_buffer = (ai_i8*)data_ins[0];
+    preprocess_image(image_data, input_buffer, AI_NETWORK_1_IN_1_SIZE);
 
     // Step 2: Run inference
-    batch = ai_network_run(network, ai_input, ai_output);
+    batch = ai_network_1_run(network_1, ai_input, ai_output);
     if (batch != 1) {
         return -3;  // Inference failed
     }
 
-    // Step 3: Get output and apply softmax
-    float* output_buffer = (float*)data_outs[0];
+    // Step 3: 读取 int8 输出并反量化为浮点 logits
+    // 反量化公式: logit = (q - zero_point) * scale，本模型 zero_point=0
+    const ai_i8* output_buffer = (const ai_i8*)data_outs[0];
+    float logits[AI_NETWORK_1_OUT_1_SIZE];
+    for (uint8_t i = 0; i < AI_NETWORK_1_OUT_1_SIZE; i++) {
+        logits[i] = (float)output_buffer[i] * AI_OUTPUT_QUANT_SCALE;
+    }
 
     // 计算softmax（用于概率归一化）
     // 首先找到最大值（用于数值稳定性）
-    float max_val = output_buffer[0];
-    for (uint8_t i = 1; i < AI_NETWORK_OUT_1_SIZE; i++) {
-        if (output_buffer[i] > max_val) {
-            max_val = output_buffer[i];
+    float max_val = logits[0];
+    for (uint8_t i = 1; i < AI_NETWORK_1_OUT_1_SIZE; i++) {
+        if (logits[i] > max_val) {
+            max_val = logits[i];
         }
     }
 
     // 计算 exp(x - max) 并求和
     float exp_sum = 0.0f;
-    float normalized_output[AI_NETWORK_OUT_1_SIZE];
-    for (uint8_t i = 0; i < AI_NETWORK_OUT_1_SIZE; i++) {
-        normalized_output[i] = expf(output_buffer[i] - max_val);
+    float normalized_output[AI_NETWORK_1_OUT_1_SIZE];
+    for (uint8_t i = 0; i < AI_NETWORK_1_OUT_1_SIZE; i++) {
+        normalized_output[i] = expf(logits[i] - max_val);
         exp_sum += normalized_output[i];
     }
 
@@ -287,12 +307,12 @@ int MX_X_CUBE_AI_Inference(const uint8_t* image_data, uint8_t* gesture_id, float
     }
 
     // 归一化：softmax = exp(x - max) / sum(exp(x - max))
-    for (uint8_t i = 0; i < AI_NETWORK_OUT_1_SIZE; i++) {
+    for (uint8_t i = 0; i < AI_NETWORK_1_OUT_1_SIZE; i++) {
         normalized_output[i] /= exp_sum;
     }
 
     // Step 4: Postprocess output (使用softmax归一化后的概率)
-    postprocess_output(normalized_output, AI_NETWORK_OUT_1_SIZE, gesture_id, confidence);
+    postprocess_output(normalized_output, AI_NETWORK_1_OUT_1_SIZE, gesture_id, confidence);
 
     return 0;  // Success
 }
@@ -300,7 +320,7 @@ int MX_X_CUBE_AI_Inference(const uint8_t* image_data, uint8_t* gesture_id, float
 /**
  * @brief Run gesture recognition and get all class confidences
  * @param image_data: input image data (uint8_t, 64x64 grayscale)
- * @param gesture_id: output - recognized gesture ID (0-4: fist/palm/v_sign/ok/nothing)
+ * @param gesture_id: output - recognized gesture ID (0-4: fist/palm/thumbs_up/ok/nothing)
  * @param confidence: output - confidence level (0.0-1.0) of the max class
  * @param all_confidences: output - array of 5 confidences (one per class)
  * @return 0 on success, negative on error
@@ -311,7 +331,7 @@ int MX_X_CUBE_AI_Inference_Full(const uint8_t* image_data, uint8_t* gesture_id,
     ai_i32 batch;
 
     // Check if network is initialized
-    if (!network) {
+    if (!network_1) {
         return -1;  // Network not initialized
     }
 
@@ -320,32 +340,37 @@ int MX_X_CUBE_AI_Inference_Full(const uint8_t* image_data, uint8_t* gesture_id,
         return -2;  // Invalid parameters
     }
 
-    // Step 1: Preprocess image data (uint8 -> float, normalize)
-    float* input_buffer = (float*)data_ins[0];
-    preprocess_image(image_data, input_buffer, AI_NETWORK_IN_1_SIZE);
+    // Step 1: Preprocess image data (uint8 -> int8, normalize + quantize)
+    ai_i8* input_buffer = (ai_i8*)data_ins[0];
+    preprocess_image(image_data, input_buffer, AI_NETWORK_1_IN_1_SIZE);
 
     // Step 2: Run inference
-    batch = ai_network_run(network, ai_input, ai_output);
+    batch = ai_network_1_run(network_1, ai_input, ai_output);
     if (batch != 1) {
         return -3;  // Inference failed
     }
 
-    // Step 3: Get output buffer and apply softmax
-    float* output_buffer = (float*)data_outs[0];
+    // Step 3: 读取 int8 输出并反量化为浮点 logits
+    // 反量化公式: logit = (q - zero_point) * scale，本模型 zero_point=0
+    const ai_i8* output_buffer = (const ai_i8*)data_outs[0];
+    float logits[AI_NETWORK_1_OUT_1_SIZE];
+    for (uint8_t i = 0; i < AI_NETWORK_1_OUT_1_SIZE; i++) {
+        logits[i] = (float)output_buffer[i] * AI_OUTPUT_QUANT_SCALE;
+    }
 
     // 计算softmax（用于概率归一化）
     // 首先找到最大值（用于数值稳定性）
-    float max_val = output_buffer[0];
-    for (uint8_t i = 1; i < AI_NETWORK_OUT_1_SIZE; i++) {
-        if (output_buffer[i] > max_val) {
-            max_val = output_buffer[i];
+    float max_val = logits[0];
+    for (uint8_t i = 1; i < AI_NETWORK_1_OUT_1_SIZE; i++) {
+        if (logits[i] > max_val) {
+            max_val = logits[i];
         }
     }
 
     // 计算 exp(x - max) 并求和
     float exp_sum = 0.0f;
-    for (uint8_t i = 0; i < AI_NETWORK_OUT_1_SIZE; i++) {
-        all_confidences[i] = expf(output_buffer[i] - max_val);
+    for (uint8_t i = 0; i < AI_NETWORK_1_OUT_1_SIZE; i++) {
+        all_confidences[i] = expf(logits[i] - max_val);
         exp_sum += all_confidences[i];
     }
 
@@ -355,12 +380,12 @@ int MX_X_CUBE_AI_Inference_Full(const uint8_t* image_data, uint8_t* gesture_id,
     }
 
     // 归一化：softmax = exp(x - max) / sum(exp(x - max))
-    for (uint8_t i = 0; i < AI_NETWORK_OUT_1_SIZE; i++) {
+    for (uint8_t i = 0; i < AI_NETWORK_1_OUT_1_SIZE; i++) {
         all_confidences[i] /= exp_sum;
     }
 
     // Step 4: Find max probability class (使用softmax归一化后的概率)
-    postprocess_output(all_confidences, AI_NETWORK_OUT_1_SIZE, gesture_id, confidence);
+    postprocess_output(all_confidences, AI_NETWORK_1_OUT_1_SIZE, gesture_id, confidence);
 
     return 0;  // Success
 }
@@ -414,7 +439,7 @@ void MX_X_CUBE_AI_Process(void)
 
   //printf("TEMPLATE - run - main loop\r\n");
 
-  if (network) {
+  if (network_1) {
 
     do {
       /* 1 - acquire and pre-process input data */

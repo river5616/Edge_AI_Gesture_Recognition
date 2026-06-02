@@ -48,9 +48,9 @@ void key_proc(void)
 	{
 		key[1].single_flag=0;
 
-		// 循环切换视图：STATUS -> IMAGE -> UART_STATS -> ALL_CONF -> STATUS
+		// 循环切换视图：STATUS -> IMAGE -> UART_STATS -> SENSORS -> ALL_CONF -> STATUS
 		view++;
-		if(view > VIEW_SENSORS)
+		if(view > VIEW_ALL_CONF)
 		{
 			view = VIEW_STATUS;
 		}

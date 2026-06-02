@@ -1,33 +1,33 @@
 ST Edge AI Core v2.2.0-20266 2adc00962
-Created date          : 2026-05-24 11:01:33
-Parameters            : generate --target stm32h7 --name network_1 -m D:/Project/embedded_designed_3/Python/gesture_v2_5_augment_int8.onnx --compression none --verbosity 1 --workspace C:/Users/Hasee/AppData/Local/Temp/mxAI_workspace357371368475004678923690147252228 --output C:/Users/Hasee/.stm32cubemx/network_output
+Created date          : 2026-06-02 20:51:25
+Parameters            : generate --target stm32h7 --name network_1 -m E:/Embedded/Project/Edge_AI_Gesture_Recognition-main/Python/gesture_v2_strongaug_int8.onnx --compression none --verbosity 1 --workspace C:/Users/river/AppData/Local/Temp/mxAI_workspace191487719791009662252231941544918 --output C:/Users/river/.stm32cubemx/network_output
 
 Exec/report summary (generate)
 ---------------------------------------------------------------------------------------------------------------------
-model file         :   D:\Project\embedded_designed_3\Python\gesture_v2_5_augment_int8.onnx                          
+model file         :   E:\Embedded\Project\Edge_AI_Gesture_Recognition-main\Python\gesture_v2_strongaug_int8.onnx    
 type               :   onnx                                                                                          
 c_name             :   network_1                                                                                     
 compression        :   none                                                                                          
 options            :   allocate-inputs, allocate-outputs                                                             
 optimization       :   balanced                                                                                      
 target/series      :   stm32h7                                                                                       
-workspace dir      :   C:\Users\Hasee\AppData\Local\Temp\mxAI_workspace357371368475004678923690147252228             
-output dir         :   C:\Users\Hasee\.stm32cubemx\network_output                                                    
+workspace dir      :   C:\Users\river\AppData\Local\Temp\mxAI_workspace191487719791009662252231941544918             
+output dir         :   C:\Users\river\.stm32cubemx\network_output                                                    
 model_fmt          :   ss/sa per tensor                                                                              
-model_name         :   gesture_v2_5_augment_int8                                                                     
-model_hash         :   0xd7a62017aa2574d81bc5c71fdc41dbb6                                                            
+model_name         :   gesture_v2_strongaug_int8                                                                     
+model_hash         :   0x2b31387b63de7c9386dbd4395833dbe7                                                            
 params #           :   73,229 items (286.05 KiB)                                                                     
 ---------------------------------------------------------------------------------------------------------------------
 input 1/1          :   'input', int8(1x64x64x1), 4.00 KBytes, QLinear(0.007874016,0,int8), activations               
-output 1/1         :   'output_QuantizeLinear_Input', int8(1x5), 5 Bytes, QLinear(0.068067588,0,int8), activations   
-macc               :   11,045,117                                                                                    
+output 1/1         :   'output_QuantizeLinear_Input', int8(1x5), 5 Bytes, QLinear(0.147128820,0,int8), activations   
+macc               :   10,995,965                                                                                    
 weights (ro)       :   76,460 B (74.67 KiB) (1 segment) / -216,456(-73.9%) vs float model                            
 activations (rw)   :   150,292 B (146.77 KiB) (1 segment) *                                                          
 ram (total)        :   150,292 B (146.77 KiB) = 150,292 + 0 + 0                                                      
 ---------------------------------------------------------------------------------------------------------------------
 (*) 'input'/'output' buffers are allocated in the activations buffer
 
-Model name - gesture_v2_5_augment_int8
+Model name - gesture_v2_strongaug_int8
 ------ ---------------------------------------------------------------- ---------------------- --------------- ----------- -------------------------------- --- ------------------ ------------------ ------------------- 
 m_id   layer (type,original)                                            oshape                 param/size             macc                     connected to   | c_size             c_macc             c_type              
 ------ ---------------------------------------------------------------- ---------------------- --------------- ----------- -------------------------------- --- ------------------ ------------------ ------------------- 
@@ -225,7 +225,7 @@ m_id   layer (type,original)                                            oshape  
 ------ ---------------------------------------------------------------- ---------------------- --------------- ----------- -------------------------------- --- ------------------ ------------------ ------------------- 
 175    _block1_block1_1_c..ear_Output (Conversion, DequantizeLinear)    [b:1,h:32,w:32,c:48]                        98,304   _block1_block1_1_c..ear_Output   |                    -98,304(-100.0%)   
 ------ ---------------------------------------------------------------- ---------------------- --------------- ----------- -------------------------------- --- ------------------ ------------------ ------------------- 
-176    _block1_block1_1_c..p_output_0 (Nonlinearity, Clip)              [b:1,h:32,w:32,c:48]                        98,304   _block1_block1_1_c..ear_Output   |                                       Nonlinearity_[21]   
+176    _block1_block1_1_c..p_output_0 (Nonlinearity, Clip)              [b:1,h:32,w:32,c:48]                        98,304   _block1_block1_1_c..ear_Output   |                    -49,152(-50.0%)    Nonlinearity_[21]   
 ------ ---------------------------------------------------------------- ---------------------- --------------- ----------- -------------------------------- --- ------------------ ------------------ ------------------- 
 177    _block1_block1_1_c..ear_Output (Conversion, QuantizeLinear)      [b:1,h:32,w:32,c:48]                        98,304   _block1_block1_1_c..p_output_0   |                    -98,304(-100.0%)   
 ------ ---------------------------------------------------------------- ---------------------- --------------- ----------- -------------------------------- --- ------------------ ------------------ ------------------- 
@@ -598,19 +598,19 @@ m_id   layer (type,original)                                            oshape  
 ------ ---------------------------------------------------------------- ---------------------- --------------- ----------- -------------------------------- --- ------------------ ------------------ ------------------- 
 400    output (Conversion, DequantizeLinear)                            [b:1,c:5]                                       10     output_QuantizeLinear_Output   |                    -10(-100.0%)       
 ------ ---------------------------------------------------------------- ---------------------- --------------- ----------- -------------------------------- --- ------------------ ------------------ ------------------- 
-model/c-model: macc=14,904,601/11,045,117 -3,859,484(-25.9%) weights=292,916/76,460 -216,456(-73.9%) activations=--/150,292 io=--/0
+model/c-model: macc=14,904,601/10,995,965 -3,908,636(-26.2%) weights=292,916/76,460 -216,456(-73.9%) activations=--/150,292 io=--/0
 
 
 
 Generated C-graph summary
 ------------------------------------------------------------------------------------------------------------------------
-model name            : gesture_v2_5_augment_int8
+model name            : gesture_v2_strongaug_int8
 c-name                : network_1
 c-node #              : 71
 c-array #             : 142
 activations size      : 150292 (1 segment)
 weights size          : 76460 (1 segment)
-macc                  : 11045117
+macc                  : 10995965
 inputs                : ['input_output']
 outputs               : ['output_QuantizeLinear_Input_output']
 
@@ -858,7 +858,7 @@ c_id   name (*_layer)                                                      id   
                                                                                                                    I: _block1_block1_1_conv_se_Expand_output_0_output                             int8(1x32x32x48) (27)     
                                                                                                                    O: _block1_block1_1_conv_se_Mul_output_0_output                                int8(1x32x32x48) (32)     
 ------ ------------------------------------------------------------------- ----- --------------- --------- ------- ------------------------------------------------------------------------------ ------------------------- 
-21     _block1_block1_1_conv_relu_Clip_output_0                            176   Nonlinearity    98304     0       I: _block1_block1_1_conv_se_Mul_output_0_output                                int8(1x32x32x48) (32)     
+21     _block1_block1_1_conv_relu_Clip_output_0                            176   Nonlinearity    49152     0       I: _block1_block1_1_conv_se_Mul_output_0_output                                int8(1x32x32x48) (32)     
                                                                                                                    O: _block1_block1_1_conv_relu_Clip_output_0_output                             int8(1x32x32x48) (30)     
 ------ ------------------------------------------------------------------- ----- --------------- --------- ------- ------------------------------------------------------------------------------ ------------------------- 
 22     _block1_block1_1_Add_output_0                                       179   Eltwise/add     49152     0       I: _block1_block1_0_relu_Clip_output_0_output                                  int8(1x32x32x48) (8)      
@@ -1097,7 +1097,7 @@ c_id    m_id   name (type)                                              #op     
 18      164    _block1_block1_1_c..d_output_0 (Nonlinearity)             48     op_s8_s8 
 19      170    _block1_block1_1_c..d_output_0 (Tile)                      0   smul_s8_s8 
 20      173    _block1_block1_1_c..l_output_0 (Eltwise/mul)          49,152     op_s8_s8 
-21      176    _block1_block1_1_c..p_output_0 (Nonlinearity)         98,304     op_s8_s8 
+21      176    _block1_block1_1_c..p_output_0 (Nonlinearity)         49,152     op_s8_s8 
 22      179    _block1_block1_1_Add_output_0 (Eltwise/add)           49,152     op_s8_s8 
 23      182    _block1_block1_2_M..l_output_0 (Pool)                 49,152   smul_s8_s8 
 24      185    _block2_block2_0_d..v_output_0 (Conv2D)              110,640   smul_s8_s8 
@@ -1148,14 +1148,14 @@ c_id    m_id   name (type)                                              #op     
 69      395    _fc_fc_2_Relu_output_0 (Nonlinearity)                     64     op_s8_s8 
 70      398    output_QuantizeLinear_Input (Dense)                      325   smul_s8_s8 
 ------- ------ ----------------------------------------------- ------------ ------------ 
-total                                                            11,045,117 
+total                                                            10,995,965 
 
 Number of operation types
 ---------------- ------------ ----------- 
 operation type              #           % 
 ---------------- ------------ ----------- 
-smul_s8_s8         10,528,345       95.3% 
-op_s8_s8              516,772        4.7% 
+smul_s8_s8         10,528,345       95.7% 
+op_s8_s8              467,620        4.3% 
 
 Complexity report (model)
 ------ ------------------------------------------ ------------------------- ------------------------- ------ 
@@ -1174,7 +1174,7 @@ m_id   name                                       c_macc                    c_ro
 126    _block1_block1_0_se_Mul_output_0           |                  0.4%   |                  0.0%   [10]   
 129    _block1_block1_0_relu_Clip_output_0        |                  0.4%   |                  0.0%   [11]   
 132    _block1_block1_1_conv_depthw..v_output_0   |||                4.0%   |                  0.8%   [12]   
-135    _block1_block1_1_conv_pointw..v_output_0   |||||||||||||||   21.4%   |||                3.3%   [13]   
+135    _block1_block1_1_conv_pointw..v_output_0   |||||||||||||||   21.5%   |||                3.3%   [13]   
 140    _block1_block1_1_conv_se_squ..l_output_0   |                  0.4%   |                  0.0%   [14]   
 155    _block1_block1_1_conv_se_exc..l_output_0   |                  0.0%   |                  0.4%   [15]   
 158    _block1_block1_1_conv_se_exc..u_output_0   |                  0.0%   |                  0.0%   [16]   
@@ -1182,7 +1182,7 @@ m_id   name                                       c_macc                    c_ro
 164    _block1_block1_1_conv_se_exc..d_output_0   |                  0.0%   |                  0.0%   [18]   
 170    _block1_block1_1_conv_se_Expand_output_0   |                  0.0%   |                  0.0%   [19]   
 173    _block1_block1_1_conv_se_Mul_output_0      |                  0.4%   |                  0.0%   [20]   
-176    _block1_block1_1_conv_relu_Clip_output_0   |                  0.9%   |                  0.0%   [21]   
+176    _block1_block1_1_conv_relu_Clip_output_0   |                  0.4%   |                  0.0%   [21]   
 179    _block1_block1_1_Add_output_0              |                  0.4%   |                  0.0%   [22]   
 182    _block1_block1_2_MaxPool_output_0          |                  0.4%   |                  0.0%   [23]   
 185    _block2_block2_0_depthwise_Conv_output_0   |                  1.0%   |                  0.8%   [24]   
@@ -1196,7 +1196,7 @@ m_id   name                                       c_macc                    c_ro
 226    _block2_block2_0_se_Mul_output_0           |                  0.2%   |                  0.0%   [32]   
 229    _block2_block2_0_relu_Clip_output_0        |                  0.2%   |                  0.0%   [33]   
 232    _block2_block2_1_conv_depthw..v_output_0   ||                 2.0%   ||                 1.6%   [34]   
-235    _block2_block2_1_conv_pointw..v_output_0   ||||||||||||||||  21.4%   |||||||||         12.6%   [35]   
+235    _block2_block2_1_conv_pointw..v_output_0   ||||||||||||||||  21.5%   |||||||||         12.6%   [35]   
 240    _block2_block2_1_conv_se_squ..l_output_0   |                  0.2%   |                  0.0%   [36]   
 255    _block2_block2_1_conv_se_exc..l_output_0   |                  0.0%   ||                 1.6%   [37]   
 258    _block2_block2_1_conv_se_exc..u_output_0   |                  0.0%   |                  0.0%   [38]   
@@ -1208,7 +1208,7 @@ m_id   name                                       c_macc                    c_ro
 279    _block2_block2_1_Add_output_0              |                  0.2%   |                  0.0%   [44]   
 282    _block2_block2_2_MaxPool_output_0          |                  0.2%   |                  0.0%   [45]   
 285    _block3_block3_0_depthwise_Conv_output_0   |                  0.5%   ||                 1.6%   [46]   
-288    _block3_block3_0_pointwise_Conv_output_0   ||||||             7.1%   ||||||||||||      16.7%   [47]   
+288    _block3_block3_0_pointwise_Conv_output_0   ||||||             7.2%   ||||||||||||      16.7%   [47]   
 293    _block3_block3_0_se_squeeze_..l_output_0   |                  0.1%   |                  0.0%   [48]   
 308    _block3_block3_0_se_excitati..l_output_0   |                  0.0%   ||                 2.8%   [49]   
 311    _block3_block3_0_se_excitati..u_output_0   |                  0.0%   |                  0.0%   [50]   
@@ -1233,24 +1233,24 @@ m_id   name                                       c_macc                    c_ro
 395    _fc_fc_2_Relu_output_0                     |                  0.0%   |                  0.0%   [69]   
 398    output_QuantizeLinear_Input                |                  0.0%   |                  0.4%   [70]   
 ------ ------------------------------------------ ------------------------- ------------------------- ------ 
-macc=11,045,117 weights=76,460 act=150,292 ram_io=0
+macc=10,995,965 weights=76,460 act=150,292 ram_io=0
  
  Requested memory size by section - "stm32h7" target
  ------------------------------ -------- -------- -------- --------- 
  module                             text   rodata     data       bss 
  ------------------------------ -------- -------- -------- --------- 
  NetworkRuntime1020_CM7_GCC.a     33,488        0        0         0 
- network_1.o                       2,680    5,696   18,448       704 
+ network_1.o                       2,684    6,460   18,448       704 
  network_1_data.o                     48       16       88         0 
  lib (toolchain)*                    104        0        0         0 
  ------------------------------ -------- -------- -------- --------- 
- RT total**                       36,320    5,712   18,536       704 
+ RT total**                       36,324    6,476   18,536       704 
  ------------------------------ -------- -------- -------- --------- 
  weights                               0   76,464        0         0 
  activations                           0        0        0   150,292 
  io                                    0        0        0         0 
  ------------------------------ -------- -------- -------- --------- 
- TOTAL                            36,320   82,176   18,536   150,996 
+ TOTAL                            36,324   82,940   18,536   150,996 
  ------------------------------ -------- -------- -------- --------- 
  *  toolchain objects (libm/libgcc*)
  ** RT AI runtime objects (kernels+infrastructure)
@@ -1259,19 +1259,19 @@ macc=11,045,117 weights=76,460 act=150,292 ram_io=0
   ---------------------------------------------------
                FLASH (ro)      %*   RAM (rw)       % 
   ---------------------------------------------------
-  RT total         60,568   44.2%     19,240   11.3% 
+  RT total         61,336   44.5%     19,240   11.3% 
   ---------------------------------------------------
-  TOTAL           137,032            169,532         
+  TOTAL           137,800            169,532         
   ---------------------------------------------------
   *  rt/total
 
 
 Generated files (7)
 -------------------------------------------------------------------- 
-C:\Users\Hasee\.stm32cubemx\network_output\network_1_data_params.h   
-C:\Users\Hasee\.stm32cubemx\network_output\network_1_data_params.c   
-C:\Users\Hasee\.stm32cubemx\network_output\network_1_data.h          
-C:\Users\Hasee\.stm32cubemx\network_output\network_1_data.c          
-C:\Users\Hasee\.stm32cubemx\network_output\network_1_config.h        
-C:\Users\Hasee\.stm32cubemx\network_output\network_1.h               
-C:\Users\Hasee\.stm32cubemx\network_output\network_1.c               
+C:\Users\river\.stm32cubemx\network_output\network_1_data_params.h   
+C:\Users\river\.stm32cubemx\network_output\network_1_data_params.c   
+C:\Users\river\.stm32cubemx\network_output\network_1_data.h          
+C:\Users\river\.stm32cubemx\network_output\network_1_data.c          
+C:\Users\river\.stm32cubemx\network_output\network_1_config.h        
+C:\Users\river\.stm32cubemx\network_output\network_1.h               
+C:\Users\river\.stm32cubemx\network_output\network_1.c               

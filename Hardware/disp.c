@@ -77,9 +77,9 @@ void oled_disp(void)
             }
             else if(s_display_gesture_id < 5)  // 5个手势
             {
-                // 手势名称映射 - 5个手势（fist/palm/v_sign/ok/nothing）
+                // 手势名称映射 - 5个手势（fist/palm/thumbs_up/ok/nothing）
                 const char* gesture_names[5] = {
-                    "Fist", "Palm", "V", "OK", "None"
+                    "Fist", "Palm", "Thumb", "OK", "None"
                 };
 
                 const char* gesture_name = gesture_names[s_display_gesture_id];
@@ -216,13 +216,50 @@ void oled_disp(void)
             OLED_Printf(7*6,line6,6,"SpO2:--    ");
         }
     }
+    else if(view == VIEW_ALL_CONF)  // 所有手势置信度视图（5个手势，单页）
+    {
+        WorkMode_t mode = Task_GetMode();
+
+        if(mode == MODE_INFERENCE)
+        {
+            // 获取全部5个手势的置信度（NUM_GESTURES==5）
+            float all_confs[NUM_GESTURES];
+            InferenceTask_GetAllConfidences(all_confs);
+
+            // 手势名称缩写（与5类模型顺序一致：fist/palm/thumbs_up/ok/nothing）
+            static const char* const gesture_names[NUM_GESTURES] = {
+                "Fist", "Palm", "Thmb", "OK  ", "None"
+            };
+
+            OLED_Printf(0,line1,6,"All Confidences");
+
+            // line2~line6 逐行显示5个手势，置信度用整数百分比
+            for(uint8_t i = 0; i < NUM_GESTURES; i++)
+            {
+                // 先夹紧到[0,1]再转百分比，避免异常值导致显示错乱
+                float c = all_confs[i];
+                if(c < 0.0f) c = 0.0f;
+                if(c > 1.0f) c = 1.0f;
+                int conf_percent = (int)(c * 100.0f + 0.5f);  // 四舍五入
+
+                OLED_Printf(0, line2 + i*8, 6, "%d:%s %3d%%",
+                            i, gesture_names[i], conf_percent);
+            }
+        }
+        else
+        {
+            OLED_Printf(0,line1,6,"All Confidences");
+            OLED_Printf(0,line3,6,"Switch to");
+            OLED_Printf(0,line4,6,"INFERENCE mode");
+        }
+    }
 
     OLED_Update();
 }
 
 /**
   * 函    数：更新手势识别结果
-  * 参    数：GestureID 手势ID，范围：0~4 (5个手势: fist/palm/v_sign/ok/nothing)
+  * 参    数：GestureID 手势ID，范围：0~4 (5个手势: fist/palm/thumbs_up/ok/nothing)
   * 参    数：Confidence 置信度，范围：0.0~1.0
   * 返 回 值：无
   * 说    明：此函数仅更新全局变量，实际显示由oled_disp()统一处理

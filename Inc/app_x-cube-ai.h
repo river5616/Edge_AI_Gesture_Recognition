@@ -27,29 +27,14 @@ extern "C" {
 
 void MX_X_CUBE_AI_Init(void);
 void MX_X_CUBE_AI_Process(void);
-
-/* Gesture recognition interface */
-/**
- * @brief Run gesture recognition inference
- * @param image_data: input image (uint8_t, 64x64 grayscale)
- * @param gesture_id: output recognized gesture ID (0-4, 5个手势: fist/palm/v_sign/ok/nothing)
- * @param confidence: output confidence level (0.0-1.0)
- * @return 0 on success, negative on error
- */
-int MX_X_CUBE_AI_Inference(const uint8_t* image_data, uint8_t* gesture_id, float* confidence);
-
-/**
- * @brief Run gesture recognition and get all class confidences
- * @param image_data: input image (uint8_t, 64x64 grayscale)
- * @param gesture_id: output recognized gesture ID (0-4, 5个手势: fist/palm/v_sign/ok/nothing)
- * @param confidence: output confidence level (0.0-1.0) of the max class
- * @param all_confidences: output array of 5 confidences (one per class)
- * @return 0 on success, negative on error
- */
-int MX_X_CUBE_AI_Inference_Full(const uint8_t* image_data, uint8_t* gesture_id,
-                                 float* confidence, float* all_confidences);
-
 /* USER CODE BEGIN includes */
+#include <stdint.h>
+
+/* 手势识别推理接口（自定义，定义在 app_x-cube-ai.c 的 USER CODE 区） */
+/* 返回 0 成功，负值失败 */
+int MX_X_CUBE_AI_Inference(const uint8_t* image_data, uint8_t* gesture_id, float* confidence);
+int MX_X_CUBE_AI_Inference_Full(const uint8_t* image_data, uint8_t* gesture_id,
+                                float* confidence, float* all_confidences);
 /* USER CODE END includes */
 #ifdef __cplusplus
 }

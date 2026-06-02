@@ -340,7 +340,7 @@
               <MiscControls></MiscControls>
               <Define>USE_PWR_LDO_SUPPLY,USE_HAL_DRIVER,STM32H753xx</Define>
               <Undefine></Undefine>
-              <IncludePath>../Inc;../Drivers/STM32H7xx_HAL_Driver/Inc;../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F;../Drivers/CMSIS/Device/ST/STM32H7xx/Include;../Drivers/CMSIS/Include;../Hardware;../App;../Middlewares/ST/AI/Inc;../Middlewares/ST/AI/Lib</IncludePath>
+              <IncludePath>../Inc;../Drivers/STM32H7xx_HAL_Driver/Inc;../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F;../Drivers/CMSIS/Device/ST/STM32H7xx/Include;../Drivers/CMSIS/Include;../Hardware;../App;../Middlewares/ST/AI/Inc;../Middlewares/ST/AI/Lib;Middlewares/ST/AI/Inc;Inc</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -710,19 +710,19 @@
               <FilePath>../Src/stm32h7xx_hal_timebase_tim.c</FilePath>
             </File>
             <File>
-              <FileName>network.c</FileName>
+              <FileName>network_1.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Src\network.c</FilePath>
+              <FilePath>..\Src\network_1.c</FilePath>
             </File>
             <File>
-              <FileName>network_data.c</FileName>
+              <FileName>network_1_data.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Src\network_data.c</FilePath>
+              <FilePath>..\Src\network_1_data.c</FilePath>
             </File>
             <File>
-              <FileName>network_data_params.c</FileName>
+              <FileName>network_1_data_params.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Src\network_data_params.c</FilePath>
+              <FilePath>..\Src\network_1_data_params.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1441,9 +1441,9 @@
           </GroupOption>
           <Files>
             <File>
-              <FileName>network_1_generate_report.txt</FileName>
+              <FileName>network_generate_report.txt</FileName>
               <FileType>5</FileType>
-              <FilePath>..//network_1_generate_report.txt</FilePath>
+              <FilePath>..//network_generate_report.txt</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -1465,9 +1465,9 @@
               </FileOption>
             </File>
             <File>
-              <FileName>network_generate_report.txt</FileName>
+              <FileName>network_1_generate_report.txt</FileName>
               <FileType>5</FileType>
-              <FilePath>..//network_generate_report.txt</FilePath>
+              <FilePath>..//network_1_generate_report.txt</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
