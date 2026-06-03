@@ -1,6 +1,6 @@
 #  STM32 AI手势识别与物联网系统
 
-基于STM32H753的智能手势识别系统，集成多传感器监测、OLED显示和OneNET云平台数据上传功能。
+基于STM32H753的智能手势识别系统，集成多传感器监测、OLED显示和OneNET云平台数据上传功能。当前版本已从旧部署模型 `gesture_v1_5.onnx` 更新到 **`gesture_v2_strongaug_int8.onnx`**，STM32端使用 X-CUBE-AI 生成的 `network_1` 模型进行本地推理。
 
 ## 📋 目录
 
@@ -19,7 +19,7 @@
 ## 📌 项目概述
 
 本项目是一个基于**深度学习**的智能家居控制与健康守护系统，实现了：
-- ✅ **实时手势识别** (4种手势：拳头、手掌、V、OK) - OV5640摄像头+OpenMV预处理
+- ✅ **实时手势识别** (5种输出：拳头、手掌、点赞、OK、无手势) - OV5640摄像头+OpenMV预处理
 - ✅ **多传感器环境监测** (温湿度、光照、距离、烟雾、心率血氧) - 异常自动报警
 - ✅ **手势控制智能设备** (LED可调光、蜂鸣器可调音) - 无接触交互
 - ✅ **OneNET云平台数据上传** (MQTT协议) - 远程监控
@@ -28,8 +28,8 @@
 - ✅ **上位机工具链** (数据集采集、模型训练、ONNX导出、X-CUBE-AI部署)
 
 ### 技术亮点
-- 🧠 **轻量级CNN模型** (GestureNet, ~108K参数)
-- 🚀 **X-CUBE-AI部署** (模型量化优化，432KB)
+- 🧠 **轻量级CNN模型** (GestureNet V2，SE注意力/残差/空间池化可选)
+- 🚀 **X-CUBE-AI部署** (`gesture_v2_strongaug_int8.onnx` → `network_1`，权重约76KB，激活区约150KB)
 - ⚡ **FreeRTOS多任务架构** (7个并发任务)
 - 🔗 **OneNET物联网平台** (MQTT协议，5秒/次上传)
 - 📊 **实时推理** (~30 FPS @ 64x64灰度图)
@@ -61,65 +61,132 @@
 - **图像传输**: OpenMV预处理后发送64x64灰度图像到STM32
 
 **AI推理**:
-- **算法**: 深度可分离卷积网络 (GestureNet, MobileNet-like架构)
-- **性能**: ~20 FPS推理速度，准确率 >95%
-- **部署**: X-CUBE-AI量化优化，模型大小100KB
+- **算法**: GestureNet V2 / V2 Spatial（深度可分离卷积 + SE注意力 + 残差连接）
+- **性能**: 64x64灰度图本地推理，具体FPS受串口图像传输、OLED刷新和调试输出影响
+- **部署**: `gesture_v2_strongaug_int8.onnx` 经 X-CUBE-AI 生成 `network_1`
+- **量化参数**: 输入scale=0.007874016、zero_point=0；输出scale=0.147128820、zero_point=0
+- **内存占用**: 权重约 76KB，激活区约 150KB（见 `Inc/network_1_data_params.h`）
 
-**神经网络架构** (基于 `train_model.py`):
+**神经网络架构** (当前部署模型基于 `train_model_v2.py` 的标准 `GestureNetV2`):
 ```
-GestureNet - 轻量级手势识别网络
+GestureNet V2 - 改进型轻量级手势识别网络
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 输入层:  [1, 1, 64, 64]  (64x64 灰度图)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Conv1:   Conv2d(1→16, k=3, s=2, p=1)  →  [1, 16, 32, 32]
+Conv1:   Conv2d(1→24, k=3, s=2, p=1)  →  [1, 24, 32, 32]
          + BatchNorm2d + ReLU6
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Block1:  DepthwiseSeparable(24→48) + SE + Residual
+         + MaxPool2d(2x2)               →  [1, 48, 16, 16]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Block2:  DepthwiseSeparable(48→96) + SE + Residual
+         + MaxPool2d(2x2)               →  [1, 96, 8, 8]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Block3:  DepthwiseSeparable(96→128) + SE + Residual
+                                           [1, 128, 8, 8]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+GlobalAvgPool: AdaptiveAvgPool2d(1)      →  [1, 128, 1, 1]
+         Flatten                         →  [1, 128]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+FC层:    Dropout(0.5)
+         Linear(128→64) + ReLU
+         Dropout(0.3)
+         Linear(64→5)                    →  [1, 5]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+输出层:  [fist, palm, thumbs_up, ok, nothing]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+说明：当前部署的 `gesture_v2_strongaug_int8.onnx` 是标准 `GestureNetV2`，不是 `--spatial-head` 版本。仓库中仍保留旧部署模型 `gesture_v1_5.onnx`、V2 Lite、Spatial Head、7类候选模型和消融实验文件；
+当前STM32固件以 `network_1` 的 5 类 INT8 输出为准。
+```
+
+**旧版基础网络结构**（`train_model.py`仍保留，用于对比和历史复现）:
+```
+Conv1:   Conv2d(1→16, k=3, s=2, p=1)  →  [1, 16, 32, 32]
 DW-Conv1: DepthwiseSeparable(16→32)   →  [1, 32, 32, 32]
          - Depthwise Conv(k=3, groups=16)
          - Pointwise Conv(1x1)
          - BatchNorm + ReLU6
          + MaxPool2d(2x2)               →  [1, 32, 16, 16]
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 DW-Conv2: DepthwiseSeparable(32→64)   →  [1, 64, 16, 16]
          + MaxPool2d(2x2)               →  [1, 64, 8, 8]
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 DW-Conv3: DepthwiseSeparable(64→128)  →  [1, 128, 8, 8]
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 GlobalAvgPool: AdaptiveAvgPool2d(1)   →  [1, 128, 1, 1]
          Flatten                       →  [1, 128]
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 FC层:    Dropout(0.5)
          Linear(128→64) + ReLU
          Dropout(0.3)
          Linear(64→5)                  →  [1, 5]
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-输出层:  [fist, palm, v_sign, ok, nothing]
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-模型参数量: ~108,000 (108K)
-ONNX模型大小: ~432 KB
-推理时间: ~33ms @ STM32H753 (480MHz)
+输出层:  [fist, palm, thumbs_up, ok, nothing]
 ```
 
 **训练配置**:
-- 优化器: Adam (lr=0.001)
-- 损失函数: CrossEntropyLoss
-- 学习率衰减: ReduceLROnPlateau (patience=5, factor=0.5)
-- 早停: patience=15
+- 优化器: AdamW (lr=0.001, weight_decay=0.01)
+- 损失函数: Focal Loss / CrossEntropyLoss / Label Smoothing（三选一，当前常用Focal Loss）
+- 学习率调度: CosineAnnealingLR
+- 早停: patience=20
 - 批量大小: 32
 - 数据增强:
   - 旋转 (±40°)
   - 仿射变换 (平移±15%, 缩放0.85-1.15, 剪切±10°)
-  - 亮度/对比度调整 (±30%)
-  - 随机擦除 (概率30%, 面积2%-15%)
+  - 亮度/对比度调整 (普通增强±30%，强增强可到±50%)
+  - Gamma、低对比度、暗光噪声增强（`--strong-aug`）
+  - 随机擦除 (概率30%-40%, 面积2%-15%)
 
-**支持手势** (4种):
+**支持手势** (当前固件5类输出):
 | 手势 | 功能 | 说明 |
 |------|------|------|
 | 拳头 (fist) | 关闭设备 | LED/蜂鸣器占空比 0% |
 | 手掌 (palm) | 高档运行 | LED/蜂鸣器占空比 30% |
-| V手势 (v_sign) | 低档运行 | LED/蜂鸣器占空比 10% |
+| 点赞 (thumbs_up) | 低档运行 | LED/蜂鸣器占空比 10% |
 | OK手势 (ok) | 切换目标 | 在LED和蜂鸣器间切换 |
+| 无手势 (nothing) | 背景/空画面 | 不触发控制动作 |
+
+> 注：`Python/gesture_definitions.py` 和部分历史文档中仍保留7类手势方案（含 `gun`、`call_me`），用于数据集实验和模型对比；当前STM32固件中的 `NUM_GESTURES` 为5，实际部署未使用 `gun` 和 `call_me`。
+
+**当前部署模型相对旧版的主要改动**:
+
+| 项目 | 旧版部署 | 当前部署 |
+|------|----------|----------|
+| ONNX模型 | `gesture_v1_5.onnx` | `gesture_v2_strongaug_int8.onnx` |
+| STM32生成模型名 | `network` / 旧模型文件 | `network_1` |
+| 网络结构 | 早期轻量GestureNet | GestureNetV2标准版 |
+| 通道数 | 16→32→64→128 | 24→48→96→128 |
+| 注意力机制 | 无 | SE Block通道注意力 |
+| 残差连接 | 无 | 每个主卷积阶段加入ResidualBlock |
+| 分类头 | GlobalAvgPool + FC | GlobalAvgPool + FC |
+| 训练增强 | 普通亮度/对比度/仿射增强 | `--strong-aug`：更强亮度/对比度、Gamma、低对比度、噪声增强 |
+| 损失函数 | CrossEntropy为主 | Focal Loss为主 |
+| 优化器/调度 | Adam / ReduceLROnPlateau | AdamW / CosineAnnealingLR |
+| 部署精度 | float ONNX导入X-CUBE-AI | 静态INT8量化ONNX导入X-CUBE-AI |
+
+`gesture_v2_strongaug_int8.onnx` 对应的训练日志为 `Python/strongaug_train.log`：
+
+- 模型结构：标准 `GestureNetV2`，不是 `--spatial-head` 版本
+- 参数量：73,797（PyTorch训练日志），X-CUBE-AI报告中为73,229 items
+- 训练配置：150 epochs上限、Focal Loss、AdamW、CosineAnnealingLR、强光照增强
+- 训练划分：随机分层划分，测试集1183张
+- 训练结果：最佳验证准确率99.83%，最终测试集准确率99.41%
+- 早停：第108轮触发，20轮验证准确率未提升
+
+X-CUBE-AI生成报告 `network_1_generate_report.txt` 中的部署参数：
+
+```text
+model_name: gesture_v2_strongaug_int8
+input : int8(1x64x64x1), QLinear(scale=0.007874016, zero_point=0)
+output: int8(1x5),       QLinear(scale=0.147128820, zero_point=0)
+macc  : 10,995,965
+weights: 76,460 B
+activations: 150,292 B
+```
+
+难例测试集 `dataset_hard_test` 上，当前INT8模型的主要错误集中在：
+
+- `thumbs_up` 被识别为 `fist` 或 `ok`
+- `nothing` 被识别为 `fist` 或 `palm`
+- 少量 `fist` 被识别为 `thumbs_up`
+
+对应混淆矩阵见 `Python/gesture_v2_strongaug_int8_dataset_hard_test_confusion_matrix.csv`，错样本明细见 `Python/gesture_v2_strongaug_int8_dataset_hard_test_wrong_samples.csv`。
 
 **上位机工具链支持**:
 1. 🎓 **数据集采集**: 通过UART1发送指令，STM32从OpenMV获取图像并返回给PC
@@ -207,7 +274,7 @@ ONNX模型大小: ~432 KB
 **数据流**:
 | 数据流ID | 内容 | 格式 |
 |---------|------|------|
-| `gesture` | 手势识别结果 | `{id: 0-3, conf: 0.0-1.0}` |
+| `gesture` | 手势识别结果 | `{id: 0-4, conf: 0.0-1.0}` |
 | `temp_humi` | 温湿度 | `{temp: °C, humi: %}` |
 | `light` | 光照强度 | `{lux: float}` |
 | `distance` | 距离 | `{cm: int}` |
@@ -241,7 +308,7 @@ ONNX模型大小: ~432 KB
 #### 场景1: 手势控制照明
 ```
 用户做出"手掌"手势 → AI识别 → LED3亮度30%
-用户做出"V手势" → AI识别 → LED3亮度10%
+用户做出"点赞"手势 → AI识别 → LED3亮度10%
 用户做出"拳头"手势 → AI识别 → LED3关闭
 ```
 
@@ -352,13 +419,15 @@ OpenMV (OV5640) → UART3 → CameraTask → imageQueue
 
 ```
 1. 图像预处理
-   uint8[64x64] → float32[64x64]
-   归一化: (x/255 - 0.5) / 0.5  →  [-1, 1]
+   uint8[64x64] → float32归一化 → int8量化输入
+   归一化: normalized = (x/255 - 0.5) / 0.5  →  [-1, 1]
+   量化: q = round(normalized / 0.007874016)，并裁剪到[-128, 127]
 
 2. 神经网络推理
-   Input[1,1,64,64] → CNN → Output[1,5] (logits)
+   int8 Input[1,64,64,1] → X-CUBE-AI network_1 → int8 Output[1,5]
 
 3. 后处理
+   反量化: logit = output_int8 * 0.147128820
    Softmax(logits) → Probabilities[0-1]
    argmax() → Gesture ID
 
@@ -368,52 +437,64 @@ OpenMV (OV5640) → UART3 → CameraTask → imageQueue
 
 ---
 
-## 🧠 神经网络训练详解 (基于 train_model.py)
+## 🧠 神经网络训练详解 (当前基于 train_model_v2.py)
 
 ### 模型架构设计思路
 
-GestureNet 采用**轻量级深度可分离卷积**架构，灵感来源于 MobileNet，专为嵌入式设备优化：
+当前推荐训练脚本为 `Python/train_model_v2.py`。相比早期 `train_model.py`，V2版本不只是换了模型名称，而是同时调整了网络结构、训练划分方式、损失函数、增强策略和评估输出。旧版 `train_model.py` 仍保留在仓库中，主要用于复现早期GestureNet结果和对比实验。
+
+GestureNet V2 采用**深度可分离卷积 + SE注意力 + 残差连接**架构，灵感来源于 MobileNet，同时针对手势形状差异和MCU部署做了轻量化处理：
 
 **为什么选择深度可分离卷积？**
 - **参数量减少**: 标准卷积参数量 = `K×K×Cin×Cout`，深度可分离卷积 = `K×K×Cin + Cin×Cout`
 - **计算量降低**: 减少 8-9 倍计算量，适合资源受限的 MCU
 - **精度保持**: 在轻量化的同时保持较高识别准确率
 
-**网络各层设计原理**:
+**V2网络各层设计原理**:
 
-1. **Conv1 (1→16, stride=2)**:
+1. **Conv1 (1→24, stride=2)**:
    - 快速降维到 32x32，减少后续计算量
    - 使用 ReLU6 激活函数（对量化友好）
 
-2. **DW-Conv1 + Pool (16→32)**:
+2. **Block1 (24→48)**:
    - 深度可分离卷积提取局部特征
+   - SEBlock学习通道权重，增强关键手部轮廓特征
+   - ResidualBlock缓解深层轻量网络的退化问题
    - MaxPool 进一步降维到 16x16
 
-3. **DW-Conv2 + Pool (32→64)**:
+3. **Block2 (48→96)**:
    - 提取中层特征（边缘、纹理）
    - 降维到 8x8
 
-4. **DW-Conv3 (64→128)**:
+4. **Block3 (96→128)**:
    - 提取高层语义特征
    - 保持 8x8 分辨率
 
-5. **Global Average Pooling**:
-   - 替代全连接层，大幅减少参数
-   - 对空间位置具有鲁棒性
+5. **分类头（两种）**:
+   - `GestureNetV2`: Global Average Pooling，参数更少
+   - `GestureNetV2Spatial`: 2x2空间池化头，保留粗空间位置信息，更适合区分拇指突起、OK圆圈等位置敏感特征
 
-6. **FC层 (128→64→5)**:
+6. **FC层**:
    - Dropout 防止过拟合
    - 最终输出 5 个类别的 logits
 
-### 训练流程 (train_model.py 详解)
+**可选模型结构**:
+
+| 参数 | 模型 | 说明 |
+|---|---|---|
+| 默认 | `GestureNetV2` | 标准V2模型，24→48→96→128通道 |
+| `--lite` | `GestureNetV2Lite` | 16→32→64→96通道，降低RAM占用 |
+| `--spatial-head` | `GestureNetV2Spatial` | 2x2空间池化分类头，当前实验中常用于增强空间判别能力 |
+
+### 训练流程 (train_model_v2.py 详解)
 
 **1. 数据集加载**
 ```python
 # 自动扫描数据集目录
-dataset_aug/
+dataset_real/ 或 dataset_augmented/
 ├── 0_fist/    (1000张)
 ├── 1_palm/    (1000张)
-├── 2_v_sign/  (1000张)
+├── 2_thumbs_up/  (1000张)
 ├── 3_ok/      (1000张)
 └── 4_nothing/ (1000张)
 
@@ -421,6 +502,22 @@ dataset_aug/
 训练集: 70% (3500张)
 验证集: 15% (750张)
 测试集: 15% (750张)
+```
+
+V2新增了 **session-based划分**，可以按连续编号区间划分训练/验证/测试集，避免同一连续采集片段中的近重复帧同时出现在训练集和测试集，评估结果更接近真实泛化能力。
+
+```bash
+--split-mode session
+--session-size 100
+--split-manifest-prefix split_session_shuffle
+```
+
+启用后会生成：
+
+```text
+split_session_shuffle_train.csv
+split_session_shuffle_val.csv
+split_session_shuffle_test.csv
 ```
 
 **2. 数据增强策略**
@@ -433,70 +530,112 @@ RandomAffine(shear=10°)       # 适应视角变化
 # 颜色增强
 ColorJitter(brightness=0.3, contrast=0.3)  # 适应光照变化
 
+# 强光照增强 (--strong-aug)
+ColorJitter(brightness=0.5, contrast=0.5)
+RandomGamma(0.6-1.6)
+RandomLowContrast(0.3-0.7)
+RandomGaussianNoise(3.0-15.0)
+
 # 随机擦除
-RandomErasing(p=0.3, scale=0.02-0.15)  # 模拟遮挡
+RandomErasing(p=0.3-0.4, scale=0.02-0.15)  # 模拟遮挡
 ```
 
 **3. 训练策略**
 ```python
 # 优化器
-Adam(lr=0.001, betas=(0.9, 0.999))
+AdamW(lr=0.001, weight_decay=0.01)
 
-# 学习率衰减
-ReduceLROnPlateau(
-    mode='min',
-    factor=0.5,      # 学习率减半
-    patience=5,      # 验证损失5个epoch不降则衰减
-    verbose=True
-)
+# 学习率调度
+CosineAnnealingLR(T_max=NUM_EPOCHS, eta_min=1e-6)
+
+# 损失函数（三选一）
+CrossEntropyLoss()
+FocalLoss(gamma=2)              # 默认，强化难样本
+LabelSmoothingLoss(smoothing=0.1)
 
 # 早停机制
-EarlyStopping(patience=15)  # 15个epoch无改善则停止
+EarlyStopping(patience=20)  # 20个epoch无改善则停止
 ```
 
 **4. 训练输出**
 ```
-gesture_v1.pth              # PyTorch 模型权重
-gesture_model.onnx          # ONNX 导出模型 (X-CUBE-AI 使用)
-training_curves.png         # 训练/验证 损失和准确率曲线
-confusion_matrix.png        # 混淆矩阵 (评估各类别表现)
+gesture_v2*.pth             # PyTorch 模型权重
+gesture_v2*.onnx            # ONNX 导出模型
+gesture_v2*_int8.onnx       # INT8量化模型
+training_curves_v2.png      # 训练/验证 损失和准确率曲线
+confusion_matrix_v2.png     # 混淆矩阵 (评估各类别表现)
+*_wrong_samples.csv         # 错误样本分析
+*_confusion_matrix.csv      # 数据集评估矩阵
 分类报告 (终端输出)          # Precision/Recall/F1-Score
 ```
 
 **5. 性能指标**
 ```
-测试集准确率: >95%
-模型大小: ~432 KB (ONNX)
-推理时间: ~33ms @ STM32H753
-参数量: ~108K (轻量级)
+输入尺寸: [1, 1, 64, 64]
+输出类别: [fist, palm, thumbs_up, ok, nothing]
+模型大小: V2 ONNX约300KB量级，INT8后约190KB-220KB（随结构变化）
+STM32模型: X-CUBE-AI生成network_1，权重约76KB，激活区约150KB
 ```
 
 ### 使用方法
 
-**训练新模型**:
+**当前部署模型对应训练命令（V2 + 强增强）**:
 ```bash
-python train_model.py \
-  --dataset dataset_aug \
-  --epochs 100 \
+python train_model_v2.py \
+  --dataset dataset_real \
+  --epochs 150 \
   --batch-size 32 \
   --lr 0.001 \
-  --model-name gesture_v1.pth
+  --loss focal \
+  --strong-aug \
+  --model-name gesture_v2_strongaug.pth
 ```
+
+说明：`--spatial-head`、`--split-mode session`、`--split-manifest-prefix` 是后来用于消融实验和更严格评估的能力，仓库中保留了 `gesture_v2_session_smooth_spatial_shuffle.*`、`gesture_v2_ablation*.onnx` 等实验产物；当前烧录到STM32的部署链路以 `gesture_v2_strongaug_int8.onnx` 为准。
 
 **快速测试 (使用10%数据)**:
 ```bash
-python train_model.py \
-  --dataset dataset_aug \
+python train_model_v2.py \
+  --dataset dataset_real \
   --subset 0.1 \
   --epochs 10
 ```
 
 **使用预增强数据 (跳过在线增强)**:
 ```bash
-python train_model.py \
-  --dataset dataset_aug \
+python train_model_v2.py \
+  --dataset dataset_augmented \
   --no-augment \
   --num-workers 4
+```
+
+**导出ONNX**:
+```bash
+python convert_to_onnx_v2.py \
+  --input gesture_v2_strongaug.pth \
+  --output gesture_v2_strongaug.onnx \
+  --model-type v2
+```
+
+**静态INT8量化**:
+```bash
+python quantize_onnx_int8.py \
+  --model gesture_v2_strongaug.onnx \
+  --output gesture_v2_strongaug_int8.onnx \
+  --dataset dataset_real \
+  --calib-images 300
+```
+
+**评估ONNX/INT8模型**:
+```bash
+python eval_onnx_dataset.py \
+  --model gesture_v2_strongaug_int8.onnx \
+  --dataset dataset_hard_test
+```
+
+**核对STM32量化等价性**:
+```bash
+python verify_stm32_equivalence.py
 ```
 
 ### 模型优化技巧
@@ -563,35 +702,44 @@ project7/
 │   ├── main.h
 │   ├── FreeRTOSConfig.h      # FreeRTOS配置
 │   ├── app_x-cube-ai.h
-│   ├── network.h             # AI模型接口
-│   ├── network_data.h        # AI模型权重
+│   ├── network_1.h           # 当前AI模型接口(network_1)
+│   ├── network_1_data.h      # 当前AI模型权重声明
+│   ├── network_1_data_params.h # 当前AI模型权重/激活区参数
+│   ├── network.h             # 旧版AI模型接口(历史保留)
+│   ├── network_data.h        # 旧版AI模型权重(历史保留)
 │   └── ...
 │
 ├── Python/                   # 训练与工具脚本
 │   ├── 📊 数据采集工具
 │   │   ├── collect_training_data.py  # UART1采集图像数据集
+│   │   ├── collect_webcam_data.py    # PC摄像头采集数据集
 │   │   └── data_collector.py         # 数据采集基础类
 │   │
 │   ├── 🔧 数据增强工具
 │   │   └── augment_dataset.py        # 离线数据增强(×5-10倍)
 │   │
 │   ├── 🧠 模型训练工具
-│   │   ├── train_model.py            # 主训练脚本(PyTorch)
-│   │   └── train_model_v2.py         # 训练脚本v2版本
+│   │   ├── train_model.py            # 旧版GestureNet训练脚本
+│   │   └── train_model_v2.py         # 当前主训练脚本(V2/V2Lite/Spatial)
 │   │
 │   ├── 📦 模型转换工具
-│   │   └── convert_to_onnx_v2.py     # PyTorch→ONNX转换
+│   │   ├── convert_to_onnx_v2.py     # PyTorch→ONNX转换
+│   │   └── quantize_onnx_int8.py     # ONNX静态INT8量化
 │   │
 │   ├── 🧪 模型测试工具
 │   │   ├── test_pytorch_model.py     # PyTorch模型测试
 │   │   ├── test_pytorch_model_v2.py  # v2版本
 │   │   ├── test_onnx_model.py        # ONNX模型验证
+│   │   ├── eval_onnx_dataset.py      # ONNX数据集评估/错样本导出
 │   │   ├── realtime_inference.py     # PC端实时推理
-│   │   └── realtime_inference_compare.py  # PC vs STM32对比
+│   │   ├── realtime_inference_webcam.py   # PC摄像头实时推理
+│   │   ├── realtime_inference_compare.py  # PC vs STM32对比
+│   │   └── verify_stm32_equivalence.py    # STM32量化预处理/后处理等价性核对
 │   │
 │   ├── 🔧 调试工具
 │   │   ├── debug_inference.py        # 推理过程调试
-│   │   ├── verify_output_issue.py    # Softmax验证
+│   │   ├── inspect_wrong_samples.py  # 错误样本检查
+│   │   ├── analyze_wrong_features.py # 错误样本特征统计
 │   │   └── test_serial.py            # 串口通信测试
 │   │
 │   └── 📚 配置与定义
@@ -608,6 +756,7 @@ project7/
 │
 ├── MDK-ARM/                  # Keil MDK工程
 ├── .ai/                      # AI模型缓存
+├── network_1_generate_report.txt # 当前network_1模型生成报告
 ├── project2.ioc              # STM32CubeMX配置
 │
 └── 文档/
@@ -653,21 +802,97 @@ project7/
 | `MX_X_CUBE_AI_Init()` | 初始化AI模型 |
 | `MX_X_CUBE_AI_Inference()` | 单次推理（返回最大概率类别） |
 | `MX_X_CUBE_AI_Inference_Full()` | 完整推理（返回所有类别概率） |
-| `preprocess_image()` | 图像预处理 (uint8→float, 归一化) |
-| `postprocess_output()` | Softmax + argmax |
+| `preprocess_image()` | 图像预处理 (uint8→归一化→int8量化) |
+| `postprocess_output()` | int8输出反量化 + Softmax + argmax |
 
-**关键修复**: `BUGFIX_v_sign_recognition.md` 修复了Softmax实现错误
+### 🔹 INT8量化与STM32端处理
+
+当前部署模型 `gesture_v2_strongaug_int8.onnx` 是经过静态INT8量化后的ONNX模型，再通过 X-CUBE-AI 生成 `network_1`。量化不是只“压缩文件大小”，还影响 STM32 端输入/输出的数据格式，因此 README 中的部署流程必须保证训练预处理、ONNX量化和 C 端推理一致。
+
+**1. 量化生成**
+
+```bash
+cd Python
+python quantize_onnx_int8.py \
+  --model gesture_v2_strongaug.onnx \
+  --output gesture_v2_strongaug_int8.onnx \
+  --dataset dataset_real \
+  --calib-images 300
+```
+
+脚本使用 `onnxruntime.quantization.quantize_static` 做静态量化：
+
+- 校准数据来自 5 类目录：`0_fist`、`1_palm`、`2_thumbs_up`、`3_ok`、`4_nothing`
+- 输入预处理保持训练一致：灰度图resize到64x64，再归一化到 `[-1, 1]`
+- 量化格式使用 QDQ，激活和权重均使用 `QInt8`
+- 量化后会对比 float ONNX 和 INT8 ONNX 的准确率、Top-1一致率和输出误差
+
+**2. X-CUBE-AI导入结果**
+
+`network_1_generate_report.txt` 中确认当前模型参数：
+
+```text
+model file : gesture_v2_strongaug_int8.onnx
+model_name : gesture_v2_strongaug_int8
+input      : int8(1x64x64x1), QLinear(0.007874016, 0, int8)
+output     : int8(1x5),       QLinear(0.147128820, 0, int8)
+macc       : 10,995,965
+weights    : 76,460 B
+activations: 150,292 B
+```
+
+**3. STM32端输入量化**
+
+`Src/app_x-cube-ai.c` 中的 `preprocess_image()` 不再只做 float 归一化，而是复刻训练预处理后量化为 int8：
+
+```c
+normalized = image / 255.0f;
+x = (normalized - 0.5f) / 0.5f;      // [-1, 1]
+q = round(x / 0.007874016f);         // zero_point = 0
+q = clamp(q, -128, 127);
+```
+
+这样 `uint8[64x64]` 图像会进入 `int8` 输入buffer，与 X-CUBE-AI 报告中的 `input int8(1x64x64x1)` 对齐。
+
+**4. STM32端输出反量化与Softmax**
+
+X-CUBE-AI输出为 `int8(1x5)`，C端先反量化为logits，再做softmax：
+
+```c
+logit = output_int8 * 0.147128820f;  // zero_point = 0
+prob = softmax(logits);
+gesture_id = argmax(prob);
+```
+
+完整置信度数组通过 `MX_X_CUBE_AI_Inference_Full()` 传给 `InferenceTask_GetAllConfidences()`，用于OLED置信度显示和串口调试。
+
+**5. 等价性验证**
+
+修改量化参数、模型文件或C端预处理后，应运行：
+
+```bash
+cd Python
+python verify_stm32_equivalence.py
+```
+
+该脚本用于核对 PC 端 ONNX 推理和 STM32 C 端“归一化→int8量化→反量化→softmax”链路是否数学一致。若结果偏差明显，优先检查 `AI_INPUT_QUANT_SCALE`、`AI_OUTPUT_QUANT_SCALE`、输入layout和模型类别数是否匹配。
 
 ### 🔹 Python工具
 
 | 脚本 | 功能 | 用法 |
 |------|------|------|
-| **train_model.py** | 训练GestureNet模型 | `python train_model.py --dataset dataset --epochs 100` |
+| **train_model_v2.py** | 当前主训练脚本，训练GestureNetV2 | `python train_model_v2.py --dataset dataset_real --epochs 150 --loss focal --strong-aug` |
+| **train_model.py** | 旧版GestureNet训练脚本，保留用于对比 | `python train_model.py --dataset dataset --epochs 100` |
 | **collect_training_data.py** | 从STM32采集训练数据 | `python collect_training_data.py --port COM3` |
+| **collect_webcam_data.py** | 使用PC摄像头采集训练数据 | `python collect_webcam_data.py --dataset dataset_webcam` |
 | **augment_dataset.py** | 离线数据增强 | `python augment_dataset.py --input dataset --output dataset_aug --factor 5` |
-| **convert_to_onnx_v2.py** | PyTorch→ONNX转换 | `python convert_to_onnx_v2.py --model gesture_v1.pth` |
+| **convert_to_onnx_v2.py** | PyTorch→ONNX转换 | `python convert_to_onnx_v2.py --input gesture_v2_strongaug.pth --output gesture_v2_strongaug.onnx --model-type v2` |
+| **quantize_onnx_int8.py** | ONNX静态INT8量化 | `python quantize_onnx_int8.py --model gesture_v2_strongaug.onnx --output gesture_v2_strongaug_int8.onnx --dataset dataset_real` |
+| **eval_onnx_dataset.py** | ONNX/INT8模型数据集评估 | `python eval_onnx_dataset.py --model gesture_v2_strongaug_int8.onnx --dataset dataset_hard_test` |
 | **realtime_inference.py** | PC端实时测试 | `python realtime_inference.py --port COM3` |
-| **test_onnx_model.py** | ONNX模型验证 | `python test_onnx_model.py --model gesture_model.onnx` |
+| **test_onnx_model.py** | ONNX模型验证 | `python test_onnx_model.py --model gesture_v2_strongaug.onnx` |
+| **debug_inference.py** | STM32与PC端ONNX推理对比调试 | `python debug_inference.py --port COM3 --onnx-model gesture_v2_strongaug_int8.onnx` |
+| **verify_stm32_equivalence.py** | 核对STM32量化预处理/后处理等价性 | `python verify_stm32_equivalence.py` |
 
 ---
 
@@ -741,7 +966,7 @@ Camera Task Start
 Inference Task Start
 Sensor Task Start
 ...
-$RESULT,2,0.98  # 手势ID=2(v_sign), 置信度=98%
+$RESULT,2,0.98  # 手势ID=2(thumbs_up), 置信度=98%
 $FPS,28.5       # 推理帧率
 ```
 
@@ -769,7 +994,7 @@ python collect_training_data.py --port COM3 --dataset-dir dataset_real
 | `--dataset-dir` | 数据集保存目录 | dataset_real |
 
 **交互流程**:
-1. 选择手势ID (0-3: fist/palm/v_sign/ok)
+1. 选择手势ID (0-4: fist/palm/thumbs_up/ok/nothing)
 2. 输入采集数量 (建议200-500张/手势)
 3. 设置准备倒计时 (默认2秒)
 4. 自动采集并保存到 `dataset_real/{id}_{name}/` 目录
@@ -853,13 +1078,13 @@ python augment_dataset.py --input dataset_real --output dataset_aug --factor 5
 
 ---
 
-#### 🧠 工具3: 模型训练 (train_model.py)
+#### 🧠 工具3: 模型训练 (train_model_v2.py)
 
-**功能**: 完整的PyTorch训练流程，生成PyTorch模型和ONNX模型
+**功能**: 当前主训练流程，训练GestureNetV2系列模型，生成PyTorch权重，并配合 `convert_to_onnx_v2.py`、`quantize_onnx_int8.py` 完成ONNX和INT8部署模型。
 
 **使用方法**:
 ```bash
-python train_model.py --dataset dataset_aug --epochs 100 --batch-size 32
+python train_model_v2.py --dataset dataset_real --epochs 150 --batch-size 32 --loss focal --strong-aug --model-name gesture_v2_strongaug.pth
 ```
 
 **主要参数**:
@@ -867,42 +1092,50 @@ python train_model.py --dataset dataset_aug --epochs 100 --batch-size 32
 |------|------|--------|
 | `--dataset` | 数据集目录 | dataset |
 | `--batch-size` | 批量大小 | 32 |
-| `--epochs` | 训练轮数 | 100 |
+| `--epochs` | 训练轮数 | 150 |
 | `--lr` | 学习率 | 0.001 |
-| `--model-name` | 模型保存名称 | gesture_v1.pth |
+| `--loss` | 损失函数: ce/focal/smooth | focal |
+| `--model-name` | 模型保存名称 | gesture_v2.pth |
 | `--no-augment` | 跳过训练时增强 (数据已预增强) | False |
 | `--num-workers` | 数据加载线程数 | 0 (Windows), 4-8 (Linux) |
 | `--subset` | 使用数据子集比例 (快速测试) | 1.0 (全部) |
+| `--lite` | 使用GestureNetV2Lite轻量版 | False |
+| `--spatial-head` | 使用2x2空间池化分类头 | False |
+| `--split-mode` | random或session划分 | random |
+| `--session-size` | session划分时每组连续帧数量 | 100 |
+| `--split-manifest-prefix` | 保存train/val/test划分CSV | None |
+| `--strong-aug` | 启用强光照/低对比度/噪声增强 | False |
 
 **训练流程**:
 1. **数据集划分** (自动):
    - 训练集: 70%
    - 验证集: 15%
    - 测试集: 15%
+   - 可选session-based划分，避免连续帧泄漏到不同集合
 
 2. **训练策略**:
-   - 优化器: Adam
-   - 损失函数: CrossEntropyLoss
-   - 学习率衰减: ReduceLROnPlateau (patience=5)
-   - 早停: patience=15 (验证集准确率不提升)
+   - 优化器: AdamW
+   - 损失函数: Focal Loss / CrossEntropyLoss / Label Smoothing
+   - 学习率调度: CosineAnnealingLR
+   - 早停: patience=20 (验证集准确率不提升)
 
 3. **输出内容**:
-   - `gesture_v1.pth` - PyTorch模型权重
-   - `gesture_model.onnx` - ONNX导出模型
-   - `training_curves.png` - 训练/验证曲线
-   - `confusion_matrix.png` - 混淆矩阵
+   - `gesture_v2_strongaug.pth` - 当前部署链路对应PyTorch权重
+   - `training_curves_v2.png` - 训练/验证曲线
+   - `confusion_matrix_v2.png` - 混淆矩阵
+   - 可选 `split_session_shuffle_*.csv` - session划分清单
    - 终端输出: 分类报告 (precision/recall/f1-score)
 
 **快速测试模式**:
 ```bash
 # 使用10%数据快速测试流程 (1-2分钟)
-python train_model.py --dataset dataset_aug --subset 0.1 --epochs 10
+python train_model_v2.py --dataset dataset_real --subset 0.1 --epochs 10
 ```
 
 **GPU加速**:
 ```bash
 # 自动检测GPU，若有CUDA则自动使用
-python train_model.py --dataset dataset_aug --epochs 100
+python train_model_v2.py --dataset dataset_real --epochs 150
 # 输出: Using device: cuda
 ```
 
@@ -914,7 +1147,7 @@ python train_model.py --dataset dataset_aug --epochs 100
 
 **使用方法**:
 ```bash
-python convert_to_onnx_v2.py --model gesture_v1.pth --output gesture_model.onnx
+python convert_to_onnx_v2.py --input gesture_v2_strongaug.pth --output gesture_v2_strongaug.onnx --model-type v2
 ```
 
 **转换步骤**:
@@ -926,8 +1159,16 @@ python convert_to_onnx_v2.py --model gesture_v1.pth --output gesture_model.onnx
 
 **注意事项**:
 - ✅ 确保输入尺寸: [1, 1, 64, 64]
+- ✅ 确保输出尺寸: [1, 5]
 - ✅ 导出时关闭Dropout、BatchNorm等训练层
 - ✅ X-CUBE-AI支持ONNX opset 9-12
+
+**INT8量化**:
+```bash
+python quantize_onnx_int8.py --model gesture_v2_strongaug.onnx --output gesture_v2_strongaug_int8.onnx --dataset dataset_real --calib-images 300
+```
+
+量化后使用X-CUBE-AI导入 `gesture_v2_strongaug_int8.onnx`，生成 `network_1.*` 相关文件。
 
 ---
 
@@ -937,7 +1178,10 @@ python convert_to_onnx_v2.py --model gesture_v1.pth --output gesture_model.onnx
 
 **使用方法**:
 ```bash
-python test_onnx_model.py --model gesture_model.onnx --image test_image.png
+python test_onnx_model.py --model gesture_v2_strongaug.onnx --image test_image.png
+
+# 数据集评估（推荐用于当前INT8模型）
+python eval_onnx_dataset.py --model gesture_v2_strongaug_int8.onnx --dataset dataset_hard_test
 ```
 
 **测试内容**:
@@ -955,17 +1199,17 @@ python test_onnx_model.py --model gesture_model.onnx --image test_image.png
 **使用方法**:
 ```bash
 # 单独PC端推理
-python realtime_inference.py --port COM3 --model gesture_v1.pth
+python realtime_inference.py --port COM3 --model gesture_v2_strongaug.pth
 
 # PC vs STM32对比
-python realtime_inference_compare.py --port COM3 --model gesture_v1.pth
+python realtime_inference_compare.py --port COM3 --model gesture_v2_strongaug.pth
 ```
 
 **显示内容**:
 ```
 Frame #123
-  STM32: v_sign (0.98)  <-- STM32推理结果
-  PC:    v_sign (0.97)  <-- PC端推理结果
+  STM32: thumbs_up (0.98)  <-- STM32推理结果
+  PC:    thumbs_up (0.97)  <-- PC端推理结果
   Match: ✓  (一致)
   FPS: 28.5
   Latency: 35ms
@@ -996,7 +1240,7 @@ python test_pytorch_model.py
   所有输出 (logits):
     0 (fist    ):  -2.5012
     1 (palm    ):   3.8542  ← MAX
-    2 (v_sign  ):  -1.2034
+    2 (thumbs_up): -1.2034
     3 (ok      ):  -0.5123
 ```
 
@@ -1013,7 +1257,7 @@ python test_pytorch_model.py
 **verify_output_issue.py**: 验证Softmax后处理问题
 - 模拟logits输出
 - 对比错误方法vs正确方法
-- 用于排查V手势识别Bug
+- 用于排查旧版模型输出后处理错误
 
 ---
 
@@ -1038,7 +1282,7 @@ python test_pytorch_model.py
     ┌─────────────────────────────────────────────────┐
     │  2. 运行上位机采集工具                            │
     │  python collect_training_data.py --port COM3    │
-    │  - 选择手势ID (0-3)                              │
+    │  - 选择手势ID (0-4)                              │
     │  - 设置采集数量 (200-500张/手势)                  │
     │  - 多角度、多光照、多距离采集                      │
     └─────────────────────────────────────────────────┘
@@ -1049,7 +1293,8 @@ python test_pytorch_model.py
     │  dataset_real/                                  │
     │  ├── 0_fist/      (200-500张)                   │
     │  ├── 1_palm/      (200-500张)                   │
-    │  ├── 2_v_sign/    (200-500张)                   │
+    │  ├── 2_thumbs_up/ (200-500张)                   │
+    │  ├── 4_nothing/   (200-500张)                   │
     │  └── 3_ok/        (200-500张)                   │
     │  总计: 800-2000张原始图像                         │
     └─────────────────────────────────────────────────┘
@@ -1079,7 +1324,8 @@ python test_pytorch_model.py
     │  dataset_aug/                                   │
     │  ├── 0_fist/      (1000-2500张)                 │
     │  ├── 1_palm/      (1000-2500张)                 │
-    │  ├── 2_v_sign/    (1000-2500张)                 │
+    │  ├── 2_thumbs_up/ (1000-2500张)                 │
+    │  ├── 4_nothing/   (1000-2500张)                 │
     │  └── 3_ok/        (1000-2500张)                 │
     │  总计: 4000-10000张增强图像                       │
     └─────────────────────────────────────────────────┘
@@ -1106,14 +1352,15 @@ python test_pytorch_model.py
                               ↓
     ┌─────────────────────────────────────────────────┐
     │  7. 训练输出                                      │
-    │  - gesture_v1.pth        (PyTorch模型)          │
-    │  - gesture_model.onnx    (ONNX模型)             │
+    │  - gesture_v2_strongaug.pth       (PyTorch模型) │
+    │  - gesture_v2_strongaug.onnx      (ONNX模型)    │
+    │  - gesture_v2_strongaug_int8.onnx (INT8模型)   │
     │  - training_curves.png   (训练曲线)              │
     │  - confusion_matrix.png  (混淆矩阵)              │
     │                                                 │
     │  性能指标:                                       │
     │  - 测试集准确率: >95%                             │
-    │  - 模型大小: ~100KB (ONNX)                       │
+    │  - INT8模型: gesture_v2_strongaug_int8.onnx     │
     └─────────────────────────────────────────────────┘
                               │
                               ↓
@@ -1140,14 +1387,15 @@ python test_pytorch_model.py
     ┌─────────────────────────────────────────────────┐
     │  9. X-CUBE-AI转换                                │
     │  - 打开STM32CubeMX项目                           │
-    │  - 导入 gesture_model.onnx                      │
+    │  - 导入 gesture_v2_strongaug_int8.onnx          │
     │  - 分析模型 (Analyze)                            │
     │  - 验证模型 (Validate on target)                 │
     │  - 生成C代码 (Generate Code)                     │
     │                                                 │
     │  生成文件:                                       │
-    │  - Inc/network.h         (AI模型接口)            │
-    │  - Inc/network_data.h    (模型权重)              │
+    │  - Inc/network_1.h              (AI模型接口)    │
+    │  - Inc/network_1_data.h         (模型权重声明)  │
+    │  - Src/network_1_data*.c        (模型权重数据)  │
     │  - Src/network.c         (AI运行时)              │
     └─────────────────────────────────────────────────┘
                               │
@@ -1163,7 +1411,7 @@ python test_pytorch_model.py
     ┌─────────────────────────────────────────────────┐
     │  11. 实时测试                                     │
     │  python realtime_inference_compare.py \         │
-    │    --port COM3 --model gesture_v1.pth           │
+    │    --port COM3 --model gesture_v2_strongaug.pth │
     │                                                 │
     │  对比PC推理 vs STM32推理:                         │
     │  - 准确率一致性验证                               │
@@ -1247,7 +1495,8 @@ python test_pytorch_model.py
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │  开始训练                                                         │
-│  python train_model.py --dataset dataset_aug --epochs 100       │
+│  python train_model_v2.py --dataset dataset_real --epochs 150  │
+│      --loss focal --strong-aug --model-name gesture_v2_strongaug.pth │
 └─────────────────────────────────────────────────────────────────┘
                               │
                               ↓
@@ -1255,16 +1504,17 @@ python test_pytorch_model.py
     │  阶段1: 数据集加载与划分                          │
     ├─────────────────────────────────────────────────┤
     │  1. 扫描数据集目录                                │
-    │     dataset_aug/                                │
+    │     dataset_real/                               │
     │     ├── 0_fist/    (1000张)                     │
     │     ├── 1_palm/    (1000张)                     │
-    │     ├── 2_v_sign/  (1000张)                     │
-    │     └── 3_ok/      (1000张)                     │
+    │     ├── 2_thumbs_up/ (1000张)                  │
+    │     ├── 3_ok/      (1000张)                     │
+    │     └── 4_nothing/ (1000张)                     │
     │                                                 │
     │  2. 自动划分数据集                                │
-    │     训练集: 2800张 (70%)                         │
-    │     验证集:  600张 (15%)                         │
-    │     测试集:  600张 (15%)                         │
+    │     训练集: 70%                                  │
+    │     验证集: 15%                                  │
+    │     测试集: 15%                                  │
     │                                                 │
     │  3. 创建DataLoader                               │
     │     batch_size = 32                             │
@@ -1276,15 +1526,15 @@ python test_pytorch_model.py
     ┌─────────────────────────────────────────────────┐
     │  阶段2: 模型初始化                                │
     ├─────────────────────────────────────────────────┤
-    │  1. 创建GestureNet模型                           │
+    │  1. 创建GestureNetV2模型                         │
     │     - 输入: [1, 1, 64, 64]                      │
-    │     - 输出: [1, 4] (4类手势)                     │
-    │     - 参数量: ~108K                              │
+    │     - 输出: [1, 5] (5类手势)                     │
+    │     - 参数量: 73,797                             │
     │                                                 │
     │  2. 定义损失函数和优化器                          │
-    │     loss_fn = CrossEntropyLoss()                │
-    │     optimizer = Adam(lr=0.001)                  │
-    │     scheduler = ReduceLROnPlateau(patience=5)   │
+    │     loss_fn = FocalLoss()                       │
+    │     optimizer = AdamW(lr=0.001)                 │
+    │     scheduler = CosineAnnealingLR()             │
     │                                                 │
     │  3. 移动到GPU (如果可用)                          │
     │     device = cuda / cpu                         │
@@ -1295,7 +1545,7 @@ python test_pytorch_model.py
     ┌─────────────────────────────────────────────────┐
     │  阶段3: 训练循环                                  │
     ├─────────────────────────────────────────────────┤
-    │  For epoch in range(100):                       │
+    │  For epoch in range(150):                       │
     │                                                 │
     │    ┌─────────────────────────────────────┐     │
     │    │  3.1 训练阶段                        │     │
@@ -1338,7 +1588,7 @@ python test_pytorch_model.py
     │    │  else:                              │     │
     │    │    patience_counter += 1            │     │
     │    │                                     │     │
-    │    │  if patience_counter >= 15:         │     │
+    │    │  if patience_counter >= 20:         │     │
     │    │    提前终止训练                       │     │
     │    └─────────────────────────────────────┘     │
     │                                                 │
@@ -1352,22 +1602,21 @@ python test_pytorch_model.py
     │     model.load_state_dict(best_weights)         │
     │                                                 │
     │  2. 测试集评估                                   │
-    │     test_acc = 96.3%                            │
+    │     test_acc = 99.41%                           │
     │                                                 │
     │  3. 生成混淆矩阵                                  │
     │            预测                                  │
-    │         0  1  2  3                              │
-    │     0 [143  2  3  2]  fist                      │
-    │  真 1 [  1 145  2  2]  palm                      │
-    │  实 2 [  2  1 146  1]  v_sign                    │
-    │     3 [  1  2  1 146]  ok                       │
+    │         0  1  2  3  4                           │
+    │     0 [98  0  2  0  0]  fist                    │
+    │  真 1 [ 0 99  0  0  1]  palm                    │
+    │  实 2 [ 9  0 82  9  0]  thumbs_up               │
+    │     3 [ 0  1  0 97  2]  ok                      │
+    │     4 [ 8  3  0  0 89]  nothing                 │
     │                                                 │
     │  4. 生成分类报告                                  │
     │     Precision / Recall / F1-Score               │
-    │     - fist:    0.97 / 0.95 / 0.96               │
-    │     - palm:    0.97 / 0.97 / 0.97               │
-    │     - v_sign:  0.96 / 0.97 / 0.97               │
-    │     - ok:      0.97 / 0.97 / 0.97               │
+    │     - hard test主要混淆：thumbs_up↔fist/ok      │
+    │     - nothing偶尔被识别为fist/palm              │
     └─────────────────────────────────────────────────┘
                               │
                               ↓
@@ -1375,12 +1624,13 @@ python test_pytorch_model.py
     │  阶段5: 模型导出                                  │
     ├─────────────────────────────────────────────────┤
     │  1. 保存PyTorch模型                              │
-    │     torch.save(model, 'gesture_v1.pth')         │
+    │     torch.save(model, 'gesture_v2_strongaug.pth') │
     │                                                 │
     │  2. 导出ONNX模型                                 │
     │     torch.onnx.export(...)                      │
     │     - 输入: dummy_input [1,1,64,64]             │
-    │     - 输出: gesture_model.onnx                  │
+    │     - 输出: gesture_v2_strongaug.onnx           │
+    │     - 量化: gesture_v2_strongaug_int8.onnx      │
     │     - opset_version: 11                         │
     │                                                 │
     │  3. 保存训练曲线图                                │
@@ -1510,7 +1760,7 @@ python test_pytorch_model.py
     ├─────────────────────────────────────────────────┤
     │  11. OLED显示更新 (10Hz)                         │
     │      ┌───────────────────────────┐              │
-    │      │ 手势: V手势                │              │
+    │      │ 手势: thumbs_up            │              │
     │      │ 置信度: 97.8%             │              │
     │      │ 目标: LED3                │              │
     │      │ 占空比: 10%               │              │
@@ -1665,7 +1915,7 @@ PC ← USB转TTL → STM32 UART1 (PA9/PA10)
 ```bash
 cd Python
 python collect_training_data.py --port COM3 --dataset-dir dataset_real
-# 按提示输入手势ID (0-3)，每个手势采集200-500张
+# 按提示输入手势ID (0-4)，每个手势采集200-500张
 # STM32会自动从OpenMV获取图像并通过UART1发送到PC
 ```
 
@@ -1693,26 +1943,36 @@ python augment_dataset.py --input dataset_real --output dataset_aug --factor 5
 
 2. **训练模型**
 ```bash
-python train_model.py --dataset dataset_aug --epochs 100 --batch-size 32
-# 训练完成后生成: gesture_v1.pth, gesture_model.onnx
+python train_model_v2.py --dataset dataset_real --epochs 150 --batch-size 32 --loss focal --strong-aug --model-name gesture_v2_strongaug.pth
+# 训练完成后生成: gesture_v2_strongaug.pth、training_curves_v2.png、confusion_matrix_v2.png
 ```
 
-3. **测试模型**
+3. **导出和量化模型**
+```bash
+python convert_to_onnx_v2.py --input gesture_v2_strongaug.pth --output gesture_v2_strongaug.onnx --model-type v2
+python quantize_onnx_int8.py --model gesture_v2_strongaug.onnx --output gesture_v2_strongaug_int8.onnx --dataset dataset_real --calib-images 300
+```
+
+4. **测试模型**
 ```bash
 # PC端测试PyTorch模型
-python test_pytorch_model.py
+python test_pytorch_model_v2.py
 
 # PC端测试ONNX模型
-python test_onnx_model.py --model gesture_model.onnx
+python test_onnx_model.py --model gesture_v2_strongaug.onnx
+
+# 数据集评估INT8模型
+python eval_onnx_dataset.py --model gesture_v2_strongaug_int8.onnx --dataset dataset_hard_test
 
 # 实时推理对比（需连接STM32 UART1）
-python realtime_inference_compare.py --port COM3
+python realtime_inference_compare.py --port COM3 --model gesture_v2_strongaug.pth
 ```
 
-4. **部署到STM32**
+5. **部署到STM32**
 - 打开STM32CubeMX项目
-- 使用X-CUBE-AI插件导入`gesture_model.onnx`
-- 分析模型 → 验证 → 生成代码
+- 使用X-CUBE-AI插件导入`gesture_v2_strongaug_int8.onnx`
+- 分析模型 → 验证 → 生成代码，当前生成模型名为 `network_1`
+- 确认生成文件包含 `Inc/network_1.h`、`Src/network_1.c`、`Src/network_1_data.c` 等
 - 重新编译烧录固件
 
 ### 蓝牙控制
@@ -1752,8 +2012,13 @@ python realtime_inference_compare.py --port COM3
 
 ## 🐛 常见问题
 
-### Q1: V手势总是识别为拳头
-**A**: 已修复。详见 `BUGFIX_v_sign_recognition.md`。确保使用最新代码（Softmax后处理）。
+### Q1: STM32端推理结果和PC端ONNX结果不一致
+**A**: 当前部署的是INT8模型，优先检查量化链路是否一致：
+1. 确认STM32导入的是 `gesture_v2_strongaug_int8.onnx`，生成模型名为 `network_1`
+2. 确认 `AI_INPUT_QUANT_SCALE = 0.007874016f`
+3. 确认 `AI_OUTPUT_QUANT_SCALE = 0.147128820f`
+4. 确认输入图像为64x64灰度图，归一化公式为 `(x/255 - 0.5) / 0.5`
+5. 运行 `Python/verify_stm32_equivalence.py` 核对PC端和STM32端量化/反量化等价性
 
 ### Q2: 摄像头无图像数据
 **A**: 检查：
@@ -1806,7 +2071,6 @@ python realtime_inference_compare.py --port COM3
 - [**GESTURE_VISUAL_GUIDE.md**](Python/GESTURE_VISUAL_GUIDE.md) - 手势定义图解
 
 ### 专题文档
-- [**BUGFIX_v_sign_recognition.md**](BUGFIX_v_sign_recognition.md) - V手势识别Bug修复
 - [**FREERTOS_CUBEMX_CONFIG_GUIDE.md**](FREERTOS_CUBEMX_CONFIG_GUIDE.md) - FreeRTOS配置
 - [**ESP8266_INIT_FIX.md**](ESP8266_INIT_FIX.md) - WiFi模块初始化
 - [**SENSOR_TASK_TROUBLESHOOTING.md**](SENSOR_TASK_TROUBLESHOOTING.md) - 传感器故障排除
@@ -1934,12 +2198,15 @@ WiFi   → UART5  → ESP8266→ MQTT     → 云平台   → 数据存储
 
 | 指标 | 数值 | 备注 |
 |------|------|------|
-| AI推理速度 | 30 FPS | 64x64灰度图 |
-| 推理延迟 | ~33ms | 包含预处理+推理+后处理 |
-| 模型大小 | 432 KB | ONNX格式 |
-| Flash占用 | ~850 KB | 包含模型权重 |
-| RAM占用 | ~450 KB | 运行时峰值 |
-| 识别准确率 | >95% | 测试集 |
+| AI推理速度 | 受串口图像传输/OLED刷新影响 | 64x64灰度图，本地INT8推理 |
+| 模型计算量 | 10,995,965 MACC | X-CUBE-AI生成报告 |
+| PyTorch参数量 | 73,797 | `strongaug_train.log` |
+| X-CUBE-AI参数量 | 73,229 items | `network_1_generate_report.txt` |
+| 模型权重 | 76,460 B | `network_1` INT8权重 |
+| 激活区 | 150,292 B | 输入/输出buffer分配在activations中 |
+| ONNX模型 | `gesture_v2_strongaug_int8.onnx` | 当前部署模型 |
+| 训练测试集准确率 | 99.41% | `strongaug_train.log` |
+| 难例测试主要问题 | thumbs_up↔fist/ok，nothing↔fist/palm | `dataset_hard_test`评估 |
 | 传感器采样率 | 1 Hz | Sensor Task周期 |
 | OLED刷新率 | 10 Hz | Display Task周期 |
 | OneNET上传周期 | 5s | 可配置 |
@@ -1993,7 +2260,7 @@ WiFi   → UART5  → ESP8266→ MQTT     → 云平台   → 数据存储
 ## 📝 更新日志
 
 ### v1.2.0 (2026-01-12)
-- ✅ 修复V手势识别问题（Softmax后处理）
+- ✅ 修复旧版模型输出后处理问题（Softmax）
 - ✅ 添加超声波传感器去抖动
 - ✅ 优化数据采集工具（从最大编号继续）
 - ✅ 完善README文档
